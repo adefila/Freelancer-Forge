@@ -1188,7 +1188,7 @@ function OptimizeTab() {
       content.push({ type: 'image', source: { type: 'base64', media_type: imageData.mediaType, data: imageData.data } });
     }
     content.push({ type: 'text', text: prompt });
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
+    const response = await fetch("/api/claude", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -1783,7 +1783,7 @@ Return ONLY JSON. No em dashes.`;
       if (imageData) content.push({ type: 'image', source: { type: 'base64', media_type: imageData.mediaType, data: imageData.data } });
       content.push({ type: 'text', text: buildPrompt() });
 
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
+      const response = await fetch("/api/claude", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 3000, messages: [{ role: "user", content }] })
