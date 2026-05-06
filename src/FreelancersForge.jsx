@@ -4,7 +4,7 @@ import {
   Sun, Moon, Plus, ExternalLink, Link as LinkIcon, ChevronDown,
   Mail, MessageSquare, FileText, Reply, Globe, Type, Image as ImgIcon,
   Target, Award, Briefcase, User, Layers, Wand2,
-  TrendingUp, Trash2
+  TrendingUp, Trash2, HelpCircle
 } from 'lucide-react';
 
 /* ====================================================================== */
@@ -1126,6 +1126,167 @@ const CSS = `
   display: inline-block;
 }
 
+/* TOOLTIP */
+.ff-tooltip-wrap {
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+}
+.ff-tooltip-trigger {
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: help;
+  color: var(--text-3);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 6px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  transition: color var(--t-fast), background-color var(--t-fast), transform var(--t-fast);
+}
+.ff-tooltip-trigger:hover,
+.ff-tooltip-trigger:focus-visible {
+  color: var(--accent);
+  background-color: var(--accent-bg-soft);
+  transform: scale(1.08);
+  outline: none;
+}
+.ff-tooltip-bubble {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%) translateY(-4px);
+  background: var(--text-1);
+  color: var(--bg);
+  padding: 9px 12px;
+  border-radius: var(--r-md);
+  font-family: var(--font-text);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.45;
+  letter-spacing: -0.005em;
+  width: max-content;
+  max-width: 240px;
+  z-index: 100;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--t-fast), transform var(--t-fast);
+  box-shadow: var(--sh-3);
+  text-align: left;
+  white-space: normal;
+}
+.ff-tooltip-bubble::before {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 5px;
+  border-style: solid;
+  border-color: transparent transparent var(--text-1) transparent;
+}
+.ff-tooltip-trigger:hover + .ff-tooltip-bubble,
+.ff-tooltip-trigger:focus-visible + .ff-tooltip-bubble,
+.ff-tooltip-wrap:hover .ff-tooltip-bubble {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+.ff-tooltip-bubble--right {
+  left: auto;
+  right: 0;
+  transform: translateY(-4px);
+}
+.ff-tooltip-bubble--right::before {
+  left: auto;
+  right: 12px;
+  transform: none;
+}
+.ff-tooltip-trigger:hover + .ff-tooltip-bubble--right,
+.ff-tooltip-trigger:focus-visible + .ff-tooltip-bubble--right,
+.ff-tooltip-wrap:hover .ff-tooltip-bubble--right {
+  transform: translateY(0);
+}
+
+/* MICRO-INTERACTIONS — extra polish */
+
+/* Inputs gently tighten on focus */
+.ff-input:focus,
+.ff-textarea:focus {
+  transform: translateY(-1px);
+}
+
+/* Card hover lift (very subtle) */
+.ff-card {
+  transition: background-color var(--t-slow),
+              border-color var(--t-slow),
+              transform var(--t-med),
+              box-shadow var(--t-med);
+}
+
+/* Smooth tab switch underline */
+.ff-tab {
+  transition: color var(--t-fast),
+              border-color var(--t-med),
+              transform var(--t-fast);
+}
+
+/* Dropdown trigger micro-bounce on open */
+.ff-dropdown-trigger:active {
+  transform: scale(0.98);
+}
+
+/* Score ring shimmer on appear */
+@keyframes ff-shimmer {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.85; }
+}
+.ff-score-ring-num {
+  animation: ff-shimmer 800ms cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+/* Copy success bounce */
+@keyframes ff-pop {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+.ff-icon-btn:has(svg.lucide-check) {
+  animation: ff-pop 320ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Status pill click feedback */
+.ff-pill,
+[class*="ff-rec-prio"] {
+  transition: transform var(--t-fast);
+}
+
+/* Tab badge subtle pulse on first appear */
+@keyframes ff-badge-fade {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+.ff-tab-badge {
+  animation: ff-badge-fade 480ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Smooth scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+*::-webkit-scrollbar { width: 8px; height: 8px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: var(--r-pill);
+  transition: background var(--t-fast);
+}
+*::-webkit-scrollbar-thumb:hover { background: var(--text-3); }
+
 
 `;
 
@@ -1330,15 +1491,57 @@ ${fetchedPage.text}
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         model: "claude-sonnet-4-5",
-        max_tokens: 5000,
+        max_tokens: 8000,
+        system: "You are a JSON-only API. You MUST respond with valid, complete JSON only. No prose, no markdown, no commentary, no code fences. Start your response with { and end with }. Every string must be properly escaped. Do not truncate. Make sure all brackets and braces close properly.",
         messages: [{ role: "user", content }]
       })
     });
-    if (!response.ok) throw new Error('Request failed');
+    if (!response.ok) {
+      const errBody = await response.text().catch(() => '');
+      throw new Error(`Request failed (${response.status}). ${errBody.slice(0, 200)}`);
+    }
     const data = await response.json();
-    const text = data.content.filter(b => b.type === 'text').map(b => b.text).join('').trim();
-    const cleaned = text.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/i, '').trim();
-    return JSON.parse(cleaned);
+    const rawText = data.content.filter(b => b.type === 'text').map(b => b.text).join('').trim();
+
+    return parseJsonResponse(rawText);
+  };
+
+  // Defensive JSON extraction — handles partial/wrapped/truncated responses
+  const parseJsonResponse = (rawText) => {
+    if (!rawText) throw new Error('Empty response from API.');
+
+    // Strip markdown code fences if present
+    let text = rawText
+      .replace(/^```json\s*/i, '')
+      .replace(/^```\s*/i, '')
+      .replace(/```\s*$/i, '')
+      .trim();
+
+    // Try parsing as-is
+    try { return JSON.parse(text); } catch {}
+
+    // Try extracting the largest balanced JSON object in the response
+    const firstBrace = text.indexOf('{');
+    const lastBrace = text.lastIndexOf('}');
+    if (firstBrace !== -1 && lastBrace > firstBrace) {
+      const candidate = text.substring(firstBrace, lastBrace + 1);
+      try { return JSON.parse(candidate); } catch {}
+    }
+
+    // Try repairing common issues: trailing commas, unclosed strings
+    if (firstBrace !== -1) {
+      let attempt = text.substring(firstBrace);
+      // Remove trailing junk after final close brace
+      const lastClose = attempt.lastIndexOf('}');
+      if (lastClose !== -1) attempt = attempt.substring(0, lastClose + 1);
+      // Strip trailing commas before } or ]
+      attempt = attempt.replace(/,(\s*[}\]])/g, '$1');
+      try { return JSON.parse(attempt); } catch {}
+    }
+
+    // Helpful error if we got here
+    const preview = rawText.slice(0, 120).replace(/\s+/g, ' ');
+    throw new Error(`Could not parse response. The model returned non-JSON output. Preview: "${preview}..."`);
   };
 
   const handleAudit = async () => {
@@ -1393,7 +1596,8 @@ Return ONLY JSON. No em dashes.`;
       if (Array.isArray(parsed.rewrites)) parsed.rewrites = parsed.rewrites.map(r => ({ ...r, before: stripEmDashes(r.before), after: stripEmDashes(r.after) }));
       setResult(parsed);
     } catch (err) {
-      setError('Audit failed. Try again.');
+      console.error('Audit error:', err);
+      setError(err.message || 'Audit failed. Try again, or paste the copy directly.');
     } finally { setAuditing(false); }
   };
 
@@ -1469,7 +1673,8 @@ Return ONLY JSON. No em dashes.`;
         document.querySelector('[data-optimized-anchor]')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }, 100);
     } catch (err) {
-      setError('Optimization failed.');
+      console.error('Optimize error:', err);
+      setError(err.message || 'Optimization failed.');
     } finally { setOptimizing(false); }
   };
 
@@ -1507,13 +1712,19 @@ Return ONLY JSON. No em dashes.`;
     <>
       <div className="grid md:grid-cols-2 gap-6 mb-10">
         <div>
-          <label className="ff-section-label block mb-3">Page Type</label>
-          <PageTypeDropdown value={pageType} onChange={setPageType} />
+          <label className="ff-section-label mb-3" style={{ display: 'inline-flex', alignItems: 'center' }}>
+            Page Type
+            <Tooltip text="Tells the audit which expert criteria and proven patterns to score against. A portfolio is judged differently than an Upwork profile." />
+          </label>
+          <div className="block"><PageTypeDropdown value={pageType} onChange={setPageType} /></div>
           <p className="ff-field-hint mt-2">{PAGE_TYPES[pageType].desc}</p>
         </div>
         <div>
-          <label className="ff-section-label block mb-3">Submission Method</label>
-          <MethodDropdown value={method} onChange={setMethod} />
+          <label className="ff-section-label mb-3" style={{ display: 'inline-flex', alignItems: 'center' }}>
+            Submission Method
+            <Tooltip text="URL fetches your live page automatically. Paste Copy gives the most accurate audit. Screenshot reads visual hierarchy and copy together." />
+          </label>
+          <div className="block"><MethodDropdown value={method} onChange={setMethod} /></div>
           <p className="ff-field-hint mt-2">
             {method === 'url' ? 'Quick audit from URL alone' : method === 'paste' ? 'Best results: paste the visible copy' : 'Visual + copy audit from a screenshot'}
           </p>
@@ -1611,12 +1822,20 @@ Return ONLY JSON. No em dashes.`;
             )}
 
             <div>
-              <label className="ff-field-label">Audience <span className="ff-field-hint" style={{ fontWeight: 400 }}>· optional</span></label>
+              <label className="ff-field-label" style={{ display: 'inline-flex', alignItems: 'center' }}>
+                Audience
+                <span className="ff-field-hint" style={{ fontWeight: 400, marginLeft: 6 }}>· optional</span>
+                <Tooltip text="The specific kind of buyer you want this page to attract. The more specific, the sharper the rewrite. 'Series A SaaS founders' beats 'tech companies'." />
+              </label>
               <input type="text" className="ff-input" placeholder="e.g. Series A SaaS founders" value={audience} onChange={e => setAudience(e.target.value)} />
             </div>
 
             <div>
-              <label className="ff-field-label">Goal of the page <span className="ff-field-hint" style={{ fontWeight: 400 }}>· optional</span></label>
+              <label className="ff-field-label" style={{ display: 'inline-flex', alignItems: 'center' }}>
+                Goal of the page
+                <span className="ff-field-hint" style={{ fontWeight: 400, marginLeft: 6 }}>· optional</span>
+                <Tooltip text="The single action you want a visitor to take. Used to score whether your CTAs and structure actually push toward that outcome." />
+              </label>
               <input type="text" className="ff-input" placeholder="e.g. Book a discovery call" value={goal} onChange={e => setGoal(e.target.value)} />
             </div>
 
@@ -1988,14 +2207,44 @@ Return ONLY JSON. No em dashes.`;
       const response = await fetch("/api/claude", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ model: "claude-sonnet-4-5", max_tokens: 3000, messages: [{ role: "user", content }] })
+        body: JSON.stringify({
+          model: "claude-sonnet-4-5",
+          max_tokens: 4000,
+          system: "You are a JSON-only API. You MUST respond with valid, complete JSON only. No prose, no markdown, no commentary, no code fences. Start your response with { and end with }. Every string must be properly escaped.",
+          messages: [{ role: "user", content }]
+        })
       });
-      if (!response.ok) throw new Error('Request failed');
+      if (!response.ok) {
+        const errBody = await response.text().catch(() => '');
+        throw new Error(`Request failed (${response.status}). ${errBody.slice(0, 200)}`);
+      }
 
       const data = await response.json();
-      const text = data.content.filter(b => b.type === 'text').map(b => b.text).join('').trim();
-      const cleaned = text.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/i, '').trim();
-      const parsed = JSON.parse(cleaned);
+      const rawText = data.content.filter(b => b.type === 'text').map(b => b.text).join('').trim();
+
+      // Defensive JSON parsing with multiple fallback strategies
+      let parsed;
+      let attemptText = rawText
+        .replace(/^```json\s*/i, '')
+        .replace(/^```\s*/i, '')
+        .replace(/```\s*$/i, '')
+        .trim();
+
+      try {
+        parsed = JSON.parse(attemptText);
+      } catch {
+        const firstBrace = attemptText.indexOf('{');
+        const lastBrace = attemptText.lastIndexOf('}');
+        if (firstBrace !== -1 && lastBrace > firstBrace) {
+          let candidate = attemptText.substring(firstBrace, lastBrace + 1);
+          candidate = candidate.replace(/,(\s*[}\]])/g, '$1');
+          try { parsed = JSON.parse(candidate); } catch (e) {
+            throw new Error(`Could not parse response. Preview: "${rawText.slice(0, 100)}..."`);
+          }
+        } else {
+          throw new Error(`Could not parse response. Preview: "${rawText.slice(0, 100)}..."`);
+        }
+      }
 
       Object.keys(parsed).forEach(k => { if (typeof parsed[k] === 'string') parsed[k] = stripEmDashes(parsed[k]); });
       if (parsed.extraction) Object.keys(parsed.extraction).forEach(k => { if (typeof parsed.extraction[k] === 'string') parsed.extraction[k] = stripEmDashes(parsed.extraction[k]); });
@@ -2009,7 +2258,10 @@ Return ONLY JSON. No em dashes.`;
 
       setResult(parsed);
       setResultMode(mode);
-    } catch (err) { setError('Generation failed.'); } finally { setLoading(false); }
+    } catch (err) {
+      console.error('Generation error:', err);
+      setError(err.message || 'Generation failed.');
+    } finally { setLoading(false); }
   };
 
   const copyText = async (which, text) => {
@@ -2047,13 +2299,19 @@ Return ONLY JSON. No em dashes.`;
     <>
       <div className="grid md:grid-cols-2 gap-6 mb-10">
         <div>
-          <label className="ff-section-label block mb-3">Mode</label>
-          <CloserModeDropdown value={mode} onChange={setMode} />
+          <label className="ff-section-label mb-3" style={{ display: 'inline-flex', alignItems: 'center' }}>
+            Mode
+            <Tooltip text="What you're sending. Each mode produces a different format with rules tuned for that channel — a proposal isn't a DM and a DM isn't an email." />
+          </label>
+          <div className="block"><CloserModeDropdown value={mode} onChange={setMode} /></div>
           <p className="ff-field-hint mt-2">{CLOSER_MODES[mode].desc}</p>
         </div>
         <div>
-          <label className="ff-section-label block mb-3">Tone</label>
-          <ToneDropdown value={tone} onChange={setTone} />
+          <label className="ff-section-label mb-3" style={{ display: 'inline-flex', alignItems: 'center' }}>
+            Tone
+            <Tooltip text="The voice the message will be written in. Pick one that matches you and the client. Auto adapts based on the situation." align="right" />
+          </label>
+          <div className="block"><ToneDropdown value={tone} onChange={setTone} /></div>
           <p className="ff-field-hint mt-2">{TONE_OPTIONS.find(t => t.id === tone)?.desc}</p>
         </div>
       </div>
@@ -2066,7 +2324,10 @@ Return ONLY JSON. No em dashes.`;
             {mode === 'followup' ? (
               <>
                 <div>
-                  <label className="ff-field-label">Client's last message <span className="ff-text-accent">*</span></label>
+                  <label className="ff-field-label" style={{ display: 'inline-flex', alignItems: 'center' }}>
+                    Client's last message <span className="ff-text-accent" style={{ marginLeft: 4 }}>*</span>
+                    <Tooltip text="Paste their exact words. The follow-up will reference real phrases from this and adapt to the client's tone and pace." />
+                  </label>
                   <textarea
                     className="ff-textarea"
                     rows={6}
@@ -2074,12 +2335,14 @@ Return ONLY JSON. No em dashes.`;
                     value={clientMessage}
                     onChange={e => setClientMessage(e.target.value)}
                   />
-                  <p className="ff-field-hint mt-2">Helps Claude read the client's tone, intent, and where they're hesitating.</p>
+                  <p className="ff-field-hint mt-2">Used to read the client's tone, intent, and where they're hesitating.</p>
                 </div>
 
                 <div>
-                  <label className="ff-field-label">
-                    Your last reply <span className="ff-field-hint" style={{ fontWeight: 400 }}>· optional</span>
+                  <label className="ff-field-label" style={{ display: 'inline-flex', alignItems: 'center' }}>
+                    Your last reply
+                    <span className="ff-field-hint" style={{ fontWeight: 400, marginLeft: 6 }}>· optional</span>
+                    <Tooltip text="What you sent before. Leave blank if you're following up for the first time." />
                   </label>
                   <textarea
                     className="ff-textarea"
@@ -2106,14 +2369,20 @@ Return ONLY JSON. No em dashes.`;
                 </div>
 
                 <div>
-                  <label className="ff-field-label">Goal of this follow-up</label>
+                  <label className="ff-field-label" style={{ display: 'inline-flex', alignItems: 'center' }}>
+                    Goal of this follow-up
+                    <Tooltip text="The single outcome you want from this message. The reply will be shaped to push toward this exact goal." />
+                  </label>
                   <textarea className="ff-textarea" rows={3} placeholder='e.g. "Get them on a 15-min call this week"' value={goal} onChange={e => setGoal(e.target.value)} />
                 </div>
               </>
             ) : (
               <>
                 <div>
-                  <label className="ff-field-label">Intel <span className="ff-text-accent">*</span></label>
+                  <label className="ff-field-label" style={{ display: 'inline-flex', alignItems: 'center' }}>
+                    Intel <span className="ff-text-accent" style={{ marginLeft: 4 }}>*</span>
+                    <Tooltip text="Whatever you know about the lead. Job post, company info, recent funding, their LinkedIn About, anything specific. The more raw context, the sharper the output." />
+                  </label>
                   <textarea className="ff-textarea" rows={8} placeholder="Job post, company info, or what you know." value={intel} onChange={e => setIntel(e.target.value)} />
                   {!imageData && (
                     <div className="mt-2">
@@ -2127,19 +2396,29 @@ Return ONLY JSON. No em dashes.`;
                 </div>
 
                 <div>
-                  <label className="ff-field-label">Positioning <span className="ff-field-hint" style={{ fontWeight: 400 }}>· optional</span></label>
+                  <label className="ff-field-label" style={{ display: 'inline-flex', alignItems: 'center' }}>
+                    Positioning
+                    <span className="ff-field-hint" style={{ fontWeight: 400, marginLeft: 6 }}>· optional</span>
+                    <Tooltip text="Your one-line pitch. Who you serve and what outcome you produce. Used to weave your angle naturally into the message." />
+                  </label>
                   <textarea className="ff-textarea" rows={3} placeholder="e.g. I close inbound calls for coaches." value={offer} onChange={e => setOffer(e.target.value)} />
                 </div>
 
                 <div>
-                  <label className="ff-field-label">Proof <span className="ff-field-hint" style={{ fontWeight: 400 }}>· optional</span></label>
+                  <label className="ff-field-label" style={{ display: 'inline-flex', alignItems: 'center' }}>
+                    Proof
+                    <span className="ff-field-hint" style={{ fontWeight: 400, marginLeft: 6 }}>· optional</span>
+                    <Tooltip text="A specific result you've produced. Numbers and named outcomes work best. Skip vague claims like 'helped grow revenue'." />
+                  </label>
                   <textarea className="ff-textarea" rows={3} placeholder="e.g. Took a $40k/mo coach to $110k/mo." value={proof} onChange={e => setProof(e.target.value)} />
                 </div>
 
                 {mode === 'proposal' && (
                   <div>
-                    <label className="ff-field-label">
-                      Portfolio Library <span className="ff-field-hint" style={{ fontWeight: 400 }}>· {portfolioCount} {portfolioCount === 1 ? 'link' : 'links'}</span>
+                    <label className="ff-field-label" style={{ display: 'inline-flex', alignItems: 'center' }}>
+                      Portfolio Library
+                      <span className="ff-field-hint" style={{ fontWeight: 400, marginLeft: 6 }}>· {portfolioCount} {portfolioCount === 1 ? 'link' : 'links'}</span>
+                      <Tooltip text="Add links to past work with optional labels and tags. Relevant pieces will be matched and recommended as attachments in the proposal." />
                     </label>
                     {portfolio.length > 0 && (
                       <div className="space-y-2 mb-3">
@@ -2206,6 +2485,35 @@ const PIPELINE_TYPES = [
   { id: 'followup', label: 'Follow-up' },
 ];
 
+const PIPELINE_STORAGE_KEY = 'ff_pipeline_v1';
+const PIPELINE_RETENTION_DAYS = 15;
+
+function loadPipelineFromStorage() {
+  try {
+    const raw = localStorage.getItem(PIPELINE_STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    const cutoff = Date.now() - PIPELINE_RETENTION_DAYS * 24 * 60 * 60 * 1000;
+    return parsed
+      .filter(e => e && typeof e === 'object' && e.id && e.client)
+      .filter(e => {
+        const ts = typeof e.createdAt === 'number' ? e.createdAt : Date.parse(e.date || '');
+        return !isNaN(ts) && ts >= cutoff;
+      });
+  } catch {
+    return [];
+  }
+}
+
+function savePipelineToStorage(entries) {
+  try {
+    localStorage.setItem(PIPELINE_STORAGE_KEY, JSON.stringify(entries));
+  } catch {
+    // Storage might be disabled or full — fail silently
+  }
+}
+
 function PipelineTab() {
   const [entries, setEntries] = useState([]);
   const [showForm, setShowForm] = useState(false);
@@ -2214,14 +2522,29 @@ function PipelineTab() {
   const [status, setStatus] = useState('sent');
   const [value, setValue] = useState('');
   const [notes, setNotes] = useState('');
+  const [loaded, setLoaded] = useState(false);
+
+  // Load entries from storage on mount, applying 15-day expiry
+  useEffect(() => {
+    const stored = loadPipelineFromStorage();
+    setEntries(stored);
+    setLoaded(true);
+  }, []);
+
+  // Persist whenever entries change (after initial load)
+  useEffect(() => {
+    if (loaded) savePipelineToStorage(entries);
+  }, [entries, loaded]);
 
   const addEntry = () => {
     if (!client.trim()) return;
-    const today = new Date().toISOString().slice(0, 10);
+    const now = Date.now();
+    const today = new Date(now).toISOString().slice(0, 10);
     setEntries(e => [
       {
-        id: Date.now().toString(36) + Math.random().toString(36).slice(2, 5),
+        id: now.toString(36) + Math.random().toString(36).slice(2, 5),
         date: today,
+        createdAt: now,
         client: client.trim(),
         type,
         status,
@@ -2292,24 +2615,34 @@ function PipelineTab() {
           <h3 className="ff-subheading mb-4" style={{ fontSize: 16 }}>New entry</h3>
           <div className="grid md:grid-cols-2 gap-4">
             <div>
-              <label className="ff-field-label">Client / Company <span className="ff-text-accent">*</span></label>
+              <label className="ff-field-label" style={{ display: 'inline-flex', alignItems: 'center' }}>
+                Client / Company <span className="ff-text-accent" style={{ marginLeft: 4 }}>*</span>
+                <Tooltip text="Who you sent this to. Used as the entry's name in the table." />
+              </label>
               <input type="text" className="ff-input" placeholder="e.g. Acme Corp" value={client} onChange={e => setClient(e.target.value)} />
             </div>
             <div>
-              <label className="ff-field-label">Type</label>
+              <label className="ff-field-label" style={{ display: 'inline-flex', alignItems: 'center' }}>
+                Type
+                <Tooltip text="What kind of outreach this was. Helps you filter and see what's working: proposals vs DMs vs emails." align="right" />
+              </label>
               <select className="ff-input" value={type} onChange={e => setType(e.target.value)} style={{ cursor: 'pointer' }}>
                 {PIPELINE_TYPES.map(t => <option key={t.id} value={t.id}>{t.label}</option>)}
               </select>
             </div>
             <div>
-              <label className="ff-field-label">Status</label>
+              <label className="ff-field-label" style={{ display: 'inline-flex', alignItems: 'center' }}>
+                Status
+                <Tooltip text="Where this lead is right now. Update it as the conversation progresses to track your reply and win rates." />
+              </label>
               <select className="ff-input" value={status} onChange={e => setStatus(e.target.value)} style={{ cursor: 'pointer' }}>
                 {PIPELINE_STATUSES.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}
               </select>
             </div>
             <div>
-              <label className="ff-field-label">
-                Value <span className="ff-field-hint" style={{ fontWeight: 400 }}>· optional</span>
+              <label className="ff-field-label" style={{ display: 'inline-flex', alignItems: 'center' }}>
+                Value <span className="ff-field-hint" style={{ fontWeight: 400, marginLeft: 6 }}>· optional</span>
+                <Tooltip text="Deal size. Numbers from closed-won entries roll up into your total revenue stat." align="right" />
               </label>
               <input type="text" className="ff-input" placeholder="e.g. $5,000 or $2k/mo" value={value} onChange={e => setValue(e.target.value)} />
             </div>
@@ -2343,7 +2676,7 @@ function PipelineTab() {
             Track replies and close rates over time.
           </p>
           <p className="ff-text-3 mt-4" style={{ fontSize: 11, lineHeight: 1.5, fontStyle: 'italic' }}>
-            Note: Pipeline data clears when you refresh.
+            Saved in your browser for 15 days. No account needed.
           </p>
         </div>
       )}
@@ -2661,6 +2994,25 @@ function MethodDropdown({ value, onChange }) {
 }
 
 /* SHARED */
+
+function Tooltip({ text, align = 'center' }) {
+  return (
+    <span className="ff-tooltip-wrap">
+      <button
+        type="button"
+        className="ff-tooltip-trigger"
+        aria-label="More info"
+        tabIndex={0}
+        onClick={(e) => e.preventDefault()}
+      >
+        <HelpCircle size={13} strokeWidth={2.2} />
+      </button>
+      <span className={`ff-tooltip-bubble${align === 'right' ? ' ff-tooltip-bubble--right' : ''}`} role="tooltip">
+        {text}
+      </span>
+    </span>
+  );
+}
 
 function ImagePreview({ data, onRemove }) {
   return (
