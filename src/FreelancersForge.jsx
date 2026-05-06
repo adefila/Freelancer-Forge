@@ -2261,6 +2261,7 @@ ${STRICT_RULES}
 Return ONLY JSON. No em dashes.`;
     }
 
+    if (mode === 'dm') {
       return `You are an expert freelance closer.
 ${imageData ? 'NOTE: Image attached.\n' : ''}
 Generate ONLY: { "clientType": "4-8 words", "hook": "4-10 words", "coldDM": "3-5 lines max, \\n breaks" }
