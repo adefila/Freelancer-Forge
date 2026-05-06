@@ -3,7 +3,8 @@ import {
   ArrowRight, Copy, Check, Loader2, Sparkles, Paperclip, X, ImageIcon,
   Sun, Moon, Plus, ExternalLink, Link as LinkIcon, ChevronDown,
   Mail, MessageSquare, FileText, Reply, Globe, Type, Image as ImgIcon,
-  Target, Award, Briefcase, User, Layers, Wand2
+  Target, Award, Briefcase, User, Layers, Wand2,
+  TrendingUp, Trash2
 } from 'lucide-react';
 
 /* ====================================================================== */
@@ -132,6 +133,12 @@ const TONE_OPTIONS = [
   { id: 'Sharp', desc: 'Confident, assertive' },
   { id: 'Persuasive', desc: 'Active selling, builds desire' },
   { id: 'Casual', desc: 'Founder-to-founder' },
+  { id: 'Bold', desc: 'Strong opinions, conviction' },
+  { id: 'Witty', desc: 'Clever, light humor' },
+  { id: 'Empathetic', desc: 'Acknowledges pain, builds trust' },
+  { id: 'Curious', desc: 'Asks questions, learns first' },
+  { id: 'Authoritative', desc: 'Expert voice, no doubt' },
+  { id: 'Playful', desc: 'Energetic, breaks the mold' },
 ];
 
 const TONE_DIRECTIVES = {
@@ -141,6 +148,12 @@ const TONE_DIRECTIVES = {
   Sharp: "Write in a SHARP voice: confident, slightly assertive, results-focused.",
   Persuasive: "Write in a PERSUASIVE voice: actively selling without sounding salesy.",
   Casual: "Write in a CASUAL voice: relaxed and conversational.",
+  Bold: "Write in a BOLD voice: strong opinions, take a clear position, no hedging. Make claims you'd defend in person.",
+  Witty: "Write in a WITTY voice: clever, light humor, unexpected turns of phrase. Never forced or punny.",
+  Empathetic: "Write in an EMPATHETIC voice: acknowledge their situation first, show you understand the pain, then offer a path forward.",
+  Curious: "Write in a CURIOUS voice: lead with questions, show interest in their world before pitching anything. Sound like you want to learn, not sell.",
+  Authoritative: "Write in an AUTHORITATIVE voice: speak as the expert. State things as fact. No 'I think' or 'maybe.' Quiet confidence.",
+  Playful: "Write in a PLAYFUL voice: energetic, surprising, breaks expectations. Still professional but anything but boring.",
 };
 
 const STRICT_RULES = `
@@ -164,9 +177,10 @@ const stripEmDashes = (s) => {
 
 const CSS = `
 @import url('https://rsms.me/inter/inter.css');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&display=swap');
 
 .ff-root {
-  --font-display: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
+  --font-display: 'Fraunces', 'Times New Roman', Georgia, serif;
   --font-text: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
   --font-mono: 'SF Mono', 'JetBrains Mono', ui-monospace, monospace;
 
@@ -255,7 +269,13 @@ const CSS = `
   --sh-focus: 0 0 0 3px rgba(59, 130, 246, 0.25);
 }
 
-.ff-display { font-family: var(--font-display); letter-spacing: -0.022em; font-weight: 600; }
+.ff-display {
+  font-family: var(--font-display);
+  letter-spacing: -0.018em;
+  font-weight: 500;
+  font-feature-settings: 'ss01', 'ss02';
+  font-optical-sizing: auto;
+}
 .ff-mono { font-family: var(--font-mono); font-feature-settings: 'tnum', 'zero'; }
 
 .ff-bg { background-color: var(--bg); }
@@ -463,57 +483,46 @@ const CSS = `
   color: var(--accent-text-on);
 }
 
-/* SLEEK FILLED PILL TABS */
+/* UNDERLINED TABS (clean, editorial) */
 .ff-tabs {
-  display: inline-flex;
-  gap: 6px;
-  padding: 5px;
-  background-color: var(--bg-elev-1);
-  border: 1px solid var(--border);
-  border-radius: var(--r-pill);
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--border);
 }
 .ff-tab {
   background: transparent;
   border: none;
-  color: var(--text-2);
+  border-bottom: 2px solid transparent;
+  color: var(--text-3);
   font-family: var(--font-text);
-  font-size: 13.5px;
+  font-size: 14px;
   font-weight: 500;
-  letter-spacing: -0.005em;
-  padding: 9px 18px;
+  letter-spacing: -0.01em;
+  padding: 14px 4px;
+  margin-right: 28px;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  transition: color var(--t-fast), background-color var(--t-med);
-  border-radius: var(--r-pill);
-  position: relative;
-  z-index: 1;
+  gap: 8px;
+  transition: color var(--t-fast), border-color var(--t-fast);
+  margin-bottom: -1px;
 }
-.ff-tab:hover:not(.ff-tab-active) {
-  color: var(--text-1);
-  background-color: var(--bg-elev-2);
-}
+.ff-tab:last-child { margin-right: 0; }
+.ff-tab:hover:not(.ff-tab-active) { color: var(--text-1); }
 .ff-tab-active {
-  background-color: var(--accent-vivid);
-  color: var(--accent-text-on);
+  color: var(--text-1);
+  border-bottom-color: var(--accent);
   font-weight: 600;
-  box-shadow: var(--sh-blue);
 }
-.ff-tab-active:hover { background-color: var(--accent-vivid-hover); color: var(--accent-text-on); }
 .ff-tab-badge {
   font-size: 10px;
-  font-weight: 700;
+  font-weight: 600;
   padding: 2px 7px;
   border-radius: var(--r-pill);
-  background-color: rgba(255, 255, 255, 0.22);
-  color: inherit;
-  letter-spacing: 0.04em;
-  margin-left: 2px;
-}
-.ff-tab:not(.ff-tab-active) .ff-tab-badge {
   background-color: var(--accent-bg-soft);
   color: var(--accent);
+  letter-spacing: 0.02em;
+  margin-left: 2px;
 }
 
 /* DROPDOWN */
@@ -811,22 +820,23 @@ const CSS = `
 
 /* OPTIMIZE CTA */
 .ff-optimize-cta {
-  background: linear-gradient(135deg, var(--accent-bg-soft) 0%, var(--bg-elev-1) 70%);
+  background: var(--accent-bg-soft);
   border: 1px solid var(--accent-border-soft);
-  padding: 24px;
+  padding: 28px;
   border-radius: var(--r-lg);
 }
 .ff-optimize-headline {
   font-family: var(--font-display);
-  font-size: 22px;
-  line-height: 1.25;
-  font-weight: 600;
-  letter-spacing: -0.022em;
+  font-size: 24px;
+  line-height: 1.2;
+  font-weight: 500;
+  letter-spacing: -0.018em;
   color: var(--text-1);
-  margin-bottom: 6px;
+  margin-bottom: 8px;
+  font-optical-sizing: auto;
 }
 .ff-optimize-sub {
-  font-size: 14px;
+  font-size: 14.5px;
   color: var(--text-2);
   line-height: 1.55;
   letter-spacing: -0.005em;
@@ -994,18 +1004,97 @@ const CSS = `
 
 .ff-subheading {
   font-family: var(--font-display);
-  font-size: 18px;
-  font-weight: 600;
-  letter-spacing: -0.022em;
+  font-size: 20px;
+  font-weight: 500;
+  letter-spacing: -0.018em;
   color: var(--text-1);
+  font-optical-sizing: auto;
 }
 
 .ff-pulse { animation: ff-pulse 1.6s ease-in-out infinite; }
 @keyframes ff-pulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
-.ff-fadeup { animation: ff-fadeup 480ms cubic-bezier(0.34, 1.56, 0.64, 1) backwards; }
+
+.ff-fadeup { animation: ff-fadeup 560ms cubic-bezier(0.16, 1, 0.3, 1) backwards; }
 @keyframes ff-fadeup {
-  from { opacity: 0; transform: translateY(8px); }
+  from { opacity: 0; transform: translateY(12px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+.ff-fadein { animation: ff-fadein 420ms cubic-bezier(0.16, 1, 0.3, 1) backwards; }
+@keyframes ff-fadein {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.ff-scalein { animation: ff-scalein 480ms cubic-bezier(0.16, 1, 0.3, 1) backwards; }
+@keyframes ff-scalein {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.ff-slidein { animation: ff-slidein 520ms cubic-bezier(0.16, 1, 0.3, 1) backwards; }
+@keyframes ff-slidein {
+  from { opacity: 0; transform: translateX(-8px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.ff-btn:hover:not(:disabled),
+.ff-icon-btn:hover,
+.ff-tab:hover {
+  transform: translateY(-1px);
+}
+.ff-btn:active:not(:disabled),
+.ff-icon-btn:active {
+  transform: translateY(0) scale(0.98);
+  transition-duration: 80ms;
+}
+
+/* Smooth focus ring transitions */
+.ff-input, .ff-textarea, .ff-btn, .ff-icon-btn, .ff-dropdown-trigger, .ff-tab {
+  transition: background-color var(--t-med),
+              border-color var(--t-fast),
+              color var(--t-fast),
+              transform var(--t-fast),
+              box-shadow var(--t-fast);
+}
+
+/* Subtle ambient gradient backdrop */
+.ff-gradient-bg {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 1400px;
+  height: 720px;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse 60% 50% at 75% 0%, var(--accent-bg-soft) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 25% 10%, var(--accent-bg-soft) 0%, transparent 55%);
+  opacity: 0.7;
+  filter: blur(8px);
+}
+.ff-root.dark .ff-gradient-bg {
+  opacity: 0.5;
+  background:
+    radial-gradient(ellipse 60% 50% at 75% 0%, rgba(59, 130, 246, 0.15) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 25% 10%, rgba(59, 130, 246, 0.12) 0%, transparent 55%);
+}
+
+/* Score animation */
+@keyframes ff-ringfill {
+  from { stroke-dashoffset: var(--ring-circumference); }
+  to { stroke-dashoffset: var(--ring-offset); }
+}
+.ff-score-ring-fg-anim {
+  animation: ff-ringfill 1100ms cubic-bezier(0.34, 1.4, 0.64, 1) forwards;
+}
+@keyframes ff-barfill {
+  from { width: 0; }
+}
+.ff-score-bar-anim {
+  animation: ff-barfill 900ms cubic-bezier(0.34, 1.4, 0.64, 1) backwards;
 }
 
 .ff-empty-state {
@@ -1037,6 +1126,7 @@ const CSS = `
   display: inline-block;
 }
 
+
 `;
 
 /* ====================================================================== */
@@ -1051,7 +1141,8 @@ export default function FreelancersForge() {
     <div className={`ff-root ${theme}`}>
       <style>{CSS}</style>
 
-      <div className="max-w-7xl mx-auto px-6 md:px-10 py-8 md:py-12">
+      <div className="ff-gradient-bg" aria-hidden="true"></div>
+      <div className="max-w-7xl mx-auto px-6 md:px-10 py-8 md:py-12" style={{ position: 'relative', zIndex: 1 }}>
 
         {/* HEADER */}
         <div className="flex items-center justify-between mb-12 gap-4">
@@ -1070,18 +1161,19 @@ export default function FreelancersForge() {
         </div>
 
         {/* TITLE */}
-        <div className="mb-12 md:mb-16" style={{ maxWidth: '900px' }}>
+        <div className="mb-12 md:mb-16">
           <h1
             className="ff-display ff-text-1 mb-5"
             style={{
-              fontSize: 'clamp(36px, 5vw, 64px)',
-              lineHeight: 1.08,
-              fontWeight: 600,
-              letterSpacing: '-0.028em',
+              fontSize: 'clamp(40px, 5.6vw, 64px)',
+              lineHeight: 1.06,
+              fontWeight: 500,
+              letterSpacing: '-0.022em',
+              maxWidth: '20ch',
             }}
           >
             Audit any page. Rewrite it like{' '}
-            <span style={{ color: 'var(--accent)' }}>the top one percent.</span>
+            <span style={{ color: 'var(--accent)', fontStyle: 'italic', fontWeight: 500 }}>the top one percent.</span>
           </h1>
           <p
             className="ff-text-2"
@@ -1096,39 +1188,39 @@ export default function FreelancersForge() {
           </p>
         </div>
 
-        {/* PILL TABS */}
-        <div className="mb-10 overflow-x-auto" style={{ paddingBottom: 4 }}>
-          <div className="ff-tabs">
-            <button
-              type="button"
-              className={`ff-tab ${tab === 'optimize' ? 'ff-tab-active' : ''}`}
-              onClick={() => setTab('optimize')}
-            >
-              <Layers size={15} />
-              Optimize Page
-              <span className="ff-tab-badge">CORE</span>
-            </button>
-            <button
-              type="button"
-              className={`ff-tab ${tab === 'close' ? 'ff-tab-active' : ''}`}
-              onClick={() => setTab('close')}
-            >
-              <Target size={15} />
-              Close Client
-            </button>
-          </div>
+        {/* TABS */}
+        <div className="ff-tabs mb-10">
+          <button
+            type="button"
+            className={`ff-tab ${tab === 'optimize' ? 'ff-tab-active' : ''}`}
+            onClick={() => setTab('optimize')}
+          >
+            <Layers size={15} />
+            Optimize Page
+            <span className="ff-tab-badge">CORE</span>
+          </button>
+          <button
+            type="button"
+            className={`ff-tab ${tab === 'close' ? 'ff-tab-active' : ''}`}
+            onClick={() => setTab('close')}
+          >
+            <Target size={15} />
+            Close Client
+          </button>
+          <button
+            type="button"
+            className={`ff-tab ${tab === 'pipeline' ? 'ff-tab-active' : ''}`}
+            onClick={() => setTab('pipeline')}
+          >
+            <TrendingUp size={15} />
+            Pipeline
+          </button>
         </div>
 
         {tab === 'optimize' && <OptimizeTab />}
         {tab === 'close' && <CloseTab />}
+        {tab === 'pipeline' && <PipelineTab />}
 
-        {/* FOOTER */}
-        <div className="mt-24 pt-8" style={{ borderTop: '1px solid var(--border)' }}>
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-            <p className="ff-meta-text">Sharper pages, better clients.</p>
-            <p className="ff-meta-text">Powered by Claude</p>
-          </div>
-        </div>
       </div>
     </div>
   );
@@ -1147,6 +1239,9 @@ function OptimizeTab() {
   const [audience, setAudience] = useState('');
   const [goal, setGoal] = useState('');
 
+  const [fetchedPage, setFetchedPage] = useState(null);
+  const [fetchingPage, setFetchingPage] = useState(false);
+
   const [auditing, setAuditing] = useState(false);
   const [optimizing, setOptimizing] = useState(false);
   const [error, setError] = useState('');
@@ -1157,8 +1252,13 @@ function OptimizeTab() {
   const fileInputRef = useRef(null);
 
   useEffect(() => {
-    setResult(null); setOptimized(null); setError('');
+    setResult(null); setOptimized(null); setError(''); setFetchedPage(null);
   }, [pageType, method]);
+
+  // Clear fetched cache if URL changes
+  useEffect(() => {
+    setFetchedPage(null);
+  }, [url]);
 
   const handleFileSelect = (file) => {
     if (!file) return;
@@ -1177,9 +1277,46 @@ function OptimizeTab() {
   };
 
   const buildPageInputBlock = () => {
-    if (method === 'url') return `URL: ${url.trim()}\n(The user gave only a URL.)`;
+    if (method === 'url') {
+      if (fetchedPage) {
+        const metaBlock = fetchedPage.meta?.description
+          ? `META DESCRIPTION: ${fetchedPage.meta.description}\n\n`
+          : '';
+        return `LIVE PAGE CONTENT (fetched from ${fetchedPage.finalUrl}):
+PAGE TITLE: ${fetchedPage.title || '(no title)'}
+
+${metaBlock}PAGE TEXT (with structure preserved, # = h1, ## = h2, etc.):
+"""
+${fetchedPage.text}
+"""${fetchedPage.truncated ? '\n\n[Note: page was truncated due to length.]' : ''}`;
+      }
+      return `URL: ${url.trim()}\n(URL provided but page content was not fetched. Audit based on URL alone.)`;
+    }
     if (method === 'paste') return `PAGE COPY:\n"""\n${pasteText.trim()}\n"""`;
     return '[See attached image.]';
+  };
+
+  const fetchPageContent = async (targetUrl) => {
+    setFetchingPage(true);
+    setError('');
+    try {
+      const response = await fetch('/api/fetch-page', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: targetUrl }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Could not fetch the page.');
+      }
+      setFetchedPage(data);
+      return data;
+    } catch (err) {
+      setError(err.message || 'Could not fetch the page. Try pasting the copy instead.');
+      return null;
+    } finally {
+      setFetchingPage(false);
+    }
   };
 
   const callClaude = async (prompt, includeImage) => {
@@ -1193,7 +1330,7 @@ function OptimizeTab() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         model: "claude-sonnet-4-5",
-        max_tokens: 4000,
+        max_tokens: 5000,
         messages: [{ role: "user", content }]
       })
     });
@@ -1208,13 +1345,22 @@ function OptimizeTab() {
     if (method === 'url' && !url.trim()) { setError('Paste a URL.'); return; }
     if (method === 'paste' && !pasteText.trim()) { setError('Paste the page copy.'); return; }
     if (method === 'image' && !imageData) { setError('Upload a screenshot.'); return; }
-    setError(''); setAuditing(true); setResult(null); setOptimized(null);
+
+    setError(''); setResult(null); setOptimized(null);
+
+    // For URL method: fetch the page first if we haven't already
+    if (method === 'url' && !fetchedPage) {
+      const fetched = await fetchPageContent(url.trim());
+      if (!fetched) return; // fetchPageContent already set the error
+    }
+
+    setAuditing(true);
 
     const pt = PAGE_TYPES[pageType];
     const criteriaList = pt.criteria.map((c, i) => `${i + 1}. ${c}`).join('\n');
 
-    const prompt = `You are an elite conversion strategist auditing a freelancer page.
-${imageData && method === 'image' ? 'NOTE: Image attached. Read every detail.\n' : ''}
+    const prompt = `You are an elite conversion strategist auditing a freelancer page. You audit ONLY based on the actual content provided. Do not invent details, do not guess about content not shown. If something is missing, flag it as missing.
+${imageData && method === 'image' ? 'NOTE: A screenshot of the page is attached. Read every visible detail.\n' : ''}${method === 'url' && fetchedPage ? 'NOTE: The actual live page was fetched and its real content is below. Audit it as you see it. Reference exact phrases when relevant.\n' : ''}
 PAGE TYPE: ${pt.label}
 PAGE TYPE DESCRIPTION: ${pt.desc}
 
@@ -1226,10 +1372,10 @@ ${buildPageInputBlock()}
 
 Generate ONLY a JSON object:
 {
-  "overall": { "score": 0-100, "verdict": "3-5 sentences brutally honest", "headline": "5-8 word verdict" },
-  "scores": [{ "criterion": "label", "score": 1-10, "note": "one short sentence" }],
-  "recommendations": [{ "priority": "High|Medium|Low", "issue": "1-2 sentences", "fix": "tactical, 1-2 sentences" }],
-  "rewrites": [{ "section": "name", "before": "current", "after": "rewritten" }]
+  "overall": { "score": 0-100, "verdict": "3-5 sentences. Lead with a definitive judgment (e.g. 'This page buries the lede.' or 'This profile reads like 90% of competitors.'). Quote or reference an exact phrase from the page when relevant. Then explain what works, what's broken, and the single biggest issue. Brutally honest, no hedging.", "headline": "5-8 word verdict, definitive not vague" },
+  "scores": [{ "criterion": "label", "score": 1-10, "note": "one short sentence referencing actual page content" }],
+  "recommendations": [{ "priority": "High|Medium|Low", "issue": "1-2 sentences citing what's actually on the page", "fix": "tactical, 1-2 sentences" }],
+  "rewrites": [{ "section": "name", "before": "current copy from the page (verbatim or near-verbatim if visible)", "after": "rewritten" }]
 }
 
 RULES: Score every criterion. 4-7 recommendations, 3-5 rewrites. Be specific.
@@ -1289,7 +1435,8 @@ YOUR TASK:
 2. Rewrite the entire page as ONE continuous, ready-to-paste block. Use ALL CAPS section headers (followed by blank line). Sections to cover:
 ${sectionsList}
 3. Weave keywords naturally where they have maximum search impact. No stuffing.
-4. Voice: human, specific, direct. No corporate buzzwords. No em dashes.
+4. Voice: human, specific, direct. No corporate buzzwords. No em dashes. If the original page has any voice (sarcastic, warm, blunt, technical), preserve and amplify it. Do NOT flatten it into generic "professional" tone. The rewrite should sound like the same person, just sharper.
+5. Specificity rule: every claim needs a number, named outcome, time frame, or specific niche term. No abstractions. Bad: "I help startups grow." Good: "I help Series A SaaS founders cut churn 18-40% in 90 days."
 
 Generate ONLY:
 {
@@ -1366,17 +1513,7 @@ Return ONLY JSON. No em dashes.`;
         </div>
         <div>
           <label className="ff-section-label block mb-3">Submission Method</label>
-          <div className="ff-segment ff-segment-color">
-            <button type="button" className={`ff-segment-item ${method === 'url' ? 'ff-segment-item-active' : ''}`} onClick={() => setMethod('url')}>
-              <Globe size={11} style={{ display: 'inline', marginRight: 4, marginBottom: 1 }} /> URL
-            </button>
-            <button type="button" className={`ff-segment-item ${method === 'paste' ? 'ff-segment-item-active' : ''}`} onClick={() => setMethod('paste')}>
-              <Type size={11} style={{ display: 'inline', marginRight: 4, marginBottom: 1 }} /> Paste Copy
-            </button>
-            <button type="button" className={`ff-segment-item ${method === 'image' ? 'ff-segment-item-active' : ''}`} onClick={() => setMethod('image')}>
-              <ImgIcon size={11} style={{ display: 'inline', marginRight: 4, marginBottom: 1 }} /> Screenshot
-            </button>
-          </div>
+          <MethodDropdown value={method} onChange={setMethod} />
           <p className="ff-field-hint mt-2">
             {method === 'url' ? 'Quick audit from URL alone' : method === 'paste' ? 'Best results: paste the visible copy' : 'Visual + copy audit from a screenshot'}
           </p>
@@ -1391,8 +1528,48 @@ Return ONLY JSON. No em dashes.`;
             {method === 'url' && (
               <div>
                 <label className="ff-field-label">URL <span className="ff-text-accent">*</span></label>
-                <input type="url" className="ff-input" placeholder="https://yoursite.com/about" value={url} onChange={e => setUrl(e.target.value)} />
-                <p className="ff-field-hint mt-2">For deeper audits, paste copy or upload a screenshot.</p>
+                <div className="flex gap-2">
+                  <input
+                    type="url"
+                    className="ff-input"
+                    placeholder="https://yoursite.com/about"
+                    value={url}
+                    onChange={e => setUrl(e.target.value)}
+                    style={{ flex: 1 }}
+                  />
+                  <button
+                    type="button"
+                    className="ff-btn ff-btn-secondary"
+                    onClick={() => url.trim() && fetchPageContent(url.trim())}
+                    disabled={!url.trim() || fetchingPage}
+                    style={{ width: 'auto', padding: '10px 14px', whiteSpace: 'nowrap' }}
+                  >
+                    {fetchingPage ? <Loader2 size={13} className="animate-spin" /> : <Globe size={13} />}
+                    Preview
+                  </button>
+                </div>
+                <p className="ff-field-hint mt-2">
+                  We fetch the live page and read its actual content. Some sites block automated requests, in which case paste the copy instead.
+                </p>
+
+                {fetchedPage && !fetchingPage && (
+                  <div className="ff-card ff-fadeup mt-3" style={{ padding: 14, background: 'var(--accent-bg-soft)', borderColor: 'var(--accent-border-soft)' }}>
+                    <div className="flex items-start gap-2 mb-2">
+                      <Check size={14} style={{ color: 'var(--accent)', flexShrink: 0, marginTop: 2 }} />
+                      <div className="flex-1 min-w-0">
+                        <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-1)' }}>Page fetched</p>
+                        {fetchedPage.title && (
+                          <p className="truncate mt-1" style={{ fontSize: 12, color: 'var(--text-2)' }}>
+                            {fetchedPage.title}
+                          </p>
+                        )}
+                        <p className="ff-text-3 mt-1" style={{ fontSize: 11.5 }}>
+                          {fetchedPage.text.length.toLocaleString()} characters extracted{fetchedPage.truncated ? ' (truncated)' : ''}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
@@ -1449,8 +1626,10 @@ Return ONLY JSON. No em dashes.`;
               </div>
             )}
 
-            <button className="ff-btn" onClick={handleAudit} disabled={auditing || optimizing} style={{ marginTop: 8 }}>
-              {auditing ? <><Loader2 size={15} className="animate-spin" />Auditing</> : <><Sparkles size={15} />Audit Page<ArrowRight size={15} /></>}
+            <button className="ff-btn" onClick={handleAudit} disabled={auditing || optimizing || fetchingPage} style={{ marginTop: 8 }}>
+              {fetchingPage ? <><Loader2 size={15} className="animate-spin" />Fetching page</> :
+               auditing ? <><Loader2 size={15} className="animate-spin" />Auditing</> :
+               <><Sparkles size={15} />Audit Page<ArrowRight size={15} /></>}
             </button>
           </div>
         </div>
@@ -1675,7 +1854,8 @@ function CloseTab() {
   const [newUrl, setNewUrl] = useState('');
   const [newLabel, setNewLabel] = useState('');
   const [newTag, setNewTag] = useState('');
-  const [conversation, setConversation] = useState('');
+  const [clientMessage, setClientMessage] = useState('');
+  const [myMessage, setMyMessage] = useState('');
   const [goal, setGoal] = useState('');
 
   const [loading, setLoading] = useState(false);
@@ -1713,14 +1893,36 @@ function CloseTab() {
     const toneInstruction = tone === 'Auto' ? 'Adapt naturally.' : `${TONE_DIRECTIVES[tone]} Apply consistently.`;
 
     if (mode === 'followup') {
-      return `You are an expert freelance closer.
-${imageData ? 'NOTE: Image attached.\n' : ''}
-Generate ONLY: { "situation": "1-2 sentences", "followup": "the message, \\n breaks" }
-RULES: match energy of last message; acknowledge without summarizing; move toward goal; offer easy off-ramp if silent.
+      const clientBlock = clientMessage.trim() ? `THE CLIENT'S MESSAGE:\n"""\n${clientMessage.trim()}\n"""` : (imageData ? "[The client's message is in the attached image.]" : '[No client message provided.]');
+      const myBlock = myMessage.trim() ? `MY LAST REPLY (what I sent before):\n"""\n${myMessage.trim()}\n"""` : '[I have not replied yet, this is the first follow-up.]';
+
+      return `You are an expert freelance closer drafting a follow-up message.
+${imageData ? 'NOTE: Image attached, may contain the conversation.\n' : ''}
+
+${clientBlock}
+
+${myBlock}
+
+GOAL OF THIS FOLLOW-UP: ${goal.trim() || 'Re-engage and move the conversation forward.'}
+
+Generate ONLY this JSON:
+{
+  "clientRead": "1-2 sentences. What kind of client is this? (e.g. 'Cautious buyer testing fit, mentions budget twice.' or 'Decisive operator, wants to move fast.')",
+  "situation": "1-2 sentences reading the room. What's the actual state of this conversation? Where did it stall, or what is the client really asking?",
+  "followup": "The follow-up message, ready to send. Use \\n for line breaks. 3-6 short paragraphs max. No greeting fluff like 'Hope you're well.'"
+}
+
+RULES:
+- Match the client's energy and formality from their message.
+- Acknowledge without summarizing what they said back to them.
+- Move toward the goal without being pushy.
+- Offer a soft off-ramp if the client has gone silent (e.g. "If timing isn't right, no worries, just let me know.").
+- Reference something specific from their message to prove you read it.
+- If I haven't replied yet, treat this as a fresh follow-up that opens new energy. If I have replied, build on what I last said.
+
 VOICE: ${toneInstruction}
 ${STRICT_RULES}
-CONVERSATION: ${conversation.trim() || (imageData ? '[See attached.]' : '')}
-GOAL: ${goal.trim() || 'Re-engage.'}
+
 Return ONLY JSON. No em dashes.`;
     }
 
@@ -1774,7 +1976,7 @@ Return ONLY JSON. No em dashes.`;
   };
 
   const handleGenerate = async () => {
-    if (mode === 'followup' && !conversation.trim() && !imageData) { setError('Paste the conversation or upload screenshot.'); return; }
+    if (mode === 'followup' && !clientMessage.trim() && !myMessage.trim() && !imageData) { setError("Paste either the client's message or your last reply."); return; }
     if (mode !== 'followup' && !intel.trim() && !imageData) { setError('Add intel.'); return; }
     setError(''); setLoading(true); setResult(null);
 
@@ -1851,13 +2053,7 @@ Return ONLY JSON. No em dashes.`;
         </div>
         <div>
           <label className="ff-section-label block mb-3">Tone</label>
-          <div className="ff-segment ff-segment-color">
-            {TONE_OPTIONS.map(opt => (
-              <button key={opt.id} type="button" className={`ff-segment-item ${tone === opt.id ? 'ff-segment-item-active' : ''}`} onClick={() => setTone(opt.id)}>
-                {opt.id}
-              </button>
-            ))}
-          </div>
+          <ToneDropdown value={tone} onChange={setTone} />
           <p className="ff-field-hint mt-2">{TONE_OPTIONS.find(t => t.id === tone)?.desc}</p>
         </div>
       </div>
@@ -1870,21 +2066,47 @@ Return ONLY JSON. No em dashes.`;
             {mode === 'followup' ? (
               <>
                 <div>
-                  <label className="ff-field-label">Conversation <span className="ff-text-accent">*</span></label>
-                  <textarea className="ff-textarea" rows={10} placeholder="Paste both your message and the client's reply." value={conversation} onChange={e => setConversation(e.target.value)} />
+                  <label className="ff-field-label">Client's last message <span className="ff-text-accent">*</span></label>
+                  <textarea
+                    className="ff-textarea"
+                    rows={6}
+                    placeholder="Paste exactly what the client wrote..."
+                    value={clientMessage}
+                    onChange={e => setClientMessage(e.target.value)}
+                  />
+                  <p className="ff-field-hint mt-2">Helps Claude read the client's tone, intent, and where they're hesitating.</p>
+                </div>
+
+                <div>
+                  <label className="ff-field-label">
+                    Your last reply <span className="ff-field-hint" style={{ fontWeight: 400 }}>· optional</span>
+                  </label>
+                  <textarea
+                    className="ff-textarea"
+                    rows={5}
+                    placeholder="What you sent before. Leave blank if this is your first follow-up."
+                    value={myMessage}
+                    onChange={e => setMyMessage(e.target.value)}
+                  />
+                </div>
+
+                <div>
+                  <label className="ff-field-label">
+                    Or upload a screenshot <span className="ff-field-hint" style={{ fontWeight: 400 }}>· optional</span>
+                  </label>
                   {!imageData && (
-                    <div className="mt-2">
+                    <>
                       <input ref={fileInputRef} type="file" accept="image/*" onChange={e => { handleFileSelect(e.target.files?.[0]); e.target.value = ''; }} style={{ display: 'none' }} />
                       <button type="button" className="ff-attach-btn" onClick={() => fileInputRef.current?.click()}>
                         <Paperclip size={13} /> Attach Screenshot
                       </button>
-                    </div>
+                    </>
                   )}
                   {imageData && <ImagePreview data={imageData} onRemove={() => setImageData(null)} />}
                 </div>
 
                 <div>
-                  <label className="ff-field-label">Goal</label>
+                  <label className="ff-field-label">Goal of this follow-up</label>
                   <textarea className="ff-textarea" rows={3} placeholder='e.g. "Get them on a 15-min call this week"' value={goal} onChange={e => setGoal(e.target.value)} />
                 </div>
               </>
@@ -1965,6 +2187,330 @@ Return ONLY JSON. No em dashes.`;
   );
 }
 
+/* ====================================================================== */
+/* PIPELINE TAB                                                           */
+/* ====================================================================== */
+
+const PIPELINE_STATUSES = [
+  { id: 'sent', label: 'Sent', color: 'var(--text-3)', bg: 'var(--bg-elev-2)' },
+  { id: 'replied', label: 'Replied', color: 'var(--accent)', bg: 'var(--accent-bg-soft)' },
+  { id: 'in_talks', label: 'In Talks', color: 'var(--warning)', bg: 'var(--warning-bg)' },
+  { id: 'closed_won', label: 'Closed Won', color: 'var(--success)', bg: 'var(--success-bg)' },
+  { id: 'closed_lost', label: 'Closed Lost', color: 'var(--danger)', bg: 'var(--danger-bg)' },
+];
+
+const PIPELINE_TYPES = [
+  { id: 'proposal', label: 'Proposal' },
+  { id: 'dm', label: 'Cold DM' },
+  { id: 'email', label: 'Cold Email' },
+  { id: 'followup', label: 'Follow-up' },
+];
+
+function PipelineTab() {
+  const [entries, setEntries] = useState([]);
+  const [showForm, setShowForm] = useState(false);
+  const [client, setClient] = useState('');
+  const [type, setType] = useState('proposal');
+  const [status, setStatus] = useState('sent');
+  const [value, setValue] = useState('');
+  const [notes, setNotes] = useState('');
+
+  const addEntry = () => {
+    if (!client.trim()) return;
+    const today = new Date().toISOString().slice(0, 10);
+    setEntries(e => [
+      {
+        id: Date.now().toString(36) + Math.random().toString(36).slice(2, 5),
+        date: today,
+        client: client.trim(),
+        type,
+        status,
+        value: value.trim(),
+        notes: notes.trim(),
+      },
+      ...e,
+    ]);
+    setClient(''); setValue(''); setNotes(''); setStatus('sent'); setType('proposal');
+    setShowForm(false);
+  };
+
+  const updateStatus = (id, newStatus) => {
+    setEntries(e => e.map(x => x.id === id ? { ...x, status: newStatus } : x));
+  };
+
+  const removeEntry = (id) => setEntries(e => e.filter(x => x.id !== id));
+
+  // Stats
+  const stats = {
+    total: entries.length,
+    sent: entries.filter(e => e.status === 'sent').length,
+    replied: entries.filter(e => e.status === 'replied').length,
+    inTalks: entries.filter(e => e.status === 'in_talks').length,
+    won: entries.filter(e => e.status === 'closed_won').length,
+    lost: entries.filter(e => e.status === 'closed_lost').length,
+  };
+  const replyRate = stats.total > 0 ? Math.round((stats.replied + stats.inTalks + stats.won + stats.lost) / stats.total * 100) : 0;
+  const winRate = (stats.won + stats.lost) > 0 ? Math.round(stats.won / (stats.won + stats.lost) * 100) : 0;
+  const totalValue = entries.filter(e => e.status === 'closed_won' && e.value).reduce((sum, e) => {
+    const num = parseFloat(e.value.replace(/[^0-9.]/g, ''));
+    return sum + (isNaN(num) ? 0 : num);
+  }, 0);
+
+  return (
+    <div className="ff-fadeup">
+      {/* HEADER */}
+      <div className="flex items-center justify-between mb-8 flex-wrap gap-3">
+        <div>
+          <h2 className="ff-display ff-text-1" style={{ fontSize: 28, fontWeight: 500, letterSpacing: '-0.018em' }}>
+            Your pipeline
+          </h2>
+          <p className="ff-text-2 mt-1" style={{ fontSize: 14, lineHeight: 1.5 }}>
+            Track every proposal, DM, and email. See what's working.
+          </p>
+        </div>
+        <button
+          className="ff-btn"
+          onClick={() => setShowForm(s => !s)}
+          style={{ width: 'auto', padding: '10px 18px' }}
+        >
+          {showForm ? <X size={14} /> : <Plus size={14} />}
+          {showForm ? 'Cancel' : 'Add Entry'}
+        </button>
+      </div>
+
+      {/* STATS GRID */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
+        <StatCard label="Total Sent" value={stats.total} />
+        <StatCard label="Replies" value={`${stats.replied + stats.inTalks + stats.won + stats.lost}`} sub={`${replyRate}% reply rate`} />
+        <StatCard label="Closed Won" value={stats.won} sub={winRate > 0 ? `${winRate}% win rate` : null} accent />
+        <StatCard label="Revenue" value={totalValue > 0 ? `$${totalValue.toLocaleString()}` : '—'} sub="from closed deals" />
+      </div>
+
+      {/* ADD FORM */}
+      {showForm && (
+        <div className="ff-card ff-fadeup mb-8" style={{ padding: 20 }}>
+          <h3 className="ff-subheading mb-4" style={{ fontSize: 16 }}>New entry</h3>
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <label className="ff-field-label">Client / Company <span className="ff-text-accent">*</span></label>
+              <input type="text" className="ff-input" placeholder="e.g. Acme Corp" value={client} onChange={e => setClient(e.target.value)} />
+            </div>
+            <div>
+              <label className="ff-field-label">Type</label>
+              <select className="ff-input" value={type} onChange={e => setType(e.target.value)} style={{ cursor: 'pointer' }}>
+                {PIPELINE_TYPES.map(t => <option key={t.id} value={t.id}>{t.label}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="ff-field-label">Status</label>
+              <select className="ff-input" value={status} onChange={e => setStatus(e.target.value)} style={{ cursor: 'pointer' }}>
+                {PIPELINE_STATUSES.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="ff-field-label">
+                Value <span className="ff-field-hint" style={{ fontWeight: 400 }}>· optional</span>
+              </label>
+              <input type="text" className="ff-input" placeholder="e.g. $5,000 or $2k/mo" value={value} onChange={e => setValue(e.target.value)} />
+            </div>
+          </div>
+          <div className="mt-4">
+            <label className="ff-field-label">
+              Notes <span className="ff-field-hint" style={{ fontWeight: 400 }}>· optional</span>
+            </label>
+            <textarea className="ff-textarea" rows={2} placeholder="Brief context, where you found them, etc." value={notes} onChange={e => setNotes(e.target.value)} />
+          </div>
+          <div className="flex gap-2 mt-4">
+            <button className="ff-btn" onClick={addEntry} disabled={!client.trim()} style={{ width: 'auto', padding: '10px 18px' }}>
+              <Check size={14} /> Save Entry
+            </button>
+            <button className="ff-btn ff-btn-secondary" onClick={() => setShowForm(false)} style={{ width: 'auto', padding: '10px 18px' }}>
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ENTRIES LIST */}
+      {entries.length === 0 && !showForm && (
+        <div className="ff-empty-state">
+          <TrendingUp size={28} style={{ color: 'var(--text-3)', display: 'inline-block', marginBottom: 12, opacity: 0.5 }} />
+          <p className="ff-display ff-text-1 mb-3" style={{ fontSize: 22, lineHeight: 1.3, fontWeight: 500, letterSpacing: '-0.018em' }}>
+            Nothing logged yet.
+          </p>
+          <p className="ff-text-3" style={{ fontSize: 13, lineHeight: 1.55 }}>
+            Add an entry every time you send a proposal, DM, or email.<br/>
+            Track replies and close rates over time.
+          </p>
+          <p className="ff-text-3 mt-4" style={{ fontSize: 11, lineHeight: 1.5, fontStyle: 'italic' }}>
+            Note: Pipeline data clears when you refresh.
+          </p>
+        </div>
+      )}
+
+      {entries.length > 0 && (
+        <div className="ff-card" style={{ padding: 0, overflow: 'hidden' }}>
+          {/* Table header */}
+          <div className="grid items-center" style={{
+            gridTemplateColumns: '90px 1fr 110px 130px 110px 32px',
+            gap: 12,
+            padding: '12px 18px',
+            borderBottom: '1px solid var(--border)',
+            backgroundColor: 'var(--bg-elev-2)',
+          }}>
+            <span className="ff-section-label" style={{ fontSize: 10 }}>Date</span>
+            <span className="ff-section-label" style={{ fontSize: 10 }}>Client</span>
+            <span className="ff-section-label" style={{ fontSize: 10 }}>Type</span>
+            <span className="ff-section-label" style={{ fontSize: 10 }}>Status</span>
+            <span className="ff-section-label" style={{ fontSize: 10 }}>Value</span>
+            <span></span>
+          </div>
+          {/* Rows */}
+          {entries.map((entry, i) => (
+            <PipelineRow
+              key={entry.id}
+              entry={entry}
+              onStatusChange={(s) => updateStatus(entry.id, s)}
+              onRemove={() => removeEntry(entry.id)}
+              delay={i * 40}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function StatCard({ label, value, sub, accent }) {
+  return (
+    <div className="ff-card ff-fadeup" style={{ padding: 18 }}>
+      <p className="ff-section-label mb-2" style={{ fontSize: 10.5 }}>{label}</p>
+      <p style={{
+        fontFamily: 'var(--font-display)',
+        fontSize: 28,
+        lineHeight: 1.1,
+        fontWeight: 500,
+        letterSpacing: '-0.022em',
+        color: accent ? 'var(--accent)' : 'var(--text-1)',
+        fontFeatureSettings: "'tnum'",
+      }}>
+        {value}
+      </p>
+      {sub && <p className="ff-text-3 mt-1" style={{ fontSize: 11.5 }}>{sub}</p>}
+    </div>
+  );
+}
+
+function PipelineRow({ entry, onStatusChange, onRemove, delay }) {
+  const status = PIPELINE_STATUSES.find(s => s.id === entry.status);
+  const type = PIPELINE_TYPES.find(t => t.id === entry.type);
+  const [statusOpen, setStatusOpen] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setStatusOpen(false); };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  return (
+    <div
+      className="ff-fadein"
+      style={{
+        display: 'grid',
+        gridTemplateColumns: '90px 1fr 110px 130px 110px 32px',
+        gap: 12,
+        padding: '14px 18px',
+        borderBottom: '1px solid var(--border)',
+        alignItems: 'center',
+        animationDelay: `${delay}ms`,
+      }}
+    >
+      <span className="ff-mono" style={{ fontSize: 12, color: 'var(--text-3)' }}>
+        {entry.date.slice(5)}
+      </span>
+      <div style={{ minWidth: 0 }}>
+        <p style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--text-1)', letterSpacing: '-0.005em' }} className="truncate">
+          {entry.client}
+        </p>
+        {entry.notes && <p className="truncate" style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 2 }}>{entry.notes}</p>}
+      </div>
+      <span style={{ fontSize: 12, color: 'var(--text-2)', fontWeight: 500 }}>
+        {type?.label}
+      </span>
+      <div className="ff-dropdown" ref={ref} style={{ width: '100%' }}>
+        <button
+          type="button"
+          onClick={() => setStatusOpen(o => !o)}
+          style={{
+            background: status?.bg || 'var(--bg-elev-2)',
+            color: status?.color || 'var(--text-2)',
+            border: 'none',
+            padding: '4px 10px',
+            borderRadius: 'var(--r-pill)',
+            fontSize: 11,
+            fontWeight: 600,
+            letterSpacing: '0.02em',
+            textTransform: 'uppercase',
+            cursor: 'pointer',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 4,
+          }}
+        >
+          {status?.label}
+          <ChevronDown size={11} />
+        </button>
+        {statusOpen && (
+          <div className="ff-dropdown-menu" style={{ minWidth: 160 }}>
+            {PIPELINE_STATUSES.map(s => (
+              <button
+                key={s.id}
+                type="button"
+                className={`ff-dropdown-option ${s.id === entry.status ? 'ff-dropdown-option-active' : ''}`}
+                onClick={() => { onStatusChange(s.id); setStatusOpen(false); }}
+              >
+                <span style={{
+                  display: 'inline-block',
+                  width: 8, height: 8,
+                  borderRadius: '50%',
+                  background: s.color,
+                  marginTop: 6,
+                }}></span>
+                <div className="ff-dropdown-option-text">
+                  <span className="ff-dropdown-option-label" style={{ fontSize: 13 }}>{s.label}</span>
+                </div>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+      <span style={{ fontSize: 13, color: 'var(--text-1)', fontWeight: 500, fontFeatureSettings: "'tnum'" }}>
+        {entry.value || '—'}
+      </span>
+      <button
+        onClick={onRemove}
+        style={{
+          background: 'transparent',
+          border: 'none',
+          color: 'var(--text-3)',
+          cursor: 'pointer',
+          padding: 4,
+          borderRadius: 'var(--r-sm)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          transition: 'all var(--t-fast)',
+        }}
+        onMouseEnter={e => { e.currentTarget.style.color = 'var(--danger)'; e.currentTarget.style.background = 'var(--danger-bg)'; }}
+        onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-3)'; e.currentTarget.style.background = 'transparent'; }}
+      >
+        <Trash2 size={14} />
+      </button>
+    </div>
+  );
+}
+
 /* DROPDOWNS */
 
 function PageTypeDropdown({ value, onChange }) {
@@ -2022,6 +2568,81 @@ function CloserModeDropdown({ value, onChange }) {
       {open && (
         <div className="ff-dropdown-menu">
           {Object.entries(CLOSER_MODES).map(([key, m]) => {
+            const Icon = m.icon;
+            return (
+              <button key={key} type="button" className={`ff-dropdown-option ${key === value ? 'ff-dropdown-option-active' : ''}`} onClick={() => { onChange(key); setOpen(false); }}>
+                <Icon size={15} className="ff-dropdown-option-icon" />
+                <div className="ff-dropdown-option-text">
+                  <span className="ff-dropdown-option-label">{m.label}</span>
+                  <span className="ff-dropdown-option-desc">{m.desc}</span>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* SIMPLE DROPDOWNS for Tone and Submission Method */
+
+function ToneDropdown({ value, onChange }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  useEffect(() => {
+    const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+  const active = TONE_OPTIONS.find(t => t.id === value);
+  return (
+    <div className="ff-dropdown" ref={ref}>
+      <button type="button" className="ff-dropdown-trigger" onClick={() => setOpen(o => !o)} style={{ minWidth: 160 }}>
+        <span style={{ fontWeight: 600 }}>{active?.id}</span>
+        <ChevronDown size={13} style={{ transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 180ms ease', marginLeft: 'auto' }} />
+      </button>
+      {open && (
+        <div className="ff-dropdown-menu" style={{ minWidth: 240, maxHeight: 380, overflowY: 'auto' }}>
+          {TONE_OPTIONS.map(opt => (
+            <button key={opt.id} type="button" className={`ff-dropdown-option ${opt.id === value ? 'ff-dropdown-option-active' : ''}`} onClick={() => { onChange(opt.id); setOpen(false); }}>
+              <div className="ff-dropdown-option-text">
+                <span className="ff-dropdown-option-label">{opt.id}</span>
+                <span className="ff-dropdown-option-desc">{opt.desc}</span>
+              </div>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function MethodDropdown({ value, onChange }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  useEffect(() => {
+    const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+  const methods = {
+    url: { label: 'URL', desc: 'Quick audit from URL alone', icon: Globe },
+    paste: { label: 'Paste Copy', desc: 'Best results: paste the visible copy', icon: Type },
+    image: { label: 'Screenshot', desc: 'Visual + copy audit from a screenshot', icon: ImgIcon },
+  };
+  const active = methods[value];
+  const ActiveIcon = active.icon;
+  return (
+    <div className="ff-dropdown" ref={ref}>
+      <button type="button" className="ff-dropdown-trigger" onClick={() => setOpen(o => !o)}>
+        <ActiveIcon size={14} />
+        {active.label}
+        <ChevronDown size={13} style={{ transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 180ms ease', marginLeft: 4 }} />
+      </button>
+      {open && (
+        <div className="ff-dropdown-menu">
+          {Object.entries(methods).map(([key, m]) => {
             const Icon = m.icon;
             return (
               <button key={key} type="button" className={`ff-dropdown-option ${key === value ? 'ff-dropdown-option-active' : ''}`} onClick={() => { onChange(key); setOpen(false); }}>
@@ -2202,10 +2823,20 @@ function EmailOutput({ result, copied, copyText, selectAllText }) {
 function FollowupOutput({ result, copied, copyText, selectAllText }) {
   return (
     <div className="space-y-5">
-      {result.situation && (
+      {(result.clientRead || result.situation) && (
         <div className="ff-fadeup ff-card">
-          <p className="ff-section-label mb-2">Read of the room</p>
-          <p style={{ fontSize: 14, color: 'var(--text-1)', lineHeight: 1.55, letterSpacing: '-0.005em' }}>{result.situation}</p>
+          {result.clientRead && (
+            <div className="mb-4">
+              <p className="ff-section-label mb-2">Who you're dealing with</p>
+              <p style={{ fontSize: 14, color: 'var(--text-1)', lineHeight: 1.55, letterSpacing: '-0.005em' }}>{result.clientRead}</p>
+            </div>
+          )}
+          {result.situation && (
+            <div>
+              <p className="ff-section-label mb-2">Read of the room</p>
+              <p style={{ fontSize: 14, color: 'var(--text-1)', lineHeight: 1.55, letterSpacing: '-0.005em' }}>{result.situation}</p>
+            </div>
+          )}
         </div>
       )}
       <OutputBlock title="Follow-up" text={result.followup} copyKey="followup" copied={copied} copyText={copyText} selectAllText={selectAllText} delay={60} />
@@ -2255,7 +2886,7 @@ function OptimizeEmpty() {
       <div className="ff-mono ff-pulse mb-4" style={{ fontSize: 11, color: 'var(--text-3)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
         Awaiting Page
       </div>
-      <p className="ff-display ff-text-1 mb-4" style={{ fontSize: 22, lineHeight: 1.3, fontWeight: 600, letterSpacing: '-0.022em' }}>
+      <p className="ff-display ff-text-1 mb-4" style={{ fontSize: 22, lineHeight: 1.3, fontWeight: 500, letterSpacing: '-0.018em' }}>
         Your audit, scores, and<br/>rewrites will appear here.
       </p>
       <p className="ff-text-3" style={{ fontSize: 13, lineHeight: 1.55 }}>
@@ -2297,7 +2928,7 @@ function CloserEmpty({ mode }) {
       <div className="ff-mono ff-pulse mb-4" style={{ fontSize: 11, color: 'var(--text-3)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
         Awaiting Intel
       </div>
-      <p className="ff-display ff-text-1" style={{ fontSize: 22, lineHeight: 1.3, fontWeight: 600, letterSpacing: '-0.022em', whiteSpace: 'pre-line' }}>
+      <p className="ff-display ff-text-1" style={{ fontSize: 22, lineHeight: 1.3, fontWeight: 500, letterSpacing: '-0.018em', whiteSpace: 'pre-line' }}>
         {messages[mode]}
       </p>
     </div>
