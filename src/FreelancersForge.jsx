@@ -2,9 +2,9 @@ import { useState, useRef, useEffect } from 'react';
 import {
   ArrowRight, Copy, Check, Loader2, Sparkles, Paperclip, X, ImageIcon,
   Sun, Moon, Plus, ExternalLink, Link as LinkIcon, ChevronDown,
-  Mail, MessageSquare, FileText, Reply, Globe, Type, Image as ImgIcon,
+  Mail, MessageSquare, FileText, Reply, Type, Image as ImgIcon,
   Target, Award, Briefcase, User, Layers, Wand2,
-  TrendingUp, Trash2, HelpCircle
+  TrendingUp, Trash2, HelpCircle, PenLine
 } from 'lucide-react';
 
 /* ====================================================================== */
@@ -62,6 +62,23 @@ PATTERNS FROM TOP-PERFORMING LINKEDIN PROFILES:
 - Each entry: 1-line summary, 2-4 outcome bullets, 1-line "what I'm proud of" close.
 - Voice is conversational, opinionated, POV-driven.
 `.trim(),
+
+  cv: `
+PATTERNS FROM TOP 1% CVS / RESUMES (people who get the interview every time):
+- One page only. Exception: very senior roles (10+ years), max two.
+- Header: name, role you want (NOT current role), city or 'Remote', email, LinkedIn URL, portfolio URL. Nothing else.
+- Professional summary (3 lines max): role + named outcomes + a number or proof point. No buzzwords. No 'passionate'.
+- Experience entries lead with outcomes, never duties. Pattern: "[Strong verb] [specific outcome] [number or scope]."
+- EVERY bullet has at minimum ONE of: a number, percentage, dollar amount, time frame, or named tool/system. Bullets without proof are deleted.
+- Use past tense for past roles, present for current. Active voice always.
+- Skills section is curated, not exhaustive. 8-15 high-relevance skills clustered by category. No 'Microsoft Word'.
+- No 'References available on request'. No 'Objective'. No photo (in most countries). No graphics, charts, ratings, or progress bars.
+- ATS-readable: standard headers, no tables, no columns, no text in images, single column layout.
+- Verbs are tactical: 'Shipped', 'Reduced', 'Closed', 'Built', 'Migrated', 'Negotiated', 'Cut', 'Scaled', 'Onboarded'. NEVER: 'Responsible for', 'Helped with', 'Worked on', 'Assisted in', 'Tasked with'.
+- No first-person pronouns anywhere. Subject is implied.
+- Quantification is everything. "Increased revenue" is weak. "Increased revenue 34% (+$2.1M ARR) in 9 months" is strong.
+- Tailor to target role: keywords from the actual job description appear naturally in summary, skills, and at least 2 experience entries.
+`.trim(),
 };
 
 const PAGE_TYPES = {
@@ -117,6 +134,20 @@ const PAGE_TYPES = {
     ],
     rewriteSections: ['Headline', 'About first 3 lines (hook)', 'Full About section', 'Featured section recommendation', 'Top experience entry', 'Banner copy direction'],
   },
+  cv: {
+    label: 'CV / Resume', icon: FileText,
+    desc: 'CV or resume for full-time, contract, or freelance roles',
+    criteria: [
+      'Header clarity: Does it show the role they want, contact, and key links cleanly?',
+      'Professional summary: Does it lead with named outcomes and proof, not buzzwords?',
+      'Quantified achievements: Does every bullet carry a number, percentage, dollar amount, or time frame?',
+      'Verbs and voice: Are bullets active, tactical, and outcome-led?',
+      'Skills relevance: Are the listed skills aligned to the target role and free of obvious filler?',
+      'ATS friendliness: Standard headers, no tables, no graphics, single column, parseable?',
+      'Length and signal density: Tight, no padding, no generic phrases?',
+    ],
+    rewriteSections: ['Header (name, role, contact, links)', 'Professional summary (3 lines)', 'Top experience entry (with bullets)', 'Skills section (clustered)', 'One weak bullet rewritten as proof'],
+  },
 };
 
 const CLOSER_MODES = {
@@ -124,6 +155,7 @@ const CLOSER_MODES = {
   dm: { label: 'Cold DM', icon: MessageSquare, desc: 'Short, pattern-breaking direct message', cta: 'Generate DM' },
   email: { label: 'Cold Email', icon: Mail, desc: 'Subject line and email body', cta: 'Generate Email' },
   followup: { label: 'Follow-up', icon: Reply, desc: 'Reply or re-engage based on a conversation', cta: 'Draft Follow-up' },
+  coverletter: { label: 'Cover Letter', icon: PenLine, desc: 'Tailored cover letter for a specific job', cta: 'Generate Cover Letter' },
 };
 
 const TONE_OPTIONS = [
@@ -163,6 +195,16 @@ const STRICT_RULES = `
 3. NO GENERIC AI / CORPORATE WORDS. Forbidden: leverage, utilize, synergy, streamline, cutting-edge, innovative, world-class, best-in-class, top-notch, game-changer, unlock, empower, optimize, maximize, robust, seamless, transform, revolutionize, supercharge, level up, holistic, ecosystem, paradigm, scalable, dynamic, results-driven, deep dive, foster, cultivate, harness, elevate, dive into, embark on.
 4. NO GENERIC OPENERS. No "I hope this finds you well", "I came across your post", "passionate about".
 5. PREFER SPECIFIC OVER ABSTRACT. Numbers, named outcomes, concrete time frames.
+`;
+
+const CV_STRICT_RULES = `
+=== CV-SPECIFIC RULES (additional, NEVER violate) ===
+A. NEVER use these phrases anywhere: "results-driven", "team player", "passionate about", "proven track record", "strong communication skills", "detail-oriented", "self-motivated", "go-getter", "out-of-the-box thinker", "wear many hats", "spearheaded", "drove results", "highly motivated", "strategic thinker", "collaborate with cross-functional teams", "responsible for", "duties included", "tasked with", "helped to", "worked on", "assisted in", "References available on request".
+B. EVERY bullet point MUST contain at least ONE of: a number, a percentage, a dollar amount, a time frame (e.g. 9 months, Q3 2024), a specific tool/system name (e.g. Salesforce, Postgres), or a named outcome (e.g. Series A close, app launch). If a bullet has none of these, REWRITE it or DELETE it.
+C. ZERO first-person pronouns (no "I", "my", "me"). Subject is implied.
+D. Use ONLY active, tactical past-tense verbs (or present for current role). Examples of strong starts: Shipped, Reduced, Closed, Built, Migrated, Negotiated, Cut, Scaled, Onboarded, Launched, Authored, Architected, Recovered, Delivered, Eliminated.
+E. NEVER add "Objective", "References available on request", or photos.
+F. ATS-friendly format only: standard headers (Experience, Education, Skills), no tables, no columns, no graphics, no progress bars or rating scales.
 `;
 
 const stripEmDashes = (s) => {
@@ -1394,14 +1436,10 @@ export default function FreelancersForge() {
 function OptimizeTab() {
   const [pageType, setPageType] = useState('portfolio');
   const [method, setMethod] = useState('paste');
-  const [url, setUrl] = useState('');
   const [pasteText, setPasteText] = useState('');
   const [imageData, setImageData] = useState(null);
   const [audience, setAudience] = useState('');
   const [goal, setGoal] = useState('');
-
-  const [fetchedPage, setFetchedPage] = useState(null);
-  const [fetchingPage, setFetchingPage] = useState(false);
 
   const [auditing, setAuditing] = useState(false);
   const [optimizing, setOptimizing] = useState(false);
@@ -1413,24 +1451,48 @@ function OptimizeTab() {
   const fileInputRef = useRef(null);
 
   useEffect(() => {
-    setResult(null); setOptimized(null); setError(''); setFetchedPage(null);
+    setResult(null); setOptimized(null); setError('');
   }, [pageType, method]);
 
-  // Clear fetched cache if URL changes
+  // CV mode is file-only — auto-switch method
   useEffect(() => {
-    setFetchedPage(null);
-  }, [url]);
+    if (pageType === 'cv' && method !== 'image') {
+      setMethod('image');
+    }
+  }, [pageType]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleFileSelect = (file) => {
     if (!file) return;
-    if (!file.type.startsWith('image/')) { setError("That doesn't look like an image file."); return; }
-    if (file.size > 5 * 1024 * 1024) { setError('Image must be under 5MB.'); return; }
+    const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+    const isImage = file.type.startsWith('image/');
+
+    // CV mode accepts PDFs in addition to images. Other modes are image-only.
+    if (pageType === 'cv') {
+      if (!isPdf && !isImage) {
+        setError('Upload a PDF or image (PNG, JPG). For Word documents, please export as PDF first.');
+        return;
+      }
+    } else if (!isImage) {
+      setError("That doesn't look like an image file.");
+      return;
+    }
+
+    const sizeLimit = isPdf ? 20 * 1024 * 1024 : 5 * 1024 * 1024;
+    if (file.size > sizeLimit) {
+      setError(`File must be under ${isPdf ? '20MB' : '5MB'}.`);
+      return;
+    }
+
     const reader = new FileReader();
     reader.onload = (e) => {
       const r = e.target.result;
       setImageData({
-        data: r.split(',')[1], mediaType: file.type, name: file.name,
-        sizeKb: Math.round(file.size / 1024), preview: r,
+        data: r.split(',')[1],
+        mediaType: isPdf ? 'application/pdf' : file.type,
+        name: file.name,
+        sizeKb: Math.round(file.size / 1024),
+        preview: r,
+        isPdf,
       });
       setError('');
     };
@@ -1438,52 +1500,25 @@ function OptimizeTab() {
   };
 
   const buildPageInputBlock = () => {
-    if (method === 'url') {
-      if (fetchedPage) {
-        const metaBlock = fetchedPage.meta?.description
-          ? `META DESCRIPTION: ${fetchedPage.meta.description}\n\n`
-          : '';
-        return `LIVE PAGE CONTENT (fetched from ${fetchedPage.finalUrl}):
-PAGE TITLE: ${fetchedPage.title || '(no title)'}
-
-${metaBlock}PAGE TEXT (with structure preserved, # = h1, ## = h2, etc.):
-"""
-${fetchedPage.text}
-"""${fetchedPage.truncated ? '\n\n[Note: page was truncated due to length.]' : ''}`;
-      }
-      return `URL: ${url.trim()}\n(URL provided but page content was not fetched. Audit based on URL alone.)`;
-    }
     if (method === 'paste') return `PAGE COPY:\n"""\n${pasteText.trim()}\n"""`;
+    if (imageData?.isPdf) return '[CV is attached as a PDF document. Read it carefully.]';
     return '[See attached image.]';
   };
 
-  const fetchPageContent = async (targetUrl) => {
-    setFetchingPage(true);
-    setError('');
-    try {
-      const response = await fetch('/api/fetch-page', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: targetUrl }),
-      });
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.error || 'Could not fetch the page.');
-      }
-      setFetchedPage(data);
-      return data;
-    } catch (err) {
-      setError(err.message || 'Could not fetch the page. Try pasting the copy instead.');
-      return null;
-    } finally {
-      setFetchingPage(false);
-    }
-  };
-
-  const callClaude = async (prompt, includeImage) => {
+  const callClaude = async (prompt, includeAttachment) => {
     const content = [];
-    if (includeImage && imageData) {
-      content.push({ type: 'image', source: { type: 'base64', media_type: imageData.mediaType, data: imageData.data } });
+    if (includeAttachment && imageData) {
+      if (imageData.isPdf) {
+        content.push({
+          type: 'document',
+          source: { type: 'base64', media_type: 'application/pdf', data: imageData.data }
+        });
+      } else {
+        content.push({
+          type: 'image',
+          source: { type: 'base64', media_type: imageData.mediaType, data: imageData.data }
+        });
+      }
     }
     content.push({ type: 'text', text: prompt });
     const response = await fetch("/api/claude", {
@@ -1545,25 +1580,24 @@ ${fetchedPage.text}
   };
 
   const handleAudit = async () => {
-    if (method === 'url' && !url.trim()) { setError('Paste a URL.'); return; }
     if (method === 'paste' && !pasteText.trim()) { setError('Paste the page copy.'); return; }
-    if (method === 'image' && !imageData) { setError('Upload a screenshot.'); return; }
-
-    setError(''); setResult(null); setOptimized(null);
-
-    // For URL method: fetch the page first if we haven't already
-    if (method === 'url' && !fetchedPage) {
-      const fetched = await fetchPageContent(url.trim());
-      if (!fetched) return; // fetchPageContent already set the error
+    if (method === 'image' && !imageData) {
+      setError(pageType === 'cv' ? 'Upload your CV (PDF, PNG, or JPG).' : 'Upload a screenshot.');
+      return;
     }
 
+    setError(''); setResult(null); setOptimized(null);
     setAuditing(true);
 
     const pt = PAGE_TYPES[pageType];
     const criteriaList = pt.criteria.map((c, i) => `${i + 1}. ${c}`).join('\n');
 
     const prompt = `You are an elite conversion strategist auditing a freelancer page. You audit ONLY based on the actual content provided. Do not invent details, do not guess about content not shown. If something is missing, flag it as missing.
-${imageData && method === 'image' ? 'NOTE: A screenshot of the page is attached. Read every visible detail.\n' : ''}${method === 'url' && fetchedPage ? 'NOTE: The actual live page was fetched and its real content is below. Audit it as you see it. Reference exact phrases when relevant.\n' : ''}
+${pageType === 'cv' && imageData
+  ? (imageData.isPdf
+    ? 'NOTE: The applicant\'s CV is attached as a PDF. Read every section carefully. Pull exact phrases, role names, time frames, and metrics from the document.\n'
+    : 'NOTE: The applicant\'s CV is attached as an image. Read every visible detail.\n')
+  : (imageData && method === 'image' ? 'NOTE: A screenshot of the page is attached. Read every visible detail.\n' : '')}
 PAGE TYPE: ${pt.label}
 PAGE TYPE DESCRIPTION: ${pt.desc}
 
@@ -1583,10 +1617,11 @@ Generate ONLY a JSON object:
 
 RULES: Score every criterion. 4-7 recommendations, 3-5 rewrites. Be specific.
 ${STRICT_RULES}
+${pageType === 'cv' ? CV_STRICT_RULES : ''}
 Return ONLY JSON. No em dashes.`;
 
     try {
-      const parsed = await callClaude(prompt, method === 'image');
+      const parsed = await callClaude(prompt, method === 'image' || (pageType === 'cv' && !!imageData));
       if (parsed.overall) {
         parsed.overall.verdict = stripEmDashes(parsed.overall.verdict);
         parsed.overall.headline = stripEmDashes(parsed.overall.headline);
@@ -1612,7 +1647,8 @@ Return ONLY JSON. No em dashes.`;
       portfolio: "Weave SEO-friendly niche keywords into the hero headline, subheadline, and About section.",
       sales: "Weave high-intent buying keywords into headline, subheadline, and section headers for paid search and SEO.",
       upwork: "CRITICAL for Upwork/Fiverr. Pull 6-10 highest-volume buyer-search keywords for this niche and weave naturally into title (3-4), first 2 lines of overview (2-3), and skills list (every keyword as a skill). Do not stuff.",
-      linkedin: "Weave keywords into the headline, the About section first 3 lines, and across experience entries."
+      linkedin: "Weave keywords into the headline, the About section first 3 lines, and across experience entries.",
+      cv: "Pull 8-12 ATS keywords from the target role / target audience. Weave them naturally into the professional summary, skills section, and top 2 experience entries. Use the exact phrasing recruiters and ATS systems search for. No keyword stuffing. If no target role is given, infer the most likely role from the CV itself and optimize for that.",
     };
 
     const prompt = `You are an elite copywriter who studies what TOP-PERFORMING freelancers do, AND you weave in search keywords.
@@ -1656,10 +1692,11 @@ Generate ONLY:
 
 REQUIRED: fullRewrite is finished page copy, not a template. Every section appears in fullRewrite. Keywords woven naturally.
 ${STRICT_RULES}
+${pageType === 'cv' ? CV_STRICT_RULES : ''}
 Return ONLY JSON. No em dashes.`;
 
     try {
-      const parsed = await callClaude(prompt, method === 'image');
+      const parsed = await callClaude(prompt, method === 'image' || (pageType === 'cv' && !!imageData));
       if (parsed.summary) {
         parsed.summary.headline = stripEmDashes(parsed.summary.headline);
         parsed.summary.shift = stripEmDashes(parsed.summary.shift);
@@ -1721,12 +1758,23 @@ Return ONLY JSON. No em dashes.`;
         </div>
         <div>
           <label className="ff-section-label mb-3" style={{ display: 'inline-flex', alignItems: 'center' }}>
-            Submission Method
-            <Tooltip text="URL fetches your live page automatically. Paste Copy gives the most accurate audit. Screenshot reads visual hierarchy and copy together." />
+            {pageType === 'cv' ? 'Upload CV' : 'Submission Method'}
+            <Tooltip text={pageType === 'cv'
+              ? "Upload your CV as PDF (best for ATS-friendly audits) or as a PNG/JPG image. For Word documents, please export as PDF first."
+              : "How you want to provide the page. Pasting the copy gives the most accurate audit. A screenshot reads visual hierarchy and copy together."} />
           </label>
-          <div className="block"><MethodDropdown value={method} onChange={setMethod} /></div>
+          {pageType === 'cv' ? (
+            <div className="ff-dropdown-trigger" style={{ cursor: 'default', opacity: 0.85 }}>
+              <Paperclip size={14} />
+              File upload
+            </div>
+          ) : (
+            <div className="block"><MethodDropdown value={method} onChange={setMethod} /></div>
+          )}
           <p className="ff-field-hint mt-2">
-            {method === 'url' ? 'Quick audit from URL alone' : method === 'paste' ? 'Best results: paste the visible copy' : 'Visual + copy audit from a screenshot'}
+            {pageType === 'cv'
+              ? 'Accepts PDF, PNG, or JPG. PDF gives the most accurate read.'
+              : (method === 'paste' ? 'Best results: paste the visible copy' : 'Visual and copy audit from a screenshot')}
           </p>
         </div>
       </div>
@@ -1736,54 +1784,6 @@ Return ONLY JSON. No em dashes.`;
           <h2 className="ff-section-label mb-5">The Page</h2>
 
           <div className="space-y-5">
-            {method === 'url' && (
-              <div>
-                <label className="ff-field-label">URL <span className="ff-text-accent">*</span></label>
-                <div className="flex gap-2">
-                  <input
-                    type="url"
-                    className="ff-input"
-                    placeholder="https://yoursite.com/about"
-                    value={url}
-                    onChange={e => setUrl(e.target.value)}
-                    style={{ flex: 1 }}
-                  />
-                  <button
-                    type="button"
-                    className="ff-btn ff-btn-secondary"
-                    onClick={() => url.trim() && fetchPageContent(url.trim())}
-                    disabled={!url.trim() || fetchingPage}
-                    style={{ width: 'auto', padding: '10px 14px', whiteSpace: 'nowrap' }}
-                  >
-                    {fetchingPage ? <Loader2 size={13} className="animate-spin" /> : <Globe size={13} />}
-                    Preview
-                  </button>
-                </div>
-                <p className="ff-field-hint mt-2">
-                  We fetch the live page and read its actual content. Some sites block automated requests, in which case paste the copy instead.
-                </p>
-
-                {fetchedPage && !fetchingPage && (
-                  <div className="ff-card ff-fadeup mt-3" style={{ padding: 14, background: 'var(--accent-bg-soft)', borderColor: 'var(--accent-border-soft)' }}>
-                    <div className="flex items-start gap-2 mb-2">
-                      <Check size={14} style={{ color: 'var(--accent)', flexShrink: 0, marginTop: 2 }} />
-                      <div className="flex-1 min-w-0">
-                        <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-1)' }}>Page fetched</p>
-                        {fetchedPage.title && (
-                          <p className="truncate mt-1" style={{ fontSize: 12, color: 'var(--text-2)' }}>
-                            {fetchedPage.title}
-                          </p>
-                        )}
-                        <p className="ff-text-3 mt-1" style={{ fontSize: 11.5 }}>
-                          {fetchedPage.text.length.toLocaleString()} characters extracted{fetchedPage.truncated ? ' (truncated)' : ''}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-
             {method === 'paste' && (
               <div>
                 <label className="ff-field-label">Page Copy <span className="ff-text-accent">*</span></label>
@@ -1793,23 +1793,45 @@ Return ONLY JSON. No em dashes.`;
 
             {method === 'image' && (
               <div>
-                <label className="ff-field-label">Screenshot <span className="ff-text-accent">*</span></label>
+                <label className="ff-field-label">
+                  {pageType === 'cv' ? 'Your CV / Resume' : 'Screenshot'} <span className="ff-text-accent">*</span>
+                </label>
                 {!imageData && (
                   <>
-                    <input ref={fileInputRef} type="file" accept="image/*" onChange={(e) => { handleFileSelect(e.target.files?.[0]); e.target.value = ''; }} style={{ display: 'none' }} />
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept={pageType === 'cv' ? '.pdf,application/pdf,image/*' : 'image/*'}
+                      onChange={(e) => { handleFileSelect(e.target.files?.[0]); e.target.value = ''; }}
+                      style={{ display: 'none' }}
+                    />
                     <button type="button" className="ff-attach-btn" style={{ padding: '36px 16px' }} onClick={() => fileInputRef.current?.click()}>
                       <Paperclip size={14} />
-                      Click to upload a screenshot
+                      {pageType === 'cv' ? 'Click to upload your CV (PDF, PNG, or JPG)' : 'Click to upload a screenshot'}
                     </button>
                   </>
                 )}
                 {imageData && (
                   <div className="ff-image-card ff-fadeup">
-                    <img src={imageData.preview} alt="" className="ff-image-thumb" />
+                    {imageData.isPdf ? (
+                      <div style={{
+                        width: 48, height: 48,
+                        background: 'var(--accent-bg-soft)',
+                        borderRadius: 'var(--r-sm)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0,
+                      }}>
+                        <FileText size={20} style={{ color: 'var(--accent)' }} />
+                      </div>
+                    ) : (
+                      <img src={imageData.preview} alt="" className="ff-image-thumb" />
+                    )}
                     <div className="flex-1 min-w-0">
                       <div className="font-medium truncate" style={{ fontSize: 13, color: 'var(--text-1)' }}>{imageData.name}</div>
                       <div className="flex items-center gap-2 mt-1" style={{ fontSize: 12, color: 'var(--text-3)' }}>
-                        <ImageIcon size={11} />
+                        {imageData.isPdf ? <FileText size={11} /> : <ImageIcon size={11} />}
                         <span>{imageData.sizeKb} KB</span>
                         <span>·</span>
                         <span style={{ color: 'var(--accent)', fontWeight: 500 }}>Attached</span>
@@ -1823,20 +1845,36 @@ Return ONLY JSON. No em dashes.`;
 
             <div>
               <label className="ff-field-label" style={{ display: 'inline-flex', alignItems: 'center' }}>
-                Audience
+                {pageType === 'cv' ? 'Target role' : 'Audience'}
                 <span className="ff-field-hint" style={{ fontWeight: 400, marginLeft: 6 }}>· optional</span>
-                <Tooltip text="The specific kind of buyer you want this page to attract. The more specific, the sharper the rewrite. 'Series A SaaS founders' beats 'tech companies'." />
+                <Tooltip text={pageType === 'cv'
+                  ? "The specific role you're applying for. Used to pull the right ATS keywords and align the rewrite to what hiring managers scan for."
+                  : "The specific kind of buyer you want this page to attract. The more specific, the sharper the rewrite. 'Series A SaaS founders' beats 'tech companies'."} />
               </label>
-              <input type="text" className="ff-input" placeholder="e.g. Series A SaaS founders" value={audience} onChange={e => setAudience(e.target.value)} />
+              <input
+                type="text"
+                className="ff-input"
+                placeholder={pageType === 'cv' ? 'e.g. Senior Product Designer at a Series B SaaS' : 'e.g. Series A SaaS founders'}
+                value={audience}
+                onChange={e => setAudience(e.target.value)}
+              />
             </div>
 
             <div>
               <label className="ff-field-label" style={{ display: 'inline-flex', alignItems: 'center' }}>
-                Goal of the page
+                {pageType === 'cv' ? 'Top outcome to highlight' : 'Goal of the page'}
                 <span className="ff-field-hint" style={{ fontWeight: 400, marginLeft: 6 }}>· optional</span>
-                <Tooltip text="The single action you want a visitor to take. Used to score whether your CTAs and structure actually push toward that outcome." />
+                <Tooltip text={pageType === 'cv'
+                  ? "The single result you most want hiring managers to remember. Pushed to the top of the rewrite where it lands first."
+                  : "The single action you want a visitor to take. Used to score whether your CTAs and structure actually push toward that outcome."} />
               </label>
-              <input type="text" className="ff-input" placeholder="e.g. Book a discovery call" value={goal} onChange={e => setGoal(e.target.value)} />
+              <input
+                type="text"
+                className="ff-input"
+                placeholder={pageType === 'cv' ? 'e.g. Cut churn 28% in 9 months as PM at Stripe' : 'e.g. Book a discovery call'}
+                value={goal}
+                onChange={e => setGoal(e.target.value)}
+              />
             </div>
 
             {error && (
@@ -1845,9 +1883,8 @@ Return ONLY JSON. No em dashes.`;
               </div>
             )}
 
-            <button className="ff-btn" onClick={handleAudit} disabled={auditing || optimizing || fetchingPage} style={{ marginTop: 8 }}>
-              {fetchingPage ? <><Loader2 size={15} className="animate-spin" />Fetching page</> :
-               auditing ? <><Loader2 size={15} className="animate-spin" />Auditing</> :
+            <button className="ff-btn" onClick={handleAudit} disabled={auditing || optimizing} style={{ marginTop: 8 }}>
+              {auditing ? <><Loader2 size={15} className="animate-spin" />Auditing</> :
                <><Sparkles size={15} />Audit Page<ArrowRight size={15} /></>}
             </button>
           </div>
@@ -2076,6 +2113,8 @@ function CloseTab() {
   const [clientMessage, setClientMessage] = useState('');
   const [myMessage, setMyMessage] = useState('');
   const [goal, setGoal] = useState('');
+  const [jobDescription, setJobDescription] = useState('');
+  const [cvFile, setCvFile] = useState(null);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -2083,6 +2122,7 @@ function CloseTab() {
   const [resultMode, setResultMode] = useState(null);
   const [copied, setCopied] = useState({});
   const fileInputRef = useRef(null);
+  const cvFileInputRef = useRef(null);
 
   useEffect(() => { setResult(null); setError(''); }, [mode]);
 
@@ -2094,6 +2134,35 @@ function CloseTab() {
     reader.onload = (e) => {
       const r = e.target.result;
       setImageData({ data: r.split(',')[1], mediaType: file.type, name: file.name, sizeKb: Math.round(file.size / 1024), preview: r });
+      setError('');
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleCvFileSelect = (file) => {
+    if (!file) return;
+    const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+    const isImage = file.type.startsWith('image/');
+    if (!isPdf && !isImage) {
+      setError('CV must be a PDF, PNG, or JPG. For Word documents, please export as PDF first.');
+      return;
+    }
+    const sizeLimit = isPdf ? 20 * 1024 * 1024 : 5 * 1024 * 1024;
+    if (file.size > sizeLimit) {
+      setError(`CV must be under ${isPdf ? '20MB' : '5MB'}.`);
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const r = e.target.result;
+      setCvFile({
+        data: r.split(',')[1],
+        mediaType: isPdf ? 'application/pdf' : file.type,
+        name: file.name,
+        sizeKb: Math.round(file.size / 1024),
+        preview: r,
+        isPdf,
+      });
       setError('');
     };
     reader.readAsDataURL(file);
@@ -2145,7 +2214,53 @@ ${STRICT_RULES}
 Return ONLY JSON. No em dashes.`;
     }
 
-    if (mode === 'dm') {
+    if (mode === 'coverletter') {
+      const cvBlock = cvFile
+        ? '[The applicant\'s CV is attached. Read it carefully and pull specific outcomes, roles, time frames, and named tools to weave into the letter.]'
+        : '[No CV attached. Use only the positioning and proof fields below to write the letter.]';
+
+      const jobBlock = jobDescription.trim()
+        ? `JOB DESCRIPTION / POSTING:\n"""\n${jobDescription.trim()}\n"""`
+        : `JOB CONTEXT (no full posting given):\n"""\n${intel.trim() || '[Nothing provided.]'}\n"""`;
+
+      return `You are an elite cover letter writer who has gotten people interviews at top companies. You are NOT a cliche generator. Your letters sound like a real, specific person.
+
+${cvBlock}
+
+${jobBlock}
+
+${offer.trim() ? `APPLICANT POSITIONING (their angle):\n"""\n${offer.trim()}\n"""\n` : ''}${proof.trim() ? `APPLICANT PROOF POINT:\n"""\n${proof.trim()}\n"""\n` : ''}
+
+Generate ONLY this JSON:
+{
+  "extraction": {
+    "targetRole": "4-8 words. The actual role being applied for.",
+    "company": "The company name if visible, else 'the company'.",
+    "topNeed": "1-2 sentences. The single biggest thing this employer is solving for, pulled from the posting.",
+    "fitAngle": "1-2 sentences. The applicant's strongest angle for this role, pulled from CV or proof."
+  },
+  "subject": "Email subject line if applicable. <60 chars. Specific. No 'Application for the X role'.",
+  "coverLetter": "The full letter, ready to send. 3-4 short paragraphs max. Use \\n for line breaks between paragraphs."
+}
+
+RULES:
+- Open with a specific observation about the company, role, or industry. NEVER 'I am writing to apply for' or 'I came across' or 'I'm excited to'.
+- Paragraph 1: Hook. State why this role specifically (1-2 sentences max). Reference something concrete from the posting.
+- Paragraph 2: Best-fit proof. Pull ONE specific outcome from the CV that matches the role's biggest need. Use a number, time frame, named tool, or dollar figure.
+- Paragraph 3: A second angle or point of difference. Why this person, not just any qualified candidate.
+- Paragraph 4 (close): One clean sentence asking for the next step. Confident, not begging.
+- NEVER use these phrases: 'I am writing to apply', 'I am excited to', 'I'm a great fit', 'I bring a unique blend', 'passionate about', 'proven track record', 'team player', 'I hope this finds you well', 'thank you for your consideration', 'attached is my resume', 'please find my CV', 'I look forward to hearing from you', 'I would love the opportunity'.
+- NEVER restate the job posting back at them.
+- NEVER use first person more than necessary. Active voice. Present tense for current work, past tense for past wins.
+- ZERO buzzwords. Every claim has proof.
+- Length: 200-280 words total. Tight.
+
+VOICE: ${toneInstruction}
+${STRICT_RULES}
+
+Return ONLY JSON. No em dashes.`;
+    }
+
       return `You are an expert freelance closer.
 ${imageData ? 'NOTE: Image attached.\n' : ''}
 Generate ONLY: { "clientType": "4-8 words", "hook": "4-10 words", "coldDM": "3-5 lines max, \\n breaks" }
@@ -2196,11 +2311,29 @@ Return ONLY JSON. No em dashes.`;
 
   const handleGenerate = async () => {
     if (mode === 'followup' && !clientMessage.trim() && !myMessage.trim() && !imageData) { setError("Paste either the client's message or your last reply."); return; }
-    if (mode !== 'followup' && !intel.trim() && !imageData) { setError('Add intel.'); return; }
+    if (mode === 'coverletter' && !jobDescription.trim() && !intel.trim() && !cvFile) {
+      setError('Paste the job description or upload your CV.');
+      return;
+    }
+    if (mode !== 'followup' && mode !== 'coverletter' && !intel.trim() && !imageData) { setError('Add intel.'); return; }
     setError(''); setLoading(true); setResult(null);
 
     try {
       const content = [];
+      // Cover letter mode: attach CV first if present
+      if (mode === 'coverletter' && cvFile) {
+        if (cvFile.isPdf) {
+          content.push({
+            type: 'document',
+            source: { type: 'base64', media_type: 'application/pdf', data: cvFile.data }
+          });
+        } else {
+          content.push({
+            type: 'image',
+            source: { type: 'base64', media_type: cvFile.mediaType, data: cvFile.data }
+          });
+        }
+      }
       if (imageData) content.push({ type: 'image', source: { type: 'base64', media_type: imageData.mediaType, data: imageData.data } });
       content.push({ type: 'text', text: buildPrompt() });
 
@@ -2301,7 +2434,7 @@ Return ONLY JSON. No em dashes.`;
         <div>
           <label className="ff-section-label mb-3" style={{ display: 'inline-flex', alignItems: 'center' }}>
             Mode
-            <Tooltip text="What you're sending. Each mode produces a different format with rules tuned for that channel — a proposal isn't a DM and a DM isn't an email." />
+            <Tooltip text="What you're sending. Each mode produces a different format with rules tuned for that channel. A proposal isn't a DM and a DM isn't an email." />
           </label>
           <div className="block"><CloserModeDropdown value={mode} onChange={setMode} /></div>
           <p className="ff-field-hint mt-2">{CLOSER_MODES[mode].desc}</p>
@@ -2309,7 +2442,7 @@ Return ONLY JSON. No em dashes.`;
         <div>
           <label className="ff-section-label mb-3" style={{ display: 'inline-flex', alignItems: 'center' }}>
             Tone
-            <Tooltip text="The voice the message will be written in. Pick one that matches you and the client. Auto adapts based on the situation." align="right" />
+            <Tooltip text="The voice the message will be written in. Pick one that matches you and the client. The 'auto' option adapts based on the situation." align="right" />
           </label>
           <div className="block"><ToneDropdown value={tone} onChange={setTone} /></div>
           <p className="ff-field-hint mt-2">{TONE_OPTIONS.find(t => t.id === tone)?.desc}</p>
@@ -2374,6 +2507,101 @@ Return ONLY JSON. No em dashes.`;
                     <Tooltip text="The single outcome you want from this message. The reply will be shaped to push toward this exact goal." />
                   </label>
                   <textarea className="ff-textarea" rows={3} placeholder='e.g. "Get them on a 15-min call this week"' value={goal} onChange={e => setGoal(e.target.value)} />
+                </div>
+              </>
+            ) : mode === 'coverletter' ? (
+              <>
+                <div>
+                  <label className="ff-field-label" style={{ display: 'inline-flex', alignItems: 'center' }}>
+                    Job description / posting <span className="ff-text-accent" style={{ marginLeft: 4 }}>*</span>
+                    <Tooltip text="Paste the actual job posting. The letter will reference the role's biggest needs and use the same language hiring managers used." />
+                  </label>
+                  <textarea
+                    className="ff-textarea"
+                    rows={8}
+                    placeholder="Paste the full job posting, role requirements, or whatever the company has shared about the role..."
+                    value={jobDescription}
+                    onChange={e => setJobDescription(e.target.value)}
+                  />
+                </div>
+
+                <div>
+                  <label className="ff-field-label" style={{ display: 'inline-flex', alignItems: 'center' }}>
+                    Your CV / Resume
+                    <span className="ff-field-hint" style={{ fontWeight: 400, marginLeft: 6 }}>· optional but strongly recommended</span>
+                    <Tooltip text="Upload your CV so the letter pulls real outcomes, time frames, and named tools from your actual experience. PDF works best." />
+                  </label>
+                  {!cvFile && (
+                    <>
+                      <input
+                        ref={cvFileInputRef}
+                        type="file"
+                        accept=".pdf,application/pdf,image/*"
+                        onChange={e => { handleCvFileSelect(e.target.files?.[0]); e.target.value = ''; }}
+                        style={{ display: 'none' }}
+                      />
+                      <button type="button" className="ff-attach-btn" onClick={() => cvFileInputRef.current?.click()}>
+                        <Paperclip size={13} /> Upload CV (PDF, PNG, JPG)
+                      </button>
+                    </>
+                  )}
+                  {cvFile && (
+                    <div className="ff-image-card mt-2 ff-fadeup">
+                      {cvFile.isPdf ? (
+                        <div style={{
+                          width: 48, height: 48,
+                          background: 'var(--accent-bg-soft)',
+                          borderRadius: 'var(--r-sm)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          flexShrink: 0,
+                        }}>
+                          <FileText size={20} style={{ color: 'var(--accent)' }} />
+                        </div>
+                      ) : (
+                        <img src={cvFile.preview} alt="" className="ff-image-thumb" />
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <div className="font-medium truncate" style={{ fontSize: 13, color: 'var(--text-1)' }}>{cvFile.name}</div>
+                        <div className="flex items-center gap-2 mt-1" style={{ fontSize: 12, color: 'var(--text-3)' }}>
+                          {cvFile.isPdf ? <FileText size={11} /> : <ImageIcon size={11} />}
+                          <span>{cvFile.sizeKb} KB</span>
+                          <span>·</span>
+                          <span style={{ color: 'var(--accent)', fontWeight: 500 }}>Attached</span>
+                        </div>
+                      </div>
+                      <button className="ff-x-btn" onClick={() => setCvFile(null)}><X size={14} /></button>
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <label className="ff-field-label" style={{ display: 'inline-flex', alignItems: 'center' }}>
+                    Your positioning <span className="ff-field-hint" style={{ fontWeight: 400, marginLeft: 6 }}>· optional</span>
+                    <Tooltip text="A one-line angle on why you're right for this role. If you skip this, the letter pulls positioning from the CV." />
+                  </label>
+                  <textarea
+                    className="ff-textarea"
+                    rows={3}
+                    placeholder="e.g. I help fintech startups go from 0 to first 1k paying users."
+                    value={offer}
+                    onChange={e => setOffer(e.target.value)}
+                  />
+                </div>
+
+                <div>
+                  <label className="ff-field-label" style={{ display: 'inline-flex', alignItems: 'center' }}>
+                    One specific proof point <span className="ff-field-hint" style={{ fontWeight: 400, marginLeft: 6 }}>· optional</span>
+                    <Tooltip text="A single result with numbers and named outcome you most want this employer to hear. Used as the lead proof in paragraph 2." />
+                  </label>
+                  <textarea
+                    className="ff-textarea"
+                    rows={3}
+                    placeholder="e.g. Cut churn 28% in 9 months by rebuilding onboarding at Stripe."
+                    value={proof}
+                    onChange={e => setProof(e.target.value)}
+                  />
                 </div>
               </>
             ) : (
@@ -2460,6 +2688,7 @@ Return ONLY JSON. No em dashes.`;
           {result && resultMode === 'dm' && <DMOutput result={result} copied={copied} copyText={copyText} selectAllText={selectAllText} />}
           {result && resultMode === 'email' && <EmailOutput result={result} copied={copied} copyText={copyText} selectAllText={selectAllText} />}
           {result && resultMode === 'followup' && <FollowupOutput result={result} copied={copied} copyText={copyText} selectAllText={selectAllText} />}
+          {result && resultMode === 'coverletter' && <CoverLetterOutput result={result} copied={copied} copyText={copyText} selectAllText={selectAllText} />}
         </div>
       </div>
     </>
@@ -2514,7 +2743,43 @@ function savePipelineToStorage(entries) {
   }
 }
 
+function formatShortDate(dateStr) {
+  if (!dateStr) return '';
+  const d = new Date(dateStr);
+  if (isNaN(d)) return dateStr;
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+function daysAgoLabel(dateStr) {
+  if (!dateStr) return '';
+  const d = new Date(dateStr);
+  if (isNaN(d)) return '';
+  const today = new Date();
+  d.setHours(0, 0, 0, 0);
+  today.setHours(0, 0, 0, 0);
+  const diff = Math.round((today - d) / (1000 * 60 * 60 * 24));
+  if (diff === 0) return 'today';
+  if (diff === 1) return 'yesterday';
+  if (diff < 0) return 'scheduled';
+  if (diff < 7) return `${diff}d ago`;
+  if (diff < 30) return `${Math.floor(diff / 7)}w ago`;
+  if (diff < 365) return `${Math.floor(diff / 30)}mo ago`;
+  return `${Math.floor(diff / 365)}y ago`;
+}
+
+function isWithinDays(dateStr, days) {
+  if (!dateStr) return false;
+  const d = new Date(dateStr);
+  if (isNaN(d)) return false;
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - days);
+  cutoff.setHours(0, 0, 0, 0);
+  return d >= cutoff;
+}
+
 function PipelineTab() {
+  const todayStr = () => new Date().toISOString().slice(0, 10);
+
   const [entries, setEntries] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [client, setClient] = useState('');
@@ -2522,7 +2787,9 @@ function PipelineTab() {
   const [status, setStatus] = useState('sent');
   const [value, setValue] = useState('');
   const [notes, setNotes] = useState('');
+  const [entryDate, setEntryDate] = useState(todayStr());
   const [loaded, setLoaded] = useState(false);
+  const [showActivity, setShowActivity] = useState(false);
 
   // Load entries from storage on mount, applying 15-day expiry
   useEffect(() => {
@@ -2539,11 +2806,12 @@ function PipelineTab() {
   const addEntry = () => {
     if (!client.trim()) return;
     const now = Date.now();
-    const today = new Date(now).toISOString().slice(0, 10);
+    // Use the selected date, but also keep createdAt for retention math
+    const dateToUse = entryDate || todayStr();
     setEntries(e => [
       {
         id: now.toString(36) + Math.random().toString(36).slice(2, 5),
-        date: today,
+        date: dateToUse,
         createdAt: now,
         client: client.trim(),
         type,
@@ -2554,6 +2822,7 @@ function PipelineTab() {
       ...e,
     ]);
     setClient(''); setValue(''); setNotes(''); setStatus('sent'); setType('proposal');
+    setEntryDate(todayStr());
     setShowForm(false);
   };
 
@@ -2579,6 +2848,26 @@ function PipelineTab() {
     return sum + (isNaN(num) ? 0 : num);
   }, 0);
 
+  // Activity windows
+  const computeWindow = (days) => {
+    const inWindow = entries.filter(e => isWithinDays(e.date, days));
+    const won = inWindow.filter(e => e.status === 'closed_won');
+    const replied = inWindow.filter(e => e.status !== 'sent');
+    const wonRevenue = won.reduce((sum, e) => {
+      const num = parseFloat((e.value || '').replace(/[^0-9.]/g, ''));
+      return sum + (isNaN(num) ? 0 : num);
+    }, 0);
+    return {
+      sent: inWindow.length,
+      replied: replied.length,
+      won: won.length,
+      revenue: wonRevenue,
+    };
+  };
+  const week = computeWindow(7);
+  const month = computeWindow(30);
+  const year = computeWindow(365);
+
   return (
     <div className="ff-fadeup">
       {/* HEADER */}
@@ -2602,12 +2891,67 @@ function PipelineTab() {
       </div>
 
       {/* STATS GRID */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
         <StatCard label="Total Sent" value={stats.total} />
         <StatCard label="Replies" value={`${stats.replied + stats.inTalks + stats.won + stats.lost}`} sub={`${replyRate}% reply rate`} />
         <StatCard label="Closed Won" value={stats.won} sub={winRate > 0 ? `${winRate}% win rate` : null} accent />
         <StatCard label="Revenue" value={totalValue > 0 ? `$${totalValue.toLocaleString()}` : '—'} sub="from closed deals" />
       </div>
+
+      {/* ACTIVITY PANEL */}
+      {entries.length > 0 && (
+        <div className="ff-card mb-8" style={{ padding: 0, overflow: 'hidden' }}>
+          <button
+            type="button"
+            onClick={() => setShowActivity(s => !s)}
+            style={{
+              width: '100%',
+              background: 'transparent',
+              border: 'none',
+              padding: '14px 18px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              cursor: 'pointer',
+              fontFamily: 'var(--font-text)',
+              transition: 'background var(--t-fast)',
+            }}
+            onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-elev-2)'}
+            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+          >
+            <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <TrendingUp size={14} style={{ color: 'var(--accent)' }} />
+              <span style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--text-1)', letterSpacing: '-0.005em' }}>
+                Activity
+              </span>
+              <span className="ff-text-3" style={{ fontSize: 12, marginLeft: 6 }}>
+                Week, month, year breakdown
+              </span>
+            </span>
+            <ChevronDown
+              size={16}
+              style={{
+                color: 'var(--text-3)',
+                transform: showActivity ? 'rotate(180deg)' : 'none',
+                transition: 'transform 220ms ease',
+              }}
+            />
+          </button>
+
+          {showActivity && (
+            <div className="ff-fadeup" style={{ borderTop: '1px solid var(--border)', padding: '20px 18px', background: 'var(--bg-elev-1)' }}>
+              <div className="grid grid-cols-3 gap-4">
+                <ActivityColumn label="This week" data={week} />
+                <ActivityColumn label="This month" data={month} />
+                <ActivityColumn label="This year" data={year} />
+              </div>
+              <p className="ff-text-3 mt-5" style={{ fontSize: 11.5, lineHeight: 1.5, fontStyle: 'italic' }}>
+                Pipeline data is stored locally and clears 15 days after each entry was added. Activity counts use the date you marked the entry as sent.
+              </p>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* ADD FORM */}
       {showForm && (
@@ -2616,8 +2960,22 @@ function PipelineTab() {
           <div className="grid md:grid-cols-2 gap-4">
             <div>
               <label className="ff-field-label" style={{ display: 'inline-flex', alignItems: 'center' }}>
+                Date sent
+                <Tooltip text="When you actually sent the proposal, DM, or email. Used to track how long ago it was and calculate response time." />
+              </label>
+              <input
+                type="date"
+                className="ff-input"
+                value={entryDate}
+                onChange={e => setEntryDate(e.target.value)}
+                max={todayStr()}
+                style={{ cursor: 'pointer' }}
+              />
+            </div>
+            <div>
+              <label className="ff-field-label" style={{ display: 'inline-flex', alignItems: 'center' }}>
                 Client / Company <span className="ff-text-accent" style={{ marginLeft: 4 }}>*</span>
-                <Tooltip text="Who you sent this to. Used as the entry's name in the table." />
+                <Tooltip text="Who you sent this to. Used as the entry's name in the table." align="right" />
               </label>
               <input type="text" className="ff-input" placeholder="e.g. Acme Corp" value={client} onChange={e => setClient(e.target.value)} />
             </div>
@@ -2682,14 +3040,16 @@ function PipelineTab() {
       )}
 
       {entries.length > 0 && (
-        <div className="ff-card" style={{ padding: 0, overflow: 'hidden' }}>
+        <div className="ff-card" style={{ padding: 0 }}>
           {/* Table header */}
           <div className="grid items-center" style={{
-            gridTemplateColumns: '90px 1fr 110px 130px 110px 32px',
+            gridTemplateColumns: '110px 1fr 110px 130px 110px 32px',
             gap: 12,
             padding: '12px 18px',
             borderBottom: '1px solid var(--border)',
             backgroundColor: 'var(--bg-elev-2)',
+            borderTopLeftRadius: 'var(--r-lg)',
+            borderTopRightRadius: 'var(--r-lg)',
           }}>
             <span className="ff-section-label" style={{ fontSize: 10 }}>Date</span>
             <span className="ff-section-label" style={{ fontSize: 10 }}>Client</span>
@@ -2734,6 +3094,42 @@ function StatCard({ label, value, sub, accent }) {
   );
 }
 
+function ActivityColumn({ label, data }) {
+  const replyRate = data.sent > 0 ? Math.round((data.replied / data.sent) * 100) : 0;
+  return (
+    <div>
+      <p className="ff-section-label mb-3" style={{ fontSize: 10.5 }}>{label}</p>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <ActivityStat label="Sent" value={data.sent} />
+        <ActivityStat label="Replied" value={data.replied} sub={data.sent > 0 ? `${replyRate}%` : null} />
+        <ActivityStat label="Won" value={data.won} accent />
+        <ActivityStat label="Revenue" value={data.revenue > 0 ? `$${data.revenue.toLocaleString()}` : '—'} />
+      </div>
+    </div>
+  );
+}
+
+function ActivityStat({ label, value, sub, accent }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 8 }}>
+      <span style={{ fontSize: 12, color: 'var(--text-3)' }}>{label}</span>
+      <span style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
+        <span style={{
+          fontFamily: 'var(--font-display)',
+          fontSize: 18,
+          fontWeight: 500,
+          letterSpacing: '-0.018em',
+          color: accent ? 'var(--accent)' : 'var(--text-1)',
+          fontFeatureSettings: "'tnum'",
+        }}>
+          {value}
+        </span>
+        {sub && <span className="ff-text-3" style={{ fontSize: 11 }}>{sub}</span>}
+      </span>
+    </div>
+  );
+}
+
 function PipelineRow({ entry, onStatusChange, onRemove, delay }) {
   const status = PIPELINE_STATUSES.find(s => s.id === entry.status);
   const type = PIPELINE_TYPES.find(t => t.id === entry.type);
@@ -2751,17 +3147,24 @@ function PipelineRow({ entry, onStatusChange, onRemove, delay }) {
       className="ff-fadein"
       style={{
         display: 'grid',
-        gridTemplateColumns: '90px 1fr 110px 130px 110px 32px',
+        gridTemplateColumns: '110px 1fr 110px 130px 110px 32px',
         gap: 12,
         padding: '14px 18px',
         borderBottom: '1px solid var(--border)',
         alignItems: 'center',
         animationDelay: `${delay}ms`,
+        position: 'relative',
+        zIndex: statusOpen ? 20 : 'auto',
       }}
     >
-      <span className="ff-mono" style={{ fontSize: 12, color: 'var(--text-3)' }}>
-        {entry.date.slice(5)}
-      </span>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <span className="ff-mono" style={{ fontSize: 12, color: 'var(--text-2)', fontWeight: 500 }}>
+          {formatShortDate(entry.date)}
+        </span>
+        <span style={{ fontSize: 11, color: 'var(--text-3)' }}>
+          {daysAgoLabel(entry.date)}
+        </span>
+      </div>
       <div style={{ minWidth: 0 }}>
         <p style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--text-1)', letterSpacing: '-0.005em' }} className="truncate">
           {entry.client}
@@ -2960,9 +3363,8 @@ function MethodDropdown({ value, onChange }) {
     return () => document.removeEventListener('mousedown', handler);
   }, []);
   const methods = {
-    url: { label: 'URL', desc: 'Quick audit from URL alone', icon: Globe },
-    paste: { label: 'Paste Copy', desc: 'Best results: paste the visible copy', icon: Type },
-    image: { label: 'Screenshot', desc: 'Visual + copy audit from a screenshot', icon: ImgIcon },
+    paste: { label: 'Paste Copy', desc: 'Most accurate audit', icon: Type },
+    image: { label: 'Screenshot', desc: 'Visual and copy audit', icon: ImgIcon },
   };
   const active = methods[value];
   const ActiveIcon = active.icon;
@@ -3196,6 +3598,65 @@ function FollowupOutput({ result, copied, copyText, selectAllText }) {
   );
 }
 
+function CoverLetterOutput({ result, copied, copyText, selectAllText }) {
+  const fullText = result.subject
+    ? `Subject: ${result.subject}\n\n${result.coverLetter || ''}`
+    : (result.coverLetter || '');
+  return (
+    <div className="space-y-5">
+      {result.extraction && (
+        <div className="ff-fadeup ff-card">
+          <h3 className="ff-subheading mb-4">Read of the role</h3>
+          <div className="grid grid-cols-2 gap-x-5 gap-y-4">
+            <Cell label="Target role" value={result.extraction.targetRole} accent />
+            <Cell label="Company" value={result.extraction.company} />
+            <Cell label="Their top need" value={result.extraction.topNeed} wide />
+            <Cell label="Your fit angle" value={result.extraction.fitAngle} wide />
+          </div>
+        </div>
+      )}
+
+      {result.subject && (
+        <div className="ff-fadeup" style={{ animationDelay: '60ms' }}>
+          <div className="flex items-end justify-between mb-3">
+            <h3 className="ff-subheading">Subject line</h3>
+            <button className="ff-icon-btn" onClick={() => copyText('coversubject', result.subject)}>
+              {copied.coversubject ? <Check size={12} /> : <Copy size={12} />}
+              {copied.coversubject ? 'Copied' : 'Copy'}
+            </button>
+          </div>
+          <div className="ff-subject-card">
+            <div className="ff-subject-text">{result.subject}</div>
+          </div>
+        </div>
+      )}
+
+      <div className="ff-fadeup" style={{ animationDelay: '120ms' }}>
+        <div className="flex items-end justify-between mb-3">
+          <h3 className="ff-subheading">Cover Letter</h3>
+          <div className="flex gap-2">
+            <button className="ff-icon-btn" onClick={() => copyText('coverletter', result.coverLetter)}>
+              {copied.coverletter ? <Check size={12} /> : <Copy size={12} />}
+              {copied.coverletter ? 'Copied' : 'Letter'}
+            </button>
+            {result.subject && (
+              <button className="ff-icon-btn" onClick={() => copyText('coverfull', fullText)}>
+                {copied.coverfull ? <Check size={12} /> : <Copy size={12} />}
+                {copied.coverfull ? 'Copied' : 'All'}
+              </button>
+            )}
+          </div>
+        </div>
+        <div className="ff-card">
+          <p className="ff-output-text" onClick={selectAllText} title="Click to select all" style={{ cursor: 'text' }}>
+            {result.coverLetter}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function OutputBlock({ title, text, copyKey, copied, copyText, selectAllText, delay = 0 }) {
   return (
     <div className="ff-fadeup" style={{ animationDelay: `${delay}ms` }}>
@@ -3274,11 +3735,17 @@ function CloserEmpty({ mode }) {
     dm: 'Your cold DM\nwill appear here.',
     email: 'Your subject line\nand email body\nwill appear here.',
     followup: 'Your follow-up\nwill appear here.',
+    coverletter: 'Your tailored cover letter\nwill appear here.',
   };
+  const kickers = {
+    followup: 'Awaiting Conversation',
+    coverletter: 'Awaiting Job Posting',
+  };
+  const kicker = kickers[mode] || 'Awaiting Intel';
   return (
     <div className="ff-empty-state">
       <div className="ff-mono ff-pulse mb-4" style={{ fontSize: 11, color: 'var(--text-3)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-        Awaiting Intel
+        {kicker}
       </div>
       <p className="ff-display ff-text-1" style={{ fontSize: 22, lineHeight: 1.3, fontWeight: 500, letterSpacing: '-0.018em', whiteSpace: 'pre-line' }}>
         {messages[mode]}
