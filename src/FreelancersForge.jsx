@@ -1192,7 +1192,7 @@ function OptimizeTab() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
+        model: "claude-sonnet-4-5",
         max_tokens: 4000,
         messages: [{ role: "user", content }]
       })
@@ -1786,7 +1786,7 @@ Return ONLY JSON. No em dashes.`;
       const response = await fetch("/api/claude", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 3000, messages: [{ role: "user", content }] })
+        body: JSON.stringify({ model: "claude-sonnet-4-5", max_tokens: 3000, messages: [{ role: "user", content }] })
       });
       if (!response.ok) throw new Error('Request failed');
 
