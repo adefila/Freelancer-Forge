@@ -1080,6 +1080,78 @@ const CSS = `
   to { opacity: 1; transform: translateX(0); }
 }
 
+/* ===== Modal ===== */
+.ff-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(8, 10, 14, 0.42);
+  backdrop-filter: saturate(140%) blur(8px);
+  -webkit-backdrop-filter: saturate(140%) blur(8px);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  animation: ff-modal-bg 280ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes ff-modal-bg {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.ff-modal {
+  background: var(--bg-elev-1);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  width: 100%;
+  max-width: 560px;
+  max-height: calc(100vh - 48px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 24px 60px -12px rgba(0, 0, 0, 0.32), 0 8px 24px -8px rgba(0, 0, 0, 0.24);
+  animation: ff-modal-pop 380ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes ff-modal-pop {
+  from { opacity: 0; transform: translateY(8px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.ff-modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+}
+.ff-modal-body {
+  padding: 24px;
+  overflow-y: auto;
+}
+.ff-modal-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  color: var(--text-3);
+  cursor: pointer;
+  transition: background var(--t-fast), color var(--t-fast), transform var(--t-fast);
+}
+.ff-modal-close:hover {
+  background: var(--bg-elev-2);
+  color: var(--text-1);
+}
+.ff-modal-close:active { transform: scale(0.94); }
+
+/* Bar chart bars grow on enter */
+@keyframes ff-bar-grow {
+  from { transform: scaleY(0); opacity: 0; }
+  to { transform: scaleY(1); opacity: 1; }
+}
+
+
 .ff-btn:hover:not(:disabled),
 .ff-icon-btn:hover,
 .ff-tab:hover {
@@ -1747,7 +1819,7 @@ Return ONLY JSON. No em dashes.`;
 
   return (
     <>
-      <div className="grid md:grid-cols-2 gap-6 mb-10">
+      <div className={pageType === 'cv' ? 'mb-10' : 'grid md:grid-cols-2 gap-6 mb-10'}>
         <div>
           <label className="ff-section-label mb-3" style={{ display: 'inline-flex', alignItems: 'center' }}>
             Page Type
@@ -1756,27 +1828,18 @@ Return ONLY JSON. No em dashes.`;
           <div className="block"><PageTypeDropdown value={pageType} onChange={setPageType} /></div>
           <p className="ff-field-hint mt-2">{PAGE_TYPES[pageType].desc}</p>
         </div>
-        <div>
-          <label className="ff-section-label mb-3" style={{ display: 'inline-flex', alignItems: 'center' }}>
-            {pageType === 'cv' ? 'Upload CV' : 'Submission Method'}
-            <Tooltip text={pageType === 'cv'
-              ? "Upload your CV as PDF (best for ATS-friendly audits) or as a PNG/JPG image. For Word documents, please export as PDF first."
-              : "How you want to provide the page. Pasting the copy gives the most accurate audit. A screenshot reads visual hierarchy and copy together."} />
-          </label>
-          {pageType === 'cv' ? (
-            <div className="ff-dropdown-trigger" style={{ cursor: 'default', opacity: 0.85 }}>
-              <Paperclip size={14} />
-              File upload
-            </div>
-          ) : (
+        {pageType !== 'cv' && (
+          <div>
+            <label className="ff-section-label mb-3" style={{ display: 'inline-flex', alignItems: 'center' }}>
+              Submission Method
+              <Tooltip text="How you want to provide the page. Pasting the copy gives the most accurate audit. A screenshot reads visual hierarchy and copy together." />
+            </label>
             <div className="block"><MethodDropdown value={method} onChange={setMethod} /></div>
-          )}
-          <p className="ff-field-hint mt-2">
-            {pageType === 'cv'
-              ? 'Accepts PDF, PNG, or JPG. PDF gives the most accurate read.'
-              : (method === 'paste' ? 'Best results: paste the visible copy' : 'Visual and copy audit from a screenshot')}
-          </p>
-        </div>
+            <p className="ff-field-hint mt-2">
+              {method === 'paste' ? 'Best results: paste the visible copy' : 'Visual and copy audit from a screenshot'}
+            </p>
+          </div>
+        )}
       </div>
 
       <div className="grid md:grid-cols-2 gap-10 md:gap-14">
@@ -2791,6 +2854,7 @@ function PipelineTab() {
   const [entryDate, setEntryDate] = useState(todayStr());
   const [loaded, setLoaded] = useState(false);
   const [showActivity, setShowActivity] = useState(false);
+  const [activityPeriod, setActivityPeriod] = useState('week');
 
   // Load entries from storage on mount, applying 15-day expiry
   useEffect(() => {
@@ -2881,78 +2945,36 @@ function PipelineTab() {
             Track every proposal, DM, and email. See what's working.
           </p>
         </div>
-        <button
-          className="ff-btn"
-          onClick={() => setShowForm(s => !s)}
-          style={{ width: 'auto', padding: '10px 18px' }}
-        >
-          {showForm ? <X size={14} /> : <Plus size={14} />}
-          {showForm ? 'Cancel' : 'Add Entry'}
-        </button>
+        <div className="flex items-center gap-2">
+          {entries.length > 0 && (
+            <button
+              className="ff-btn ff-btn-secondary"
+              onClick={() => setShowActivity(true)}
+              style={{ width: 'auto', padding: '10px 16px' }}
+              aria-label="View activity"
+            >
+              <TrendingUp size={14} />
+              Activity
+            </button>
+          )}
+          <button
+            className="ff-btn"
+            onClick={() => setShowForm(s => !s)}
+            style={{ width: 'auto', padding: '10px 18px' }}
+          >
+            {showForm ? <X size={14} /> : <Plus size={14} />}
+            {showForm ? 'Cancel' : 'Add Entry'}
+          </button>
+        </div>
       </div>
 
       {/* STATS GRID */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
         <StatCard label="Total Sent" value={stats.total} />
         <StatCard label="Replies" value={`${stats.replied + stats.inTalks + stats.won + stats.lost}`} sub={`${replyRate}% reply rate`} />
         <StatCard label="Closed Won" value={stats.won} sub={winRate > 0 ? `${winRate}% win rate` : null} accent />
         <StatCard label="Revenue" value={totalValue > 0 ? `$${totalValue.toLocaleString()}` : '—'} sub="from closed deals" />
       </div>
-
-      {/* ACTIVITY PANEL */}
-      {entries.length > 0 && (
-        <div className="ff-card mb-8" style={{ padding: 0, overflow: 'hidden' }}>
-          <button
-            type="button"
-            onClick={() => setShowActivity(s => !s)}
-            style={{
-              width: '100%',
-              background: 'transparent',
-              border: 'none',
-              padding: '14px 18px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              cursor: 'pointer',
-              fontFamily: 'var(--font-text)',
-              transition: 'background var(--t-fast)',
-            }}
-            onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-elev-2)'}
-            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-          >
-            <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <TrendingUp size={14} style={{ color: 'var(--accent)' }} />
-              <span style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--text-1)', letterSpacing: '-0.005em' }}>
-                Activity
-              </span>
-              <span className="ff-text-3" style={{ fontSize: 12, marginLeft: 6 }}>
-                Week, month, year breakdown
-              </span>
-            </span>
-            <ChevronDown
-              size={16}
-              style={{
-                color: 'var(--text-3)',
-                transform: showActivity ? 'rotate(180deg)' : 'none',
-                transition: 'transform 220ms ease',
-              }}
-            />
-          </button>
-
-          {showActivity && (
-            <div className="ff-fadeup" style={{ borderTop: '1px solid var(--border)', padding: '20px 18px', background: 'var(--bg-elev-1)' }}>
-              <div className="grid grid-cols-3 gap-4">
-                <ActivityColumn label="This week" data={week} />
-                <ActivityColumn label="This month" data={month} />
-                <ActivityColumn label="This year" data={year} />
-              </div>
-              <p className="ff-text-3 mt-5" style={{ fontSize: 11.5, lineHeight: 1.5, fontStyle: 'italic' }}>
-                Pipeline data is stored locally and clears 15 days after each entry was added. Activity counts use the date you marked the entry as sent.
-              </p>
-            </div>
-          )}
-        </div>
-      )}
 
       {/* ADD FORM */}
       {showForm && (
@@ -3071,6 +3093,17 @@ function PipelineTab() {
           ))}
         </div>
       )}
+
+      {/* ACTIVITY MODAL */}
+      <ActivityModal
+        open={showActivity}
+        onClose={() => setShowActivity(false)}
+        period={activityPeriod}
+        setPeriod={setActivityPeriod}
+        week={week}
+        month={month}
+        year={year}
+      />
     </div>
   );
 }
@@ -3127,6 +3160,241 @@ function ActivityStat({ label, value, sub, accent }) {
         </span>
         {sub && <span className="ff-text-3" style={{ fontSize: 11 }}>{sub}</span>}
       </span>
+    </div>
+  );
+}
+
+function ActivityModal({ open, onClose, period, setPeriod, week, month, year }) {
+  // Esc-to-close
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', handler);
+    // Lock body scroll while open
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.removeEventListener('keydown', handler);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [open, onClose]);
+
+  if (!open) return null;
+
+  const periodMap = { week, month, year };
+  const periodLabels = { week: 'This week', month: 'This month', year: 'This year' };
+  const data = periodMap[period] || week;
+
+  const replyRate = data.sent > 0 ? Math.round((data.replied / data.sent) * 100) : 0;
+  const winRate = data.sent > 0 ? Math.round((data.won / data.sent) * 100) : 0;
+
+  // Build bar values from full status breakdown of the period
+  // We need to recompute by status; for now we have aggregate counts but not per-status
+  // so the chart shows the four meaningful counts available
+  const bars = [
+    { label: 'Sent', value: data.sent, color: 'var(--text-2)' },
+    { label: 'Replied', value: data.replied, color: 'var(--accent)' },
+    { label: 'Won', value: data.won, color: 'var(--success)' },
+    { label: 'Revenue', value: data.revenue, color: 'var(--accent-vivid, var(--accent))', isRevenue: true },
+  ];
+
+  const chartBars = bars.filter(b => !b.isRevenue);
+  const maxBarValue = Math.max(1, ...chartBars.map(b => b.value));
+
+  const periods = [
+    { id: 'week', label: 'Week' },
+    { id: 'month', label: 'Month' },
+    { id: 'year', label: 'Year' },
+  ];
+
+  return (
+    <div
+      className="ff-modal-backdrop"
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Activity"
+    >
+      <div className="ff-modal" onClick={(e) => e.stopPropagation()}>
+        {/* Header */}
+        <div className="ff-modal-head">
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <TrendingUp size={16} style={{ color: 'var(--accent)' }} />
+            <h2 style={{
+              fontFamily: 'var(--font-display)',
+              fontSize: 20,
+              fontWeight: 500,
+              letterSpacing: '-0.018em',
+              color: 'var(--text-1)',
+              margin: 0,
+            }}>
+              Activity
+            </h2>
+          </div>
+          <button className="ff-modal-close" onClick={onClose} aria-label="Close">
+            <X size={16} />
+          </button>
+        </div>
+
+        {/* Body */}
+        <div className="ff-modal-body">
+          {/* Period segmented control */}
+          <div
+            role="tablist"
+            aria-label="Activity period"
+            style={{
+              display: 'inline-flex',
+              padding: 3,
+              background: 'var(--bg-elev-2)',
+              borderRadius: 10,
+              marginBottom: 24,
+            }}
+          >
+            {periods.map(p => {
+              const active = p.id === period;
+              return (
+                <button
+                  key={p.id}
+                  role="tab"
+                  aria-selected={active}
+                  onClick={() => setPeriod(p.id)}
+                  style={{
+                    appearance: 'none',
+                    border: 'none',
+                    background: active ? 'var(--bg-elev-1)' : 'transparent',
+                    color: active ? 'var(--text-1)' : 'var(--text-3)',
+                    padding: '7px 16px',
+                    borderRadius: 7,
+                    fontSize: 12.5,
+                    fontWeight: 600,
+                    fontFamily: 'var(--font-text)',
+                    letterSpacing: '-0.005em',
+                    cursor: 'pointer',
+                    transition: 'background 220ms cubic-bezier(0.16, 1, 0.3, 1), color 220ms ease',
+                    boxShadow: active ? '0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)' : 'none',
+                  }}
+                >
+                  {p.label}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Summary stats */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(2, 1fr)',
+            gap: 16,
+            paddingBottom: 24,
+            borderBottom: '1px solid var(--border)',
+            marginBottom: 24,
+          }}>
+            <SummaryStat label="Reply rate" value={`${replyRate}%`} />
+            <SummaryStat label="Win rate" value={`${winRate}%`} accent />
+            <SummaryStat label="Revenue" value={data.revenue > 0 ? `$${data.revenue.toLocaleString()}` : '—'} />
+            <SummaryStat label="Period" value={periodLabels[period]} muted />
+          </div>
+
+          {/* Bar chart */}
+          <div>
+            <div style={{
+              display: 'flex',
+              alignItems: 'baseline',
+              justifyContent: 'space-between',
+              marginBottom: 18,
+            }}>
+              <span className="ff-section-label" style={{ fontSize: 10.5 }}>Breakdown</span>
+              <span style={{ fontSize: 11.5, color: 'var(--text-3)', fontFeatureSettings: "'tnum'" }}>
+                {data.sent} {data.sent === 1 ? 'entry' : 'entries'}
+              </span>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              {chartBars.map((bar, i) => {
+                const widthPct = data.sent > 0 ? (bar.value / maxBarValue) * 100 : 0;
+                return (
+                  <div key={bar.label} style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                    {/* Label column (fixed width for alignment) */}
+                    <div style={{
+                      width: 72,
+                      fontSize: 12.5,
+                      color: 'var(--text-2)',
+                      fontWeight: 500,
+                      letterSpacing: '-0.003em',
+                      flexShrink: 0,
+                      textAlign: 'left',
+                    }}>
+                      {bar.label}
+                    </div>
+
+                    {/* Bar track */}
+                    <div style={{
+                      flex: 1,
+                      height: 26,
+                      background: 'var(--bg-elev-2)',
+                      borderRadius: 7,
+                      overflow: 'hidden',
+                      position: 'relative',
+                    }}>
+                      <div
+                        key={`${period}-${bar.label}`}
+                        style={{
+                          height: '100%',
+                          width: `${widthPct}%`,
+                          background: bar.color,
+                          borderRadius: 7,
+                          transformOrigin: 'left center',
+                          animation: `ff-bar-grow 620ms cubic-bezier(0.16, 1, 0.3, 1) ${i * 60}ms backwards`,
+                          transition: 'width 480ms cubic-bezier(0.16, 1, 0.3, 1)',
+                        }}
+                      />
+                    </div>
+
+                    {/* Value column (fixed width for alignment) */}
+                    <div style={{
+                      width: 36,
+                      textAlign: 'right',
+                      fontFamily: 'var(--font-display)',
+                      fontSize: 15,
+                      fontWeight: 500,
+                      color: 'var(--text-1)',
+                      letterSpacing: '-0.012em',
+                      fontFeatureSettings: "'tnum'",
+                      flexShrink: 0,
+                    }}>
+                      {bar.value}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <p className="ff-text-3" style={{ fontSize: 11, lineHeight: 1.55, marginTop: 22, fontStyle: 'italic' }}>
+              Counts use the date you marked each entry as sent. Pipeline data is stored locally and clears 15 days after each entry was added.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SummaryStat({ label, value, accent, muted }) {
+  return (
+    <div>
+      <p className="ff-section-label" style={{ fontSize: 10, marginBottom: 6 }}>{label}</p>
+      <p style={{
+        fontFamily: 'var(--font-display)',
+        fontSize: 22,
+        fontWeight: 500,
+        letterSpacing: '-0.02em',
+        color: accent ? 'var(--accent)' : (muted ? 'var(--text-2)' : 'var(--text-1)'),
+        fontFeatureSettings: "'tnum'",
+        margin: 0,
+        lineHeight: 1.1,
+      }}>
+        {value}
+      </p>
     </div>
   );
 }
