@@ -2460,40 +2460,6 @@ Return ONLY JSON. No em dashes.`;
               </div>
             )}
 
-            <div>
-              <label className="ff-field-label" style={{ display: 'inline-flex', alignItems: 'center' }}>
-                {pageType === 'cv' ? 'Target role' : 'Audience'}
-                <span className="ff-field-hint" style={{ fontWeight: 400, marginLeft: 6 }}>· optional</span>
-                <Tooltip text={pageType === 'cv'
-                  ? "The specific role you're applying for. Used to pull the right ATS keywords and align the rewrite to what hiring managers scan for."
-                  : "The specific kind of buyer you want this page to attract. The more specific, the sharper the rewrite. 'Series A SaaS founders' beats 'tech companies'."} />
-              </label>
-              <input
-                type="text"
-                className="ff-input"
-                placeholder={pageType === 'cv' ? 'e.g. Senior Product Designer at a Series B SaaS' : 'e.g. Series A SaaS founders'}
-                value={audience}
-                onChange={e => setAudience(e.target.value)}
-              />
-            </div>
-
-            <div>
-              <label className="ff-field-label" style={{ display: 'inline-flex', alignItems: 'center' }}>
-                {pageType === 'cv' ? 'Top outcome to highlight' : 'Goal of the page'}
-                <span className="ff-field-hint" style={{ fontWeight: 400, marginLeft: 6 }}>· optional</span>
-                <Tooltip text={pageType === 'cv'
-                  ? "The single result you most want hiring managers to remember. Pushed to the top of the rewrite where it lands first."
-                  : "The single action you want a visitor to take. Used to score whether your CTAs and structure actually push toward that outcome."} />
-              </label>
-              <input
-                type="text"
-                className="ff-input"
-                placeholder={pageType === 'cv' ? 'e.g. Cut churn 28% in 9 months as PM at Stripe' : 'e.g. Book a discovery call'}
-                value={goal}
-                onChange={e => setGoal(e.target.value)}
-              />
-            </div>
-
             {error && (
               <div className="ff-fadeup" style={{ background: 'var(--danger-bg)', color: 'var(--danger)', padding: '10px 14px', borderRadius: 'var(--r-md)', fontSize: 13, fontWeight: 500 }}>
                 {error}
@@ -3192,33 +3158,6 @@ Return ONLY JSON. No em dashes.`;
                   )}
                 </div>
 
-                <div>
-                  <label className="ff-field-label" style={{ display: 'inline-flex', alignItems: 'center' }}>
-                    Your positioning <span className="ff-field-hint" style={{ fontWeight: 400, marginLeft: 6 }}>· optional</span>
-                    <Tooltip text="A one-line angle on why you're right for this role. If you skip this, the letter pulls positioning from the CV." />
-                  </label>
-                  <textarea
-                    className="ff-textarea"
-                    rows={3}
-                    placeholder="e.g. I help fintech startups go from 0 to first 1k paying users."
-                    value={offer}
-                    onChange={e => setOffer(e.target.value)}
-                  />
-                </div>
-
-                <div>
-                  <label className="ff-field-label" style={{ display: 'inline-flex', alignItems: 'center' }}>
-                    One specific proof point <span className="ff-field-hint" style={{ fontWeight: 400, marginLeft: 6 }}>· optional</span>
-                    <Tooltip text="A single result with numbers and named outcome you most want this employer to hear. Used as the lead proof in paragraph 2." />
-                  </label>
-                  <textarea
-                    className="ff-textarea"
-                    rows={3}
-                    placeholder="e.g. Cut churn 28% in 9 months by rebuilding onboarding at Stripe."
-                    value={proof}
-                    onChange={e => setProof(e.target.value)}
-                  />
-                </div>
               </>
             ) : (
               <>
@@ -3237,24 +3176,6 @@ Return ONLY JSON. No em dashes.`;
                     </div>
                   )}
                   {imageData && <ImagePreview data={imageData} onRemove={() => setImageData(null)} />}
-                </div>
-
-                <div>
-                  <label className="ff-field-label" style={{ display: 'inline-flex', alignItems: 'center' }}>
-                    Positioning
-                    <span className="ff-field-hint" style={{ fontWeight: 400, marginLeft: 6 }}>· optional</span>
-                    <Tooltip text="Your one-line pitch. Who you serve and what outcome you produce. Used to weave your angle naturally into the message." />
-                  </label>
-                  <textarea className="ff-textarea" rows={3} placeholder="e.g. I close inbound calls for coaches." value={offer} onChange={e => setOffer(e.target.value)} />
-                </div>
-
-                <div>
-                  <label className="ff-field-label" style={{ display: 'inline-flex', alignItems: 'center' }}>
-                    Proof
-                    <span className="ff-field-hint" style={{ fontWeight: 400, marginLeft: 6 }}>· optional</span>
-                    <Tooltip text="A specific result you've produced. Numbers and named outcomes work best. Skip vague claims like 'helped grow revenue'." />
-                  </label>
-                  <textarea className="ff-textarea" rows={3} placeholder="e.g. Took a $40k/mo coach to $110k/mo." value={proof} onChange={e => setProof(e.target.value)} />
                 </div>
 
                 {mode === 'proposal' && (
