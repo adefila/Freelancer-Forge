@@ -4,7 +4,8 @@ import {
   Sun, Moon, Plus, ExternalLink, Link as LinkIcon, ChevronDown,
   Mail, MessageSquare, FileText, Reply, Type, Image as ImgIcon,
   Target, Award, Briefcase, User, Layers, Wand2,
-  TrendingUp, Trash2, HelpCircle, PenLine
+  TrendingUp, Trash2, HelpCircle, PenLine, Bot, Send, RotateCcw,
+  ChevronUp
 } from 'lucide-react';
 
 /* ====================================================================== */
@@ -212,6 +213,19 @@ const stripEmDashes = (s) => {
   return s.replace(/\s*—\s*/g, ', ').replace(/\s*–\s*/g, ', ')
     .replace(/,\s*,/g, ',').replace(/,\s*\./g, '.');
 };
+
+/* ====================================================================== */
+/* ASK ANYTHING — SUGGESTED PROMPTS                                       */
+/* ====================================================================== */
+
+const SUGGESTED_PROMPTS = [
+  { label: 'Rate my hourly', text: 'How do I figure out what to charge per hour as a freelancer? I do UX design.' },
+  { label: 'Niche down advice', text: 'Should I niche down or stay a generalist? I currently do branding, web design, and social media.' },
+  { label: 'Handle lowball offers', text: 'A client just offered me 40% of my quoted rate. How should I respond without losing the deal?' },
+  { label: 'Write a bio', text: 'Help me write a sharp 3-sentence bio. I am a freelance copywriter who specializes in SaaS onboarding emails.' },
+  { label: 'Raise my rates', text: 'How do I tell existing clients I am raising my rates by 30% without losing them?' },
+  { label: 'Scope creep script', text: 'Give me a script to push back on a client who keeps adding work outside the original scope.' },
+];
 
 /* ====================================================================== */
 /* DESIGN SYSTEM — Apple-inspired, blue primary                            */
@@ -493,7 +507,7 @@ const CSS = `
 }
 .ff-root.dark .ff-segment-item-active { background: var(--bg-elev-2); }
 
-/* COLORED SEGMENTED CONTROL (filled saturated blue active, fully rounded) */
+/* COLORED SEGMENTED CONTROL */
 .ff-segment-color {
   background: var(--accent-bg-soft);
   border-color: var(--accent-border-soft);
@@ -525,7 +539,7 @@ const CSS = `
   color: var(--accent-text-on);
 }
 
-/* UNDERLINED TABS (clean, editorial) */
+/* UNDERLINED TABS */
 .ff-tabs {
   display: flex;
   gap: 4px;
@@ -1145,12 +1159,10 @@ const CSS = `
 }
 .ff-modal-close:active { transform: scale(0.94); }
 
-/* Bar chart bars grow on enter */
 @keyframes ff-bar-grow {
   from { transform: scaleY(0); opacity: 0; }
   to { transform: scaleY(1); opacity: 1; }
 }
-
 
 .ff-btn:hover:not(:disabled),
 .ff-icon-btn:hover,
@@ -1163,7 +1175,6 @@ const CSS = `
   transition-duration: 80ms;
 }
 
-/* Smooth focus ring transitions */
 .ff-input, .ff-textarea, .ff-btn, .ff-icon-btn, .ff-dropdown-trigger, .ff-tab {
   transition: background-color var(--t-med),
               border-color var(--t-fast),
@@ -1172,7 +1183,6 @@ const CSS = `
               box-shadow var(--t-fast);
 }
 
-/* Subtle ambient gradient backdrop */
 .ff-gradient-bg {
   position: absolute;
   top: 0;
@@ -1196,7 +1206,6 @@ const CSS = `
     radial-gradient(ellipse 50% 40% at 25% 10%, rgba(59, 130, 246, 0.12) 0%, transparent 55%);
 }
 
-/* Score animation */
 @keyframes ff-ringfill {
   from { stroke-dashoffset: var(--ring-circumference); }
   to { stroke-dashoffset: var(--ring-offset); }
@@ -1324,15 +1333,11 @@ const CSS = `
   transform: translateY(0);
 }
 
-/* MICRO-INTERACTIONS — extra polish */
-
-/* Inputs gently tighten on focus */
 .ff-input:focus,
 .ff-textarea:focus {
   transform: translateY(-1px);
 }
 
-/* Card hover lift (very subtle) */
 .ff-card {
   transition: background-color var(--t-slow),
               border-color var(--t-slow),
@@ -1340,19 +1345,16 @@ const CSS = `
               box-shadow var(--t-med);
 }
 
-/* Smooth tab switch underline */
 .ff-tab {
   transition: color var(--t-fast),
               border-color var(--t-med),
               transform var(--t-fast);
 }
 
-/* Dropdown trigger micro-bounce on open */
 .ff-dropdown-trigger:active {
   transform: scale(0.98);
 }
 
-/* Score ring shimmer on appear */
 @keyframes ff-shimmer {
   0% { opacity: 0.6; }
   50% { opacity: 1; }
@@ -1362,23 +1364,12 @@ const CSS = `
   animation: ff-shimmer 800ms cubic-bezier(0.16, 1, 0.3, 1) backwards;
 }
 
-/* Copy success bounce */
 @keyframes ff-pop {
   0% { transform: scale(1); }
   40% { transform: scale(1.08); }
   100% { transform: scale(1); }
 }
-.ff-icon-btn:has(svg.lucide-check) {
-  animation: ff-pop 320ms cubic-bezier(0.34, 1.56, 0.64, 1);
-}
 
-/* Status pill click feedback */
-.ff-pill,
-[class*="ff-rec-prio"] {
-  transition: transform var(--t-fast);
-}
-
-/* Tab badge subtle pulse on first appear */
 @keyframes ff-badge-fade {
   from { opacity: 0; transform: scale(0.9); }
   to { opacity: 1; transform: scale(1); }
@@ -1387,7 +1378,6 @@ const CSS = `
   animation: ff-badge-fade 480ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-/* Smooth scrollbar */
 * {
   scrollbar-width: thin;
   scrollbar-color: var(--border-strong) transparent;
@@ -1401,6 +1391,261 @@ const CSS = `
 }
 *::-webkit-scrollbar-thumb:hover { background: var(--text-3); }
 
+/* ====================================================================== */
+/* ASK ANYTHING — CHAT STYLES                                             */
+/* ====================================================================== */
+
+.ff-chat-wrap {
+  display: flex;
+  flex-direction: column;
+  height: 640px;
+  max-height: 80vh;
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  overflow: hidden;
+  background: var(--bg-elev-1);
+  box-shadow: var(--sh-2);
+}
+
+.ff-chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.ff-chat-msg {
+  display: flex;
+  gap: 12px;
+  animation: ff-fadeup 380ms cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+.ff-chat-msg-user {
+  flex-direction: row-reverse;
+}
+
+.ff-chat-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--r-pill);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.ff-chat-avatar-ai {
+  background: var(--accent-bg-soft);
+  border: 1px solid var(--accent-border-soft);
+  color: var(--accent);
+}
+
+.ff-chat-avatar-user {
+  background: var(--accent);
+  color: var(--accent-text-on);
+}
+
+.ff-chat-bubble {
+  max-width: min(560px, 80%);
+  padding: 13px 16px;
+  border-radius: var(--r-lg);
+  font-size: 14.5px;
+  line-height: 1.65;
+  letter-spacing: -0.005em;
+}
+
+.ff-chat-bubble-ai {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text-1);
+  border-bottom-left-radius: var(--r-sm);
+  box-shadow: var(--sh-1);
+}
+
+.ff-chat-bubble-user {
+  background: var(--accent);
+  color: var(--accent-text-on);
+  border-bottom-right-radius: var(--r-sm);
+}
+
+.ff-chat-bubble pre,
+.ff-chat-bubble code {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  background: var(--bg-elev-2);
+  padding: 2px 6px;
+  border-radius: var(--r-sm);
+}
+
+.ff-chat-bubble-ai pre {
+  padding: 12px 14px;
+  border-radius: var(--r-md);
+  overflow-x: auto;
+  margin: 8px 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.ff-chat-typing {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 0;
+}
+
+.ff-chat-typing span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: ff-typing-bounce 1.2s ease-in-out infinite;
+}
+.ff-chat-typing span:nth-child(2) { animation-delay: 0.15s; }
+.ff-chat-typing span:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes ff-typing-bounce {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
+  30% { transform: translateY(-5px); opacity: 1; }
+}
+
+.ff-chat-footer {
+  padding: 16px;
+  border-top: 1px solid var(--border);
+  background: var(--bg);
+}
+
+.ff-chat-input-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+}
+
+.ff-chat-textarea {
+  flex: 1;
+  background: var(--bg-elev-1);
+  border: 1px solid var(--border-strong);
+  color: var(--text-1);
+  font-family: var(--font-text);
+  font-size: 14px;
+  line-height: 1.5;
+  padding: 11px 14px;
+  border-radius: var(--r-md);
+  resize: none;
+  outline: none;
+  letter-spacing: -0.005em;
+  transition: border-color var(--t-fast), box-shadow var(--t-fast);
+  max-height: 160px;
+  overflow-y: auto;
+  min-height: 44px;
+}
+
+.ff-chat-textarea:focus {
+  border-color: var(--accent);
+  box-shadow: var(--sh-focus);
+}
+
+.ff-chat-textarea::placeholder { color: var(--text-3); }
+
+.ff-chat-send {
+  width: 42px;
+  height: 42px;
+  background: var(--accent);
+  border: none;
+  border-radius: var(--r-md);
+  color: var(--accent-text-on);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background var(--t-fast), transform var(--t-fast), box-shadow var(--t-fast);
+  box-shadow: var(--sh-1);
+}
+
+.ff-chat-send:hover:not(:disabled) {
+  background: var(--accent-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--sh-blue);
+}
+
+.ff-chat-send:active:not(:disabled) {
+  transform: translateY(0) scale(0.95);
+}
+
+.ff-chat-send:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.ff-chat-empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+  text-align: center;
+}
+
+.ff-suggested-prompt {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text-1);
+  font-family: var(--font-text);
+  font-size: 12.5px;
+  font-weight: 500;
+  padding: 9px 14px;
+  border-radius: var(--r-pill);
+  cursor: pointer;
+  letter-spacing: -0.005em;
+  transition: all var(--t-fast);
+  white-space: nowrap;
+}
+
+.ff-suggested-prompt:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-bg-soft);
+  transform: translateY(-1px);
+}
+
+.ff-chat-copy-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-3);
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: var(--r-sm);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-family: var(--font-text);
+  font-weight: 500;
+  transition: all var(--t-fast);
+  margin-top: 8px;
+}
+
+.ff-chat-copy-btn:hover {
+  color: var(--text-1);
+  background: var(--bg-elev-2);
+}
+
+.ff-chat-bubble-text {
+  white-space: pre-wrap;
+}
+
+.ff-chat-bubble-text strong {
+  font-weight: 700;
+}
+
+.ff-chat-bubble-text em {
+  font-style: italic;
+}
 
 `;
 
@@ -1490,12 +1735,337 @@ export default function FreelancersForge() {
             <TrendingUp size={15} />
             Pipeline
           </button>
+          <button
+            type="button"
+            className={`ff-tab ${tab === 'ask' ? 'ff-tab-active' : ''}`}
+            onClick={() => setTab('ask')}
+          >
+            <Bot size={15} />
+            Ask Anything
+          </button>
         </div>
 
         {tab === 'optimize' && <OptimizeTab />}
         {tab === 'close' && <CloseTab />}
         {tab === 'pipeline' && <PipelineTab />}
+        {tab === 'ask' && <AskAnythingTab />}
 
+      </div>
+    </div>
+  );
+}
+
+/* ====================================================================== */
+/* ASK ANYTHING TAB                                                       */
+/* ====================================================================== */
+
+function formatMessageText(text) {
+  // Basic markdown-like formatting: **bold**, *italic*, newlines
+  const lines = text.split('\n');
+  return lines.map((line, i) => {
+    const parts = line.split(/(\*\*[^*]+\*\*|\*[^*]+\*)/g);
+    return (
+      <span key={i}>
+        {parts.map((part, j) => {
+          if (part.startsWith('**') && part.endsWith('**')) {
+            return <strong key={j}>{part.slice(2, -2)}</strong>;
+          }
+          if (part.startsWith('*') && part.endsWith('*')) {
+            return <em key={j}>{part.slice(1, -1)}</em>;
+          }
+          return part;
+        })}
+        {i < lines.length - 1 && <br />}
+      </span>
+    );
+  });
+}
+
+function AskAnythingTab() {
+  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [copiedIdx, setCopiedIdx] = useState(null);
+  const messagesEndRef = useRef(null);
+  const textareaRef = useRef(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, loading]);
+
+  const autoResize = () => {
+    const ta = textareaRef.current;
+    if (!ta) return;
+    ta.style.height = 'auto';
+    ta.style.height = Math.min(ta.scrollHeight, 160) + 'px';
+  };
+
+  const sendMessage = async (text) => {
+    const trimmed = (text || input).trim();
+    if (!trimmed || loading) return;
+
+    const userMsg = { role: 'user', content: trimmed };
+    const updatedMessages = [...messages, userMsg];
+    setMessages(updatedMessages);
+    setInput('');
+    setError('');
+    setLoading(true);
+
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+    }
+
+    try {
+      const apiMessages = updatedMessages.map(m => ({
+        role: m.role,
+        content: m.content,
+      }));
+
+      const response = await fetch('/api/claude', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 1000,
+          system: `You are Forge AI, the expert assistant built into Freelancer's Forge. You specialize in helping freelancers, independent contractors, and solopreneurs with:
+- Positioning, pricing, and niche strategy
+- Writing copy (bios, proposals, pitches, profiles)
+- Client management (handling objections, scope creep, difficult conversations)
+- Rates, contracts, and negotiation
+- Platform-specific advice (Upwork, Fiverr, LinkedIn, portfolio sites)
+- Business development and pipeline strategy
+- Job applications, cover letters, and career moves
+
+You give direct, tactical advice. No fluff. No buzzwords. No "it depends" without immediately saying what it depends on and giving a concrete answer anyway. You write like a sharp mentor who has done this work, not like a consultant. Short sentences. Specific numbers when possible. Opinions that you'd defend.`,
+          messages: apiMessages,
+        }),
+      });
+
+      if (!response.ok) {
+        const errBody = await response.text().catch(() => '');
+        throw new Error(`Request failed (${response.status}). ${errBody.slice(0, 200)}`);
+      }
+
+      const data = await response.json();
+      const replyText = data.content.filter(b => b.type === 'text').map(b => b.text).join('').trim();
+
+      setMessages(prev => [...prev, { role: 'assistant', content: replyText }]);
+    } catch (err) {
+      console.error('Ask error:', err);
+      setError(err.message || 'Something went wrong. Try again.');
+      // Remove the user message if the request failed
+      setMessages(prev => prev.slice(0, -1));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  };
+
+  const copyMessage = async (text, idx) => {
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+      } else {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed'; ta.style.left = '-9999px';
+        document.body.appendChild(ta); ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+      }
+      setCopiedIdx(idx);
+      setTimeout(() => setCopiedIdx(null), 1800);
+    } catch {}
+  };
+
+  const clearChat = () => {
+    setMessages([]);
+    setError('');
+  };
+
+  const isEmpty = messages.length === 0;
+
+  return (
+    <div className="ff-fadeup">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+        <div>
+          <h2 className="ff-display ff-text-1" style={{ fontSize: 28, fontWeight: 500, letterSpacing: '-0.018em' }}>
+            Ask anything
+          </h2>
+          <p className="ff-text-2 mt-1" style={{ fontSize: 14, lineHeight: 1.5 }}>
+            Freelance strategy, pricing, copy, clients. Direct answers, no fluff.
+          </p>
+        </div>
+        {messages.length > 0 && (
+          <button
+            type="button"
+            className="ff-btn ff-btn-secondary"
+            onClick={clearChat}
+            style={{ width: 'auto', padding: '10px 16px' }}
+          >
+            <RotateCcw size={13} />
+            New chat
+          </button>
+        )}
+      </div>
+
+      {/* Chat window */}
+      <div className="ff-chat-wrap">
+        {/* Messages area */}
+        <div className="ff-chat-messages">
+          {isEmpty && !loading && (
+            <div className="ff-chat-empty">
+              <div style={{
+                width: 52,
+                height: 52,
+                borderRadius: '50%',
+                background: 'var(--accent-bg-soft)',
+                border: '1px solid var(--accent-border-soft)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginBottom: 16,
+              }}>
+                <Bot size={22} style={{ color: 'var(--accent)' }} />
+              </div>
+              <p className="ff-display ff-text-1 mb-2" style={{ fontSize: 20, lineHeight: 1.3, fontWeight: 500, letterSpacing: '-0.018em' }}>
+                What do you want to know?
+              </p>
+              <p className="ff-text-3 mb-8" style={{ fontSize: 13.5, lineHeight: 1.55, maxWidth: '36ch' }}>
+                Ask about pricing, niches, client scripts, copy help, or anything freelance.
+              </p>
+              {/* Suggested prompts */}
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center', maxWidth: 560 }}>
+                {SUGGESTED_PROMPTS.map((p, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    className="ff-suggested-prompt"
+                    onClick={() => sendMessage(p.text)}
+                    style={{ animationDelay: `${i * 50}ms` }}
+                  >
+                    {p.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {messages.map((msg, i) => (
+            <div key={i} className={`ff-chat-msg ${msg.role === 'user' ? 'ff-chat-msg-user' : ''}`}>
+              <div className={`ff-chat-avatar ${msg.role === 'user' ? 'ff-chat-avatar-user' : 'ff-chat-avatar-ai'}`}>
+                {msg.role === 'user' ? 'You' : <Bot size={15} />}
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: msg.role === 'user' ? 'flex-end' : 'flex-start' }}>
+                <div className={`ff-chat-bubble ${msg.role === 'user' ? 'ff-chat-bubble-user' : 'ff-chat-bubble-ai'}`}>
+                  <div className="ff-chat-bubble-text">
+                    {formatMessageText(msg.content)}
+                  </div>
+                </div>
+                {msg.role === 'assistant' && (
+                  <button
+                    type="button"
+                    className="ff-chat-copy-btn"
+                    onClick={() => copyMessage(msg.content, i)}
+                  >
+                    {copiedIdx === i ? <Check size={11} /> : <Copy size={11} />}
+                    {copiedIdx === i ? 'Copied' : 'Copy'}
+                  </button>
+                )}
+              </div>
+            </div>
+          ))}
+
+          {/* Typing indicator */}
+          {loading && (
+            <div className="ff-chat-msg ff-fadein">
+              <div className="ff-chat-avatar ff-chat-avatar-ai">
+                <Bot size={15} />
+              </div>
+              <div className="ff-chat-bubble ff-chat-bubble-ai">
+                <div className="ff-chat-typing">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Error */}
+          {error && (
+            <div className="ff-fadeup" style={{
+              background: 'var(--danger-bg)',
+              color: 'var(--danger)',
+              padding: '10px 14px',
+              borderRadius: 'var(--r-md)',
+              fontSize: 13,
+              fontWeight: 500,
+              textAlign: 'center',
+            }}>
+              {error}
+            </div>
+          )}
+
+          <div ref={messagesEndRef} />
+        </div>
+
+        {/* Input footer */}
+        <div className="ff-chat-footer">
+          {/* Suggested prompts when chat has messages */}
+          {messages.length > 0 && messages.length < 3 && (
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 10 }}>
+              {SUGGESTED_PROMPTS.slice(0, 3).map((p, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  className="ff-suggested-prompt"
+                  onClick={() => sendMessage(p.text)}
+                  style={{ fontSize: 11.5, padding: '6px 11px' }}
+                >
+                  {p.label}
+                </button>
+              ))}
+            </div>
+          )}
+
+          <div className="ff-chat-input-row">
+            <textarea
+              ref={textareaRef}
+              className="ff-chat-textarea"
+              placeholder="Ask anything about freelancing…"
+              value={input}
+              onChange={(e) => { setInput(e.target.value); autoResize(); }}
+              onKeyDown={handleKeyDown}
+              rows={1}
+              disabled={loading}
+            />
+            <button
+              type="button"
+              className="ff-chat-send"
+              onClick={() => sendMessage()}
+              disabled={loading || !input.trim()}
+              aria-label="Send message"
+            >
+              {loading ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
+            </button>
+          </div>
+          <p className="ff-text-3 mt-2" style={{ fontSize: 11, textAlign: 'center', letterSpacing: '-0.003em' }}>
+            Enter to send, Shift+Enter for new line
+          </p>
+        </div>
       </div>
     </div>
   );
@@ -1526,7 +2096,6 @@ function OptimizeTab() {
     setResult(null); setOptimized(null); setError('');
   }, [pageType, method]);
 
-  // CV mode is file-only — auto-switch method
   useEffect(() => {
     if (pageType === 'cv' && method !== 'image') {
       setMethod('image');
@@ -1538,7 +2107,6 @@ function OptimizeTab() {
     const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
     const isImage = file.type.startsWith('image/');
 
-    // CV mode accepts PDFs in addition to images. Other modes are image-only.
     if (pageType === 'cv') {
       if (!isPdf && !isImage) {
         setError('Upload a PDF or image (PNG, JPG). For Word documents, please export as PDF first.');
@@ -1613,21 +2181,17 @@ function OptimizeTab() {
     return parseJsonResponse(rawText);
   };
 
-  // Defensive JSON extraction — handles partial/wrapped/truncated responses
   const parseJsonResponse = (rawText) => {
     if (!rawText) throw new Error('Empty response from API.');
 
-    // Strip markdown code fences if present
     let text = rawText
       .replace(/^```json\s*/i, '')
       .replace(/^```\s*/i, '')
       .replace(/```\s*$/i, '')
       .trim();
 
-    // Try parsing as-is
     try { return JSON.parse(text); } catch {}
 
-    // Try extracting the largest balanced JSON object in the response
     const firstBrace = text.indexOf('{');
     const lastBrace = text.lastIndexOf('}');
     if (firstBrace !== -1 && lastBrace > firstBrace) {
@@ -1635,18 +2199,14 @@ function OptimizeTab() {
       try { return JSON.parse(candidate); } catch {}
     }
 
-    // Try repairing common issues: trailing commas, unclosed strings
     if (firstBrace !== -1) {
       let attempt = text.substring(firstBrace);
-      // Remove trailing junk after final close brace
       const lastClose = attempt.lastIndexOf('}');
       if (lastClose !== -1) attempt = attempt.substring(0, lastClose + 1);
-      // Strip trailing commas before } or ]
       attempt = attempt.replace(/,(\s*[}\]])/g, '$1');
       try { return JSON.parse(attempt); } catch {}
     }
 
-    // Helpful error if we got here
     const preview = rawText.slice(0, 120).replace(/\s+/g, ' ');
     throw new Error(`Could not parse response. The model returned non-JSON output. Preview: "${preview}..."`);
   };
@@ -2384,7 +2944,6 @@ Return ONLY JSON. No em dashes.`;
 
     try {
       const content = [];
-      // Cover letter mode: attach CV first if present
       if (mode === 'coverletter' && cvFile) {
         if (cvFile.isPdf) {
           content.push({
@@ -2419,7 +2978,6 @@ Return ONLY JSON. No em dashes.`;
       const data = await response.json();
       const rawText = data.content.filter(b => b.type === 'text').map(b => b.text).join('').trim();
 
-      // Defensive JSON parsing with multiple fallback strategies
       let parsed;
       let attemptText = rawText
         .replace(/^```json\s*/i, '')
@@ -2802,9 +3360,7 @@ function loadPipelineFromStorage() {
 function savePipelineToStorage(entries) {
   try {
     localStorage.setItem(PIPELINE_STORAGE_KEY, JSON.stringify(entries));
-  } catch {
-    // Storage might be disabled or full — fail silently
-  }
+  } catch {}
 }
 
 function formatShortDate(dateStr) {
@@ -2856,14 +3412,12 @@ function PipelineTab() {
   const [showActivity, setShowActivity] = useState(false);
   const [activityPeriod, setActivityPeriod] = useState('week');
 
-  // Load entries from storage on mount, applying 15-day expiry
   useEffect(() => {
     const stored = loadPipelineFromStorage();
     setEntries(stored);
     setLoaded(true);
   }, []);
 
-  // Persist whenever entries change (after initial load)
   useEffect(() => {
     if (loaded) savePipelineToStorage(entries);
   }, [entries, loaded]);
@@ -2871,7 +3425,6 @@ function PipelineTab() {
   const addEntry = () => {
     if (!client.trim()) return;
     const now = Date.now();
-    // Use the selected date, but also keep createdAt for retention math
     const dateToUse = entryDate || todayStr();
     setEntries(e => [
       {
@@ -2897,7 +3450,6 @@ function PipelineTab() {
 
   const removeEntry = (id) => setEntries(e => e.filter(x => x.id !== id));
 
-  // Stats
   const stats = {
     total: entries.length,
     sent: entries.filter(e => e.status === 'sent').length,
@@ -2913,7 +3465,6 @@ function PipelineTab() {
     return sum + (isNaN(num) ? 0 : num);
   }, 0);
 
-  // Activity windows
   const computeWindow = (days) => {
     const inWindow = entries.filter(e => isWithinDays(e.date, days));
     const won = inWindow.filter(e => e.status === 'closed_won');
@@ -2935,7 +3486,6 @@ function PipelineTab() {
 
   return (
     <div className="ff-fadeup">
-      {/* HEADER */}
       <div className="flex items-center justify-between mb-8 flex-wrap gap-3">
         <div>
           <h2 className="ff-display ff-text-1" style={{ fontSize: 28, fontWeight: 500, letterSpacing: '-0.018em' }}>
@@ -2951,7 +3501,6 @@ function PipelineTab() {
               className="ff-btn ff-btn-secondary"
               onClick={() => setShowActivity(true)}
               style={{ width: 'auto', padding: '10px 16px' }}
-              aria-label="View activity"
             >
               <TrendingUp size={14} />
               Activity
@@ -2968,7 +3517,6 @@ function PipelineTab() {
         </div>
       </div>
 
-      {/* STATS GRID */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
         <StatCard label="Total Sent" value={stats.total} />
         <StatCard label="Replies" value={`${stats.replied + stats.inTalks + stats.won + stats.lost}`} sub={`${replyRate}% reply rate`} />
@@ -2976,7 +3524,6 @@ function PipelineTab() {
         <StatCard label="Revenue" value={totalValue > 0 ? `$${totalValue.toLocaleString()}` : '—'} sub="from closed deals" />
       </div>
 
-      {/* ADD FORM */}
       {showForm && (
         <div className="ff-card ff-fadeup mb-8" style={{ padding: 20 }}>
           <h3 className="ff-subheading mb-4" style={{ fontSize: 16 }}>New entry</h3>
@@ -2984,7 +3531,7 @@ function PipelineTab() {
             <div>
               <label className="ff-field-label" style={{ display: 'inline-flex', alignItems: 'center' }}>
                 Date sent
-                <Tooltip text="When you actually sent the proposal, DM, or email. Used to track how long ago it was and calculate response time." />
+                <Tooltip text="When you actually sent the proposal, DM, or email." />
               </label>
               <input
                 type="date"
@@ -2998,14 +3545,14 @@ function PipelineTab() {
             <div>
               <label className="ff-field-label" style={{ display: 'inline-flex', alignItems: 'center' }}>
                 Client / Company <span className="ff-text-accent" style={{ marginLeft: 4 }}>*</span>
-                <Tooltip text="Who you sent this to. Used as the entry's name in the table." align="right" />
+                <Tooltip text="Who you sent this to." align="right" />
               </label>
               <input type="text" className="ff-input" placeholder="e.g. Acme Corp" value={client} onChange={e => setClient(e.target.value)} />
             </div>
             <div>
               <label className="ff-field-label" style={{ display: 'inline-flex', alignItems: 'center' }}>
                 Type
-                <Tooltip text="What kind of outreach this was. Helps you filter and see what's working: proposals vs DMs vs emails." align="right" />
+                <Tooltip text="What kind of outreach this was." align="right" />
               </label>
               <select className="ff-input" value={type} onChange={e => setType(e.target.value)} style={{ cursor: 'pointer' }}>
                 {PIPELINE_TYPES.map(t => <option key={t.id} value={t.id}>{t.label}</option>)}
@@ -3014,7 +3561,7 @@ function PipelineTab() {
             <div>
               <label className="ff-field-label" style={{ display: 'inline-flex', alignItems: 'center' }}>
                 Status
-                <Tooltip text="Where this lead is right now. Update it as the conversation progresses to track your reply and win rates." />
+                <Tooltip text="Where this lead is right now." />
               </label>
               <select className="ff-input" value={status} onChange={e => setStatus(e.target.value)} style={{ cursor: 'pointer' }}>
                 {PIPELINE_STATUSES.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}
@@ -3023,7 +3570,7 @@ function PipelineTab() {
             <div>
               <label className="ff-field-label" style={{ display: 'inline-flex', alignItems: 'center' }}>
                 Value <span className="ff-field-hint" style={{ fontWeight: 400, marginLeft: 6 }}>· optional</span>
-                <Tooltip text="Deal size. Numbers from closed-won entries roll up into your total revenue stat." align="right" />
+                <Tooltip text="Deal size." align="right" />
               </label>
               <input type="text" className="ff-input" placeholder="e.g. $5,000 or $2k/mo" value={value} onChange={e => setValue(e.target.value)} />
             </div>
@@ -3045,7 +3592,6 @@ function PipelineTab() {
         </div>
       )}
 
-      {/* ENTRIES LIST */}
       {entries.length === 0 && !showForm && (
         <div className="ff-empty-state">
           <TrendingUp size={28} style={{ color: 'var(--text-3)', display: 'inline-block', marginBottom: 12, opacity: 0.5 }} />
@@ -3064,7 +3610,6 @@ function PipelineTab() {
 
       {entries.length > 0 && (
         <div className="ff-card" style={{ padding: 0 }}>
-          {/* Table header */}
           <div className="grid items-center" style={{
             gridTemplateColumns: '110px 1fr 110px 130px 110px 32px',
             gap: 12,
@@ -3081,7 +3626,6 @@ function PipelineTab() {
             <span className="ff-section-label" style={{ fontSize: 10 }}>Value</span>
             <span></span>
           </div>
-          {/* Rows */}
           {entries.map((entry, i) => (
             <PipelineRow
               key={entry.id}
@@ -3094,7 +3638,6 @@ function PipelineTab() {
         </div>
       )}
 
-      {/* ACTIVITY MODAL */}
       <ActivityModal
         open={showActivity}
         onClose={() => setShowActivity(false)}
@@ -3128,49 +3671,11 @@ function StatCard({ label, value, sub, accent }) {
   );
 }
 
-function ActivityColumn({ label, data }) {
-  const replyRate = data.sent > 0 ? Math.round((data.replied / data.sent) * 100) : 0;
-  return (
-    <div>
-      <p className="ff-section-label mb-3" style={{ fontSize: 10.5 }}>{label}</p>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-        <ActivityStat label="Sent" value={data.sent} />
-        <ActivityStat label="Replied" value={data.replied} sub={data.sent > 0 ? `${replyRate}%` : null} />
-        <ActivityStat label="Won" value={data.won} accent />
-        <ActivityStat label="Revenue" value={data.revenue > 0 ? `$${data.revenue.toLocaleString()}` : '—'} />
-      </div>
-    </div>
-  );
-}
-
-function ActivityStat({ label, value, sub, accent }) {
-  return (
-    <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 8 }}>
-      <span style={{ fontSize: 12, color: 'var(--text-3)' }}>{label}</span>
-      <span style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
-        <span style={{
-          fontFamily: 'var(--font-display)',
-          fontSize: 18,
-          fontWeight: 500,
-          letterSpacing: '-0.018em',
-          color: accent ? 'var(--accent)' : 'var(--text-1)',
-          fontFeatureSettings: "'tnum'",
-        }}>
-          {value}
-        </span>
-        {sub && <span className="ff-text-3" style={{ fontSize: 11 }}>{sub}</span>}
-      </span>
-    </div>
-  );
-}
-
 function ActivityModal({ open, onClose, period, setPeriod, week, month, year }) {
-  // Esc-to-close
   useEffect(() => {
     if (!open) return;
     const handler = (e) => { if (e.key === 'Escape') onClose(); };
     document.addEventListener('keydown', handler);
-    // Lock body scroll while open
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     return () => {
@@ -3188,17 +3693,12 @@ function ActivityModal({ open, onClose, period, setPeriod, week, month, year }) 
   const replyRate = data.sent > 0 ? Math.round((data.replied / data.sent) * 100) : 0;
   const winRate = data.sent > 0 ? Math.round((data.won / data.sent) * 100) : 0;
 
-  // Build bar values from full status breakdown of the period
-  // We need to recompute by status; for now we have aggregate counts but not per-status
-  // so the chart shows the four meaningful counts available
-  const bars = [
+  const chartBars = [
     { label: 'Sent', value: data.sent, color: 'var(--text-2)' },
     { label: 'Replied', value: data.replied, color: 'var(--accent)' },
     { label: 'Won', value: data.won, color: 'var(--success)' },
-    { label: 'Revenue', value: data.revenue, color: 'var(--accent-vivid, var(--accent))', isRevenue: true },
   ];
 
-  const chartBars = bars.filter(b => !b.isRevenue);
   const maxBarValue = Math.max(1, ...chartBars.map(b => b.value));
 
   const periods = [
@@ -3213,65 +3713,35 @@ function ActivityModal({ open, onClose, period, setPeriod, week, month, year }) 
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
       role="dialog"
       aria-modal="true"
-      aria-label="Activity"
     >
       <div className="ff-modal" onClick={(e) => e.stopPropagation()}>
-        {/* Header */}
         <div className="ff-modal-head">
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <TrendingUp size={16} style={{ color: 'var(--accent)' }} />
-            <h2 style={{
-              fontFamily: 'var(--font-display)',
-              fontSize: 20,
-              fontWeight: 500,
-              letterSpacing: '-0.018em',
-              color: 'var(--text-1)',
-              margin: 0,
-            }}>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 500, letterSpacing: '-0.018em', color: 'var(--text-1)', margin: 0 }}>
               Activity
             </h2>
           </div>
-          <button className="ff-modal-close" onClick={onClose} aria-label="Close">
-            <X size={16} />
-          </button>
+          <button className="ff-modal-close" onClick={onClose}><X size={16} /></button>
         </div>
 
-        {/* Body */}
         <div className="ff-modal-body">
-          {/* Period segmented control */}
-          <div
-            role="tablist"
-            aria-label="Activity period"
-            style={{
-              display: 'inline-flex',
-              padding: 3,
-              background: 'var(--bg-elev-2)',
-              borderRadius: 10,
-              marginBottom: 24,
-            }}
-          >
+          <div style={{ display: 'inline-flex', padding: 3, background: 'var(--bg-elev-2)', borderRadius: 10, marginBottom: 24 }}>
             {periods.map(p => {
               const active = p.id === period;
               return (
                 <button
                   key={p.id}
-                  role="tab"
-                  aria-selected={active}
                   onClick={() => setPeriod(p.id)}
                   style={{
-                    appearance: 'none',
-                    border: 'none',
+                    appearance: 'none', border: 'none',
                     background: active ? 'var(--bg-elev-1)' : 'transparent',
                     color: active ? 'var(--text-1)' : 'var(--text-3)',
-                    padding: '7px 16px',
-                    borderRadius: 7,
-                    fontSize: 12.5,
-                    fontWeight: 600,
-                    fontFamily: 'var(--font-text)',
-                    letterSpacing: '-0.005em',
+                    padding: '7px 16px', borderRadius: 7,
+                    fontSize: 12.5, fontWeight: 600, fontFamily: 'var(--font-text)',
                     cursor: 'pointer',
-                    transition: 'background 220ms cubic-bezier(0.16, 1, 0.3, 1), color 220ms ease',
-                    boxShadow: active ? '0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)' : 'none',
+                    transition: 'background 220ms, color 220ms',
+                    boxShadow: active ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
                   }}
                 >
                   {p.label}
@@ -3280,33 +3750,17 @@ function ActivityModal({ open, onClose, period, setPeriod, week, month, year }) 
             })}
           </div>
 
-          {/* Summary stats */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(2, 1fr)',
-            gap: 16,
-            paddingBottom: 24,
-            borderBottom: '1px solid var(--border)',
-            marginBottom: 24,
-          }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16, paddingBottom: 24, borderBottom: '1px solid var(--border)', marginBottom: 24 }}>
             <SummaryStat label="Reply rate" value={`${replyRate}%`} />
             <SummaryStat label="Win rate" value={`${winRate}%`} accent />
             <SummaryStat label="Revenue" value={data.revenue > 0 ? `$${data.revenue.toLocaleString()}` : '—'} />
             <SummaryStat label="Period" value={periodLabels[period]} muted />
           </div>
 
-          {/* Bar chart */}
           <div>
-            <div style={{
-              display: 'flex',
-              alignItems: 'baseline',
-              justifyContent: 'space-between',
-              marginBottom: 18,
-            }}>
+            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 18 }}>
               <span className="ff-section-label" style={{ fontSize: 10.5 }}>Breakdown</span>
-              <span style={{ fontSize: 11.5, color: 'var(--text-3)', fontFeatureSettings: "'tnum'" }}>
-                {data.sent} {data.sent === 1 ? 'entry' : 'entries'}
-              </span>
+              <span style={{ fontSize: 11.5, color: 'var(--text-3)', fontFeatureSettings: "'tnum'" }}>{data.sent} {data.sent === 1 ? 'entry' : 'entries'}</span>
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -3314,64 +3768,23 @@ function ActivityModal({ open, onClose, period, setPeriod, week, month, year }) 
                 const widthPct = data.sent > 0 ? (bar.value / maxBarValue) * 100 : 0;
                 return (
                   <div key={bar.label} style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                    {/* Label column (fixed width for alignment) */}
-                    <div style={{
-                      width: 72,
-                      fontSize: 12.5,
-                      color: 'var(--text-2)',
-                      fontWeight: 500,
-                      letterSpacing: '-0.003em',
-                      flexShrink: 0,
-                      textAlign: 'left',
-                    }}>
-                      {bar.label}
-                    </div>
-
-                    {/* Bar track */}
-                    <div style={{
-                      flex: 1,
-                      height: 26,
-                      background: 'var(--bg-elev-2)',
-                      borderRadius: 7,
-                      overflow: 'hidden',
-                      position: 'relative',
-                    }}>
+                    <div style={{ width: 72, fontSize: 12.5, color: 'var(--text-2)', fontWeight: 500, flexShrink: 0 }}>{bar.label}</div>
+                    <div style={{ flex: 1, height: 26, background: 'var(--bg-elev-2)', borderRadius: 7, overflow: 'hidden' }}>
                       <div
                         key={`${period}-${bar.label}`}
                         style={{
-                          height: '100%',
-                          width: `${widthPct}%`,
-                          background: bar.color,
-                          borderRadius: 7,
+                          height: '100%', width: `${widthPct}%`,
+                          background: bar.color, borderRadius: 7,
                           transformOrigin: 'left center',
                           animation: `ff-bar-grow 620ms cubic-bezier(0.16, 1, 0.3, 1) ${i * 60}ms backwards`,
-                          transition: 'width 480ms cubic-bezier(0.16, 1, 0.3, 1)',
                         }}
                       />
                     </div>
-
-                    {/* Value column (fixed width for alignment) */}
-                    <div style={{
-                      width: 36,
-                      textAlign: 'right',
-                      fontFamily: 'var(--font-display)',
-                      fontSize: 15,
-                      fontWeight: 500,
-                      color: 'var(--text-1)',
-                      letterSpacing: '-0.012em',
-                      fontFeatureSettings: "'tnum'",
-                      flexShrink: 0,
-                    }}>
-                      {bar.value}
-                    </div>
+                    <div style={{ width: 36, textAlign: 'right', fontFamily: 'var(--font-display)', fontSize: 15, fontWeight: 500, color: 'var(--text-1)', flexShrink: 0 }}>{bar.value}</div>
                   </div>
                 );
               })}
             </div>
-
-            <p className="ff-text-3" style={{ fontSize: 11, lineHeight: 1.55, marginTop: 22, fontStyle: 'italic' }}>
-              Counts use the date you marked each entry as sent. Pipeline data is stored locally and clears 15 days after each entry was added.
-            </p>
           </div>
         </div>
       </div>
@@ -3383,16 +3796,7 @@ function SummaryStat({ label, value, accent, muted }) {
   return (
     <div>
       <p className="ff-section-label" style={{ fontSize: 10, marginBottom: 6 }}>{label}</p>
-      <p style={{
-        fontFamily: 'var(--font-display)',
-        fontSize: 22,
-        fontWeight: 500,
-        letterSpacing: '-0.02em',
-        color: accent ? 'var(--accent)' : (muted ? 'var(--text-2)' : 'var(--text-1)'),
-        fontFeatureSettings: "'tnum'",
-        margin: 0,
-        lineHeight: 1.1,
-      }}>
+      <p style={{ fontFamily: 'var(--font-display)', fontSize: 22, fontWeight: 500, letterSpacing: '-0.02em', color: accent ? 'var(--accent)' : (muted ? 'var(--text-2)' : 'var(--text-1)'), margin: 0, lineHeight: 1.1 }}>
         {value}
       </p>
     </div>
@@ -3417,8 +3821,7 @@ function PipelineRow({ entry, onStatusChange, onRemove, delay }) {
       style={{
         display: 'grid',
         gridTemplateColumns: '110px 1fr 110px 130px 110px 32px',
-        gap: 12,
-        padding: '14px 18px',
+        gap: 12, padding: '14px 18px',
         borderBottom: '1px solid var(--border)',
         alignItems: 'center',
         animationDelay: `${delay}ms`,
@@ -3427,22 +3830,14 @@ function PipelineRow({ entry, onStatusChange, onRemove, delay }) {
       }}
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-        <span className="ff-mono" style={{ fontSize: 12, color: 'var(--text-2)', fontWeight: 500 }}>
-          {formatShortDate(entry.date)}
-        </span>
-        <span style={{ fontSize: 11, color: 'var(--text-3)' }}>
-          {daysAgoLabel(entry.date)}
-        </span>
+        <span className="ff-mono" style={{ fontSize: 12, color: 'var(--text-2)', fontWeight: 500 }}>{formatShortDate(entry.date)}</span>
+        <span style={{ fontSize: 11, color: 'var(--text-3)' }}>{daysAgoLabel(entry.date)}</span>
       </div>
       <div style={{ minWidth: 0 }}>
-        <p style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--text-1)', letterSpacing: '-0.005em' }} className="truncate">
-          {entry.client}
-        </p>
+        <p style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--text-1)', letterSpacing: '-0.005em' }} className="truncate">{entry.client}</p>
         {entry.notes && <p className="truncate" style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 2 }}>{entry.notes}</p>}
       </div>
-      <span style={{ fontSize: 12, color: 'var(--text-2)', fontWeight: 500 }}>
-        {type?.label}
-      </span>
+      <span style={{ fontSize: 12, color: 'var(--text-2)', fontWeight: 500 }}>{type?.label}</span>
       <div className="ff-dropdown" ref={ref} style={{ width: '100%' }}>
         <button
           type="button"
@@ -3450,38 +3845,23 @@ function PipelineRow({ entry, onStatusChange, onRemove, delay }) {
           style={{
             background: status?.bg || 'var(--bg-elev-2)',
             color: status?.color || 'var(--text-2)',
-            border: 'none',
-            padding: '4px 10px',
+            border: 'none', padding: '4px 10px',
             borderRadius: 'var(--r-pill)',
-            fontSize: 11,
-            fontWeight: 600,
-            letterSpacing: '0.02em',
-            textTransform: 'uppercase',
-            cursor: 'pointer',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 4,
+            fontSize: 11, fontWeight: 600, letterSpacing: '0.02em', textTransform: 'uppercase',
+            cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 4,
           }}
         >
-          {status?.label}
-          <ChevronDown size={11} />
+          {status?.label}<ChevronDown size={11} />
         </button>
         {statusOpen && (
           <div className="ff-dropdown-menu" style={{ minWidth: 160 }}>
             {PIPELINE_STATUSES.map(s => (
               <button
-                key={s.id}
-                type="button"
+                key={s.id} type="button"
                 className={`ff-dropdown-option ${s.id === entry.status ? 'ff-dropdown-option-active' : ''}`}
                 onClick={() => { onStatusChange(s.id); setStatusOpen(false); }}
               >
-                <span style={{
-                  display: 'inline-block',
-                  width: 8, height: 8,
-                  borderRadius: '50%',
-                  background: s.color,
-                  marginTop: 6,
-                }}></span>
+                <span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: s.color, marginTop: 6 }}></span>
                 <div className="ff-dropdown-option-text">
                   <span className="ff-dropdown-option-label" style={{ fontSize: 13 }}>{s.label}</span>
                 </div>
@@ -3490,23 +3870,10 @@ function PipelineRow({ entry, onStatusChange, onRemove, delay }) {
           </div>
         )}
       </div>
-      <span style={{ fontSize: 13, color: 'var(--text-1)', fontWeight: 500, fontFeatureSettings: "'tnum'" }}>
-        {entry.value || '—'}
-      </span>
+      <span style={{ fontSize: 13, color: 'var(--text-1)', fontWeight: 500, fontFeatureSettings: "'tnum'" }}>{entry.value || '—'}</span>
       <button
         onClick={onRemove}
-        style={{
-          background: 'transparent',
-          border: 'none',
-          color: 'var(--text-3)',
-          cursor: 'pointer',
-          padding: 4,
-          borderRadius: 'var(--r-sm)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          transition: 'all var(--t-fast)',
-        }}
+        style={{ background: 'transparent', border: 'none', color: 'var(--text-3)', cursor: 'pointer', padding: 4, borderRadius: 'var(--r-sm)', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all var(--t-fast)' }}
         onMouseEnter={e => { e.currentTarget.style.color = 'var(--danger)'; e.currentTarget.style.background = 'var(--danger-bg)'; }}
         onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-3)'; e.currentTarget.style.background = 'transparent'; }}
       >
@@ -3590,8 +3957,6 @@ function CloserModeDropdown({ value, onChange }) {
   );
 }
 
-/* SIMPLE DROPDOWNS for Tone and Submission Method */
-
 function ToneDropdown({ value, onChange }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
@@ -3669,18 +4034,10 @@ function MethodDropdown({ value, onChange }) {
 function Tooltip({ text, align = 'center' }) {
   return (
     <span className="ff-tooltip-wrap">
-      <button
-        type="button"
-        className="ff-tooltip-trigger"
-        aria-label="More info"
-        tabIndex={0}
-        onClick={(e) => e.preventDefault()}
-      >
+      <button type="button" className="ff-tooltip-trigger" aria-label="More info" tabIndex={0} onClick={(e) => e.preventDefault()}>
         <HelpCircle size={13} strokeWidth={2.2} />
       </button>
-      <span className={`ff-tooltip-bubble${align === 'right' ? ' ff-tooltip-bubble--right' : ''}`} role="tooltip">
-        {text}
-      </span>
+      <span className={`ff-tooltip-bubble${align === 'right' ? ' ff-tooltip-bubble--right' : ''}`} role="tooltip">{text}</span>
     </span>
   );
 }
@@ -3948,13 +4305,7 @@ function Cell({ label, value, children, wide, accent }) {
     <div className={wide ? 'col-span-2' : ''}>
       <div className="ff-section-label mb-1.5" style={{ fontSize: 10.5 }}>{label}</div>
       {children || (
-        <p style={{
-          fontSize: 13.5,
-          lineHeight: 1.5,
-          color: accent ? 'var(--accent)' : 'var(--text-1)',
-          fontWeight: accent ? 600 : 400,
-          letterSpacing: '-0.005em',
-        }}>
+        <p style={{ fontSize: 13.5, lineHeight: 1.5, color: accent ? 'var(--accent)' : 'var(--text-1)', fontWeight: accent ? 600 : 400, letterSpacing: '-0.005em' }}>
           {value || '...'}
         </p>
       )}
