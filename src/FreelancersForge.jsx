@@ -1760,7 +1760,6 @@ export default function FreelancersForge() {
 /* ====================================================================== */
 
 function formatMessageText(text) {
-  // Basic markdown-like formatting: **bold**, *italic*, newlines
   const lines = text.split('\n');
   return lines.map((line, i) => {
     const parts = line.split(/(\*\*[^*]+\*\*|\*[^*]+\*)/g);
@@ -1830,7 +1829,7 @@ function AskAnythingTab() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
+          model: 'claude-sonnet-4-5',
           max_tokens: 1000,
           system: `You are Forge AI, the expert assistant built into Freelancer's Forge. You specialize in helping freelancers, independent contractors, and solopreneurs with:
 - Positioning, pricing, and niche strategy
@@ -1858,7 +1857,6 @@ You give direct, tactical advice. No fluff. No buzzwords. No "it depends" withou
     } catch (err) {
       console.error('Ask error:', err);
       setError(err.message || 'Something went wrong. Try again.');
-      // Remove the user message if the request failed
       setMessages(prev => prev.slice(0, -1));
     } finally {
       setLoading(false);
@@ -1946,7 +1944,6 @@ You give direct, tactical advice. No fluff. No buzzwords. No "it depends" withou
               <p className="ff-text-3 mb-8" style={{ fontSize: 13.5, lineHeight: 1.55, maxWidth: '36ch' }}>
                 Ask about pricing, niches, client scripts, copy help, or anything freelance.
               </p>
-              {/* Suggested prompts */}
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center', maxWidth: 560 }}>
                 {SUGGESTED_PROMPTS.map((p, i) => (
                   <button
@@ -1988,7 +1985,6 @@ You give direct, tactical advice. No fluff. No buzzwords. No "it depends" withou
             </div>
           ))}
 
-          {/* Typing indicator */}
           {loading && (
             <div className="ff-chat-msg ff-fadein">
               <div className="ff-chat-avatar ff-chat-avatar-ai">
@@ -2004,7 +2000,6 @@ You give direct, tactical advice. No fluff. No buzzwords. No "it depends" withou
             </div>
           )}
 
-          {/* Error */}
           {error && (
             <div className="ff-fadeup" style={{
               background: 'var(--danger-bg)',
@@ -2024,7 +2019,6 @@ You give direct, tactical advice. No fluff. No buzzwords. No "it depends" withou
 
         {/* Input footer */}
         <div className="ff-chat-footer">
-          {/* Suggested prompts when chat has messages */}
           {messages.length > 0 && messages.length < 3 && (
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 10 }}>
               {SUGGESTED_PROMPTS.slice(0, 3).map((p, i) => (
