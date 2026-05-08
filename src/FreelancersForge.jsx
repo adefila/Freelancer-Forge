@@ -542,9 +542,15 @@ const CSS = `
 /* UNDERLINED TABS */
 .ff-tabs {
   display: flex;
-  gap: 4px;
+  gap: 0;
   border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+  overflow-y: visible;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
+.ff-tabs::-webkit-scrollbar { display: none; }
 .ff-tab {
   background: transparent;
   border: none;
@@ -554,14 +560,16 @@ const CSS = `
   font-size: 14px;
   font-weight: 500;
   letter-spacing: -0.01em;
-  padding: 14px 4px;
-  margin-right: 28px;
+  padding: 13px 0;
+  margin-right: 24px;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
   transition: color var(--t-fast), border-color var(--t-fast);
   margin-bottom: -1px;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 .ff-tab:last-child { margin-right: 0; }
 .ff-tab:hover:not(.ff-tab-active) { color: var(--text-1); }
@@ -571,14 +579,17 @@ const CSS = `
   font-weight: 600;
 }
 .ff-tab-badge {
-  font-size: 10px;
-  font-weight: 600;
-  padding: 2px 7px;
+  font-size: 9.5px;
+  font-weight: 700;
+  padding: 2px 6px;
   border-radius: var(--r-pill);
   background-color: var(--accent-bg-soft);
   color: var(--accent);
-  letter-spacing: 0.02em;
-  margin-left: 2px;
+  letter-spacing: 0.03em;
+  margin-left: 1px;
+}
+@media (max-width: 640px) {
+  .ff-tab { font-size: 13px; padding: 12px 0; margin-right: 20px; gap: 6px; }
 }
 
 /* DROPDOWN */
@@ -1392,6 +1403,240 @@ const CSS = `
 *::-webkit-scrollbar-thumb:hover { background: var(--text-3); }
 
 /* ====================================================================== */
+/* LAYOUT — RESPONSIVE CONTAINERS                                         */
+/* ====================================================================== */
+
+.ff-root-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 24px 20px 48px;
+}
+
+.ff-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 32px;
+  gap: 12px;
+}
+
+.ff-hero {
+  margin-bottom: 36px;
+}
+
+.ff-hero-heading {
+  font-size: clamp(32px, 5.6vw, 64px);
+  line-height: 1.06;
+  font-weight: 500;
+  letter-spacing: -0.022em;
+  max-width: 20ch;
+  margin-bottom: 16px;
+}
+
+.ff-hero-sub {
+  font-size: clamp(14px, 1.3vw, 17px);
+  line-height: 1.55;
+  letter-spacing: -0.01em;
+  max-width: 52ch;
+}
+
+.ff-tabs-nav {
+  margin-bottom: 32px;
+}
+
+.ff-cv-selector {
+  margin-bottom: 32px;
+}
+
+.ff-pipeline-topbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.ff-stat-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+@media (max-width: 768px) {
+  .ff-stat-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .ff-pipeline-topbar {
+    margin-bottom: 20px;
+  }
+  .ff-cv-selector {
+    margin-bottom: 24px;
+  }
+}
+
+/* Two-col grid used in tabs */
+.ff-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 32px;
+}
+
+.ff-2col-stack {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px 56px;
+}
+
+.ff-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px 20px;
+}
+
+@media (max-width: 480px) {
+  .ff-detail-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .ff-detail-grid .col-span-2 {
+    grid-column: 1;
+  }
+}
+
+/* Apple-clean refinements */
+.ff-card {
+  border-radius: var(--r-xl);
+}
+
+.ff-empty-state {
+  border-radius: var(--r-xl);
+}
+
+.ff-optimize-cta {
+  border-radius: var(--r-xl);
+}
+
+.ff-chat-bubble-ai {
+  border-radius: var(--r-lg) var(--r-lg) var(--r-lg) 4px;
+}
+
+.ff-chat-bubble-user {
+  border-radius: var(--r-lg) var(--r-lg) 4px var(--r-lg);
+}
+
+/* Tighter form spacing on mobile */
+@media (max-width: 768px) {
+  .space-y-5 > * + * { margin-top: 16px !important; }
+  .space-y-6 > * + * { margin-top: 20px !important; }
+  .ff-textarea { font-size: 14px; }
+  .ff-output-text { font-size: 14px; }
+  .ff-subheading { font-size: 18px; }
+  .ff-dropdown-menu { min-width: min(280px, 90vw); left: 0; right: auto; }
+}
+
+/* Pipeline table */
+.ff-pipeline-table-header {
+  display: grid;
+  grid-template-columns: 100px 1fr 90px 120px 90px 32px;
+  gap: 10px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  background-color: var(--bg-elev-2);
+  border-top-left-radius: var(--r-lg);
+  border-top-right-radius: var(--r-lg);
+}
+
+.ff-pipeline-row-grid {
+  display: grid;
+  grid-template-columns: 100px 1fr 90px 120px 90px 32px;
+  gap: 10px;
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--border);
+  align-items: center;
+}
+
+/* Mobile overrides */
+@media (max-width: 768px) {
+  .ff-root-inner {
+    padding: 20px 16px 40px;
+  }
+
+  .ff-topbar {
+    margin-bottom: 24px;
+  }
+
+  .ff-hero {
+    margin-bottom: 28px;
+  }
+
+  .ff-tabs-nav {
+    margin-bottom: 24px;
+  }
+
+  .ff-2col {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .ff-2col-stack {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+
+  .ff-pipeline-table-header {
+    grid-template-columns: 80px 1fr 100px 28px;
+  }
+
+  .ff-pipeline-row-grid {
+    grid-template-columns: 80px 1fr 100px 28px;
+  }
+
+  .ff-pipeline-col-type,
+  .ff-pipeline-col-value {
+    display: none;
+  }
+
+  .ff-card {
+    padding: 18px 16px;
+  }
+
+  .ff-optimize-cta {
+    padding: 20px 18px;
+  }
+
+  .ff-chat-wrap {
+    height: 520px;
+    border-radius: var(--r-lg);
+  }
+
+  .ff-dropdown-menu {
+    min-width: 260px;
+  }
+}
+
+@media (max-width: 480px) {
+  .ff-hero-heading {
+    font-size: 28px;
+  }
+
+  .ff-2col-stack {
+    gap: 28px;
+  }
+
+  .ff-chat-wrap {
+    height: 460px;
+  }
+
+  .ff-modal {
+    border-radius: 16px;
+  }
+}
+
+/* ====================================================================== */
 /* ASK ANYTHING — CHAT STYLES                                             */
 /* ====================================================================== */
 
@@ -1662,10 +1907,10 @@ export default function FreelancersForge() {
       <style>{CSS}</style>
 
       <div className="ff-gradient-bg" aria-hidden="true"></div>
-      <div className="max-w-7xl mx-auto px-6 md:px-10 py-8 md:py-12" style={{ position: 'relative', zIndex: 1 }}>
+      <div className="ff-root-inner" style={{ position: 'relative', zIndex: 1 }}>
 
         {/* HEADER */}
-        <div className="flex items-center justify-between mb-12 gap-4">
+        <div className="ff-topbar">
           <div className="flex items-center gap-3">
             <span className="ff-status-dot"></span>
             <span className="ff-meta-text">Freelancer's Forge</span>
@@ -1681,35 +1926,18 @@ export default function FreelancersForge() {
         </div>
 
         {/* TITLE */}
-        <div className="mb-12 md:mb-16">
-          <h1
-            className="ff-display ff-text-1 mb-5"
-            style={{
-              fontSize: 'clamp(40px, 5.6vw, 64px)',
-              lineHeight: 1.06,
-              fontWeight: 500,
-              letterSpacing: '-0.022em',
-              maxWidth: '20ch',
-            }}
-          >
+        <div className="ff-hero">
+          <h1 className="ff-display ff-text-1 ff-hero-heading">
             Audit any page. Rewrite it like{' '}
             <span style={{ color: 'var(--accent)', fontStyle: 'italic', fontWeight: 500 }}>the top one percent.</span>
           </h1>
-          <p
-            className="ff-text-2"
-            style={{
-              fontSize: 'clamp(15px, 1.3vw, 18px)',
-              lineHeight: 1.55,
-              letterSpacing: '-0.01em',
-              maxWidth: '52ch',
-            }}
-          >
+          <p className="ff-text-2 ff-hero-sub">
             Score against expert criteria, then one-click rewrite using the patterns of top performers.
           </p>
         </div>
 
         {/* TABS */}
-        <div className="ff-tabs mb-10">
+        <div className="ff-tabs ff-tabs-nav">
           <button
             type="button"
             className={`ff-tab ${tab === 'optimize' ? 'ff-tab-active' : ''}`}
@@ -2373,7 +2601,7 @@ Return ONLY JSON. No em dashes.`;
 
   return (
     <>
-      <div className={pageType === 'cv' ? 'mb-10' : 'grid md:grid-cols-2 gap-6 mb-10'}>
+      <div className={pageType === 'cv' ? 'ff-cv-selector' : 'ff-2col'}>
         <div>
           <label className="ff-section-label mb-3" style={{ display: 'inline-flex', alignItems: 'center' }}>
             Page Type
@@ -2396,7 +2624,7 @@ Return ONLY JSON. No em dashes.`;
         )}
       </div>
 
-      <div className="grid md:grid-cols-2 gap-10 md:gap-14">
+      <div className="ff-2col-stack">
         <div>
           <h2 className="ff-section-label mb-5">The Page</h2>
 
@@ -3012,7 +3240,7 @@ Return ONLY JSON. No em dashes.`;
 
   return (
     <>
-      <div className="grid md:grid-cols-2 gap-6 mb-10">
+      <div className="ff-2col">
         <div>
           <label className="ff-section-label mb-3" style={{ display: 'inline-flex', alignItems: 'center' }}>
             Mode
@@ -3031,7 +3259,7 @@ Return ONLY JSON. No em dashes.`;
         </div>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-10 md:gap-14">
+      <div className="ff-2col-stack">
         <div>
           <h2 className="ff-section-label mb-5">The Input</h2>
 
@@ -3401,7 +3629,7 @@ function PipelineTab() {
 
   return (
     <div className="ff-fadeup">
-      <div className="flex items-center justify-between mb-8 flex-wrap gap-3">
+      <div className="ff-pipeline-topbar">
         <div>
           <h2 className="ff-display ff-text-1" style={{ fontSize: 28, fontWeight: 500, letterSpacing: '-0.018em' }}>
             Your pipeline
@@ -3432,7 +3660,7 @@ function PipelineTab() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
+      <div className="ff-stat-cards">
         <StatCard label="Total Sent" value={stats.total} />
         <StatCard label="Replies" value={`${stats.replied + stats.inTalks + stats.won + stats.lost}`} sub={`${replyRate}% reply rate`} />
         <StatCard label="Closed Won" value={stats.won} sub={winRate > 0 ? `${winRate}% win rate` : null} accent />
@@ -3442,7 +3670,7 @@ function PipelineTab() {
       {showForm && (
         <div className="ff-card ff-fadeup mb-8" style={{ padding: 20 }}>
           <h3 className="ff-subheading mb-4" style={{ fontSize: 16 }}>New entry</h3>
-          <div className="grid md:grid-cols-2 gap-4">
+          <div className="ff-2col">
             <div>
               <label className="ff-field-label" style={{ display: 'inline-flex', alignItems: 'center' }}>
                 Date sent
@@ -3525,20 +3753,12 @@ function PipelineTab() {
 
       {entries.length > 0 && (
         <div className="ff-card" style={{ padding: 0 }}>
-          <div className="grid items-center" style={{
-            gridTemplateColumns: '110px 1fr 110px 130px 110px 32px',
-            gap: 12,
-            padding: '12px 18px',
-            borderBottom: '1px solid var(--border)',
-            backgroundColor: 'var(--bg-elev-2)',
-            borderTopLeftRadius: 'var(--r-lg)',
-            borderTopRightRadius: 'var(--r-lg)',
-          }}>
+          <div className="ff-pipeline-table-header">
             <span className="ff-section-label" style={{ fontSize: 10 }}>Date</span>
             <span className="ff-section-label" style={{ fontSize: 10 }}>Client</span>
-            <span className="ff-section-label" style={{ fontSize: 10 }}>Type</span>
+            <span className="ff-section-label ff-pipeline-col-type" style={{ fontSize: 10 }}>Type</span>
             <span className="ff-section-label" style={{ fontSize: 10 }}>Status</span>
-            <span className="ff-section-label" style={{ fontSize: 10 }}>Value</span>
+            <span className="ff-section-label ff-pipeline-col-value" style={{ fontSize: 10 }}>Value</span>
             <span></span>
           </div>
           {entries.map((entry, i) => (
@@ -3732,11 +3952,8 @@ function PipelineRow({ entry, onStatusChange, onRemove, delay }) {
 
   return (
     <div
-      className="ff-fadein"
+      className="ff-fadein ff-pipeline-row-grid"
       style={{
-        display: 'grid',
-        gridTemplateColumns: '110px 1fr 110px 130px 110px 32px',
-        gap: 12, padding: '14px 18px',
         borderBottom: '1px solid var(--border)',
         alignItems: 'center',
         animationDelay: `${delay}ms`,
@@ -3752,7 +3969,7 @@ function PipelineRow({ entry, onStatusChange, onRemove, delay }) {
         <p style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--text-1)', letterSpacing: '-0.005em' }} className="truncate">{entry.client}</p>
         {entry.notes && <p className="truncate" style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 2 }}>{entry.notes}</p>}
       </div>
-      <span style={{ fontSize: 12, color: 'var(--text-2)', fontWeight: 500 }}>{type?.label}</span>
+      <span className="ff-pipeline-col-type" style={{ fontSize: 12, color: 'var(--text-2)', fontWeight: 500 }}>{type?.label}</span>
       <div className="ff-dropdown" ref={ref} style={{ width: '100%' }}>
         <button
           type="button"
@@ -3785,7 +4002,7 @@ function PipelineRow({ entry, onStatusChange, onRemove, delay }) {
           </div>
         )}
       </div>
-      <span style={{ fontSize: 13, color: 'var(--text-1)', fontWeight: 500, fontFeatureSettings: "'tnum'" }}>{entry.value || '—'}</span>
+      <span className="ff-pipeline-col-value" style={{ fontSize: 13, color: 'var(--text-1)', fontWeight: 500, fontFeatureSettings: "'tnum'" }}>{entry.value || '—'}</span>
       <button
         onClick={onRemove}
         style={{ background: 'transparent', border: 'none', color: 'var(--text-3)', cursor: 'pointer', padding: 4, borderRadius: 'var(--r-sm)', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all var(--t-fast)' }}
@@ -3996,7 +4213,7 @@ function ProposalOutput({ result, pillClass, portfolio, copied, copyText, select
     <div className="space-y-6">
       <div className="ff-fadeup ff-card">
         <h3 className="ff-subheading mb-4">Breakdown</h3>
-        <div className="grid grid-cols-2 gap-x-5 gap-y-4">
+        <div className="ff-detail-grid">
           <Cell label="Client Type" value={result.extraction?.clientType} />
           <Cell label="Project Type" value={result.extraction?.projectType} accent />
           <Cell label="Tone" value={result.extraction?.tone} wide />
@@ -4148,7 +4365,7 @@ function CoverLetterOutput({ result, copied, copyText, selectAllText }) {
       {result.extraction && (
         <div className="ff-fadeup ff-card">
           <h3 className="ff-subheading mb-4">Read of the role</h3>
-          <div className="grid grid-cols-2 gap-x-5 gap-y-4">
+          <div className="ff-detail-grid">
             <Cell label="Target role" value={result.extraction.targetRole} accent />
             <Cell label="Company" value={result.extraction.company} />
             <Cell label="Their top need" value={result.extraction.topNeed} wide />
