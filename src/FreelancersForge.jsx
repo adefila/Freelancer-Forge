@@ -1613,10 +1613,6 @@ const CSS = `
     padding: 20px 18px;
   }
 
-  .ff-chat-wrap {
-    height: 520px;
-    border-radius: var(--r-lg);
-  }
 
   .ff-dropdown-menu {
     min-width: 260px;
@@ -1632,9 +1628,6 @@ const CSS = `
     gap: 28px;
   }
 
-  .ff-chat-wrap {
-    height: 460px;
-  }
 
   .ff-modal {
     border-radius: 16px;
@@ -1642,384 +1635,277 @@ const CSS = `
 }
 
 /* ====================================================================== */
-/* ASK ANYTHING — CHAT STYLES                                             */
+/* ASK ANYTHING — SIDEBAR + CHAT LAYOUT                                  */
 /* ====================================================================== */
 
-.ff-chat-wrap {
-  display: flex;
-  flex-direction: column;
-  height: 640px;
-  max-height: 80vh;
+.ff-ask-layout {
+  display: grid;
+  grid-template-columns: 210px 1fr;
   border: 1px solid var(--border);
   border-radius: var(--r-xl);
   overflow: hidden;
-  background: var(--bg-elev-1);
+  height: 560px;
+  background: var(--bg);
   box-shadow: var(--sh-2);
 }
 
-.ff-chat-messages {
-  flex: 1;
-  overflow-y: auto;
-  padding: 24px;
+.ff-chat-sidebar {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  border-right: 1px solid var(--border);
+  background: var(--bg-elev-1);
+  overflow: hidden;
 }
 
-.ff-chat-msg {
-  display: flex;
-  gap: 12px;
-  animation: ff-fadeup 380ms cubic-bezier(0.16, 1, 0.3, 1) backwards;
-}
-
-.ff-chat-msg-user {
-  flex-direction: row-reverse;
-}
-
-.ff-chat-avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: var(--r-pill);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  font-size: 13px;
-  font-weight: 700;
-}
-
-.ff-chat-avatar-ai {
-  background: var(--accent-bg-soft);
-  border: 1px solid var(--accent-border-soft);
-  color: var(--accent);
-}
-
-.ff-chat-avatar-user {
-  background: var(--accent);
-  color: var(--accent-text-on);
-}
-
-.ff-chat-bubble {
-  max-width: min(560px, 80%);
-  padding: 13px 16px;
-  border-radius: var(--r-lg);
-  font-size: 14.5px;
-  line-height: 1.65;
-  letter-spacing: -0.005em;
-}
-
-.ff-chat-bubble-ai {
-  background: var(--bg);
-  border: 1px solid var(--border);
-  color: var(--text-1);
-  border-bottom-left-radius: var(--r-sm);
-  box-shadow: var(--sh-1);
-}
-
-.ff-chat-bubble-user {
-  background: var(--accent);
-  color: var(--accent-text-on);
-  border-bottom-right-radius: var(--r-sm);
-}
-
-.ff-chat-bubble pre,
-.ff-chat-bubble code {
-  font-family: var(--font-mono);
-  font-size: 13px;
-  background: var(--bg-elev-2);
-  padding: 2px 6px;
-  border-radius: var(--r-sm);
-}
-
-.ff-chat-bubble-ai pre {
-  padding: 12px 14px;
-  border-radius: var(--r-md);
-  overflow-x: auto;
-  margin: 8px 0;
-  white-space: pre-wrap;
-  word-break: break-word;
-}
-
-.ff-chat-typing {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  padding: 4px 0;
-}
-
-.ff-chat-typing span {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--accent);
-  animation: ff-typing-bounce 1.2s ease-in-out infinite;
-}
-.ff-chat-typing span:nth-child(2) { animation-delay: 0.15s; }
-.ff-chat-typing span:nth-child(3) { animation-delay: 0.3s; }
-
-@keyframes ff-typing-bounce {
-  0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
-  30% { transform: translateY(-5px); opacity: 1; }
-}
-
-.ff-chat-footer {
-  padding: 12px 16px 14px;
-  border-top: 1px solid var(--border);
-  background: var(--bg);
-}
-
-/* Unified input container — ChatGPT/Claude style */
-.ff-chat-input-box {
-  background: var(--bg-input);
-  border: 1px solid var(--border-strong);
-  border-radius: 16px;
-  transition: border-color var(--t-fast), box-shadow var(--t-fast);
-  position: relative;
-}
-
-.ff-chat-input-box:focus-within {
-  border-color: var(--border-strong);
-  box-shadow: 0 0 0 3px rgba(0,0,0,0.04);
-}
-
-.ff-root.dark .ff-chat-input-box:focus-within {
-  box-shadow: 0 0 0 3px rgba(255,255,255,0.05);
-}
-
-.ff-chat-textarea {
-  display: block;
-  width: 100%;
-  background: transparent;
-  border: none;
-  color: var(--text-1);
-  font-family: var(--font-text);
-  font-size: 16px;
-  line-height: 1.5;
-  padding: 14px 16px 0;
-  resize: none;
-  outline: none;
-  letter-spacing: -0.005em;
-  max-height: 160px;
-  overflow-y: auto;
-  min-height: 28px;
-}
-@media (min-width: 768px) {
-  .ff-chat-textarea { font-size: 15px; }
-}
-
-.ff-chat-textarea::placeholder { color: var(--text-3); }
-
-/* Bottom bar with attach + send */
-.ff-chat-input-actions {
+.ff-chat-sidebar-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 10px 10px;
+  padding: 12px 12px 9px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
 }
 
-.ff-chat-attach-btn {
-  width: 32px;
-  height: 32px;
-  background: transparent;
-  border: none;
-  border-radius: 8px;
+.ff-chat-sidebar-title {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
   color: var(--text-3);
+  font-family: var(--font-text);
+}
+
+.ff-chat-new-btn {
+  width: 24px; height: 24px;
+  background: var(--accent-bg-soft);
+  border: 1px solid var(--accent-border-soft);
+  border-radius: 7px;
+  color: var(--accent);
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
   transition: all var(--t-fast);
-}
-
-.ff-chat-attach-btn:hover {
-  background: var(--bg-elev-2);
-  color: var(--text-1);
-}
-
-.ff-chat-send {
-  width: 32px;
-  height: 32px;
-  background: var(--text-1);
-  border: none;
-  border-radius: 8px;
-  color: var(--bg);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   flex-shrink: 0;
-  transition: background var(--t-fast), transform var(--t-fast), opacity var(--t-fast);
+}
+.ff-chat-new-btn:hover { background: var(--accent); color: var(--accent-text-on); border-color: var(--accent); }
+
+.ff-chat-sidebar-list {
+  flex: 1; overflow-y: auto; padding: 5px;
 }
 
-.ff-chat-send:hover:not(:disabled) {
-  background: var(--text-2);
-  transform: scale(1.05);
+.ff-chat-sidebar-item {
+  width: 100%; background: transparent; border: none;
+  border-radius: 8px; padding: 8px 9px; text-align: left;
+  cursor: pointer; transition: background var(--t-fast);
+  display: flex; flex-direction: column; gap: 2px; margin-bottom: 1px;
+}
+.ff-chat-sidebar-item:hover { background: var(--bg-elev-2); }
+.ff-chat-sidebar-item-active { background: var(--accent-bg-soft) !important; }
+
+.ff-chat-sidebar-item-title {
+  font-size: 12px; font-weight: 600; color: var(--text-1);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  letter-spacing: -0.005em; font-family: var(--font-text);
+}
+.ff-chat-sidebar-item-active .ff-chat-sidebar-item-title { color: var(--accent); }
+
+.ff-chat-sidebar-item-meta {
+  font-size: 10.5px; color: var(--text-3);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  font-family: var(--font-text);
+}
+.ff-chat-sidebar-item-active .ff-chat-sidebar-item-meta { color: var(--accent); opacity: 0.65; }
+
+.ff-chat-sidebar-empty {
+  padding: 20px 10px; text-align: center;
+  color: var(--text-3); font-size: 11.5px; line-height: 1.5;
+  font-family: var(--font-text);
 }
 
-.ff-chat-send:active:not(:disabled) {
-  transform: scale(0.95);
+.ff-chat-pane {
+  display: flex; flex-direction: column; overflow: hidden; min-width: 0;
 }
 
-.ff-chat-send:disabled {
-  opacity: 0.2;
-  cursor: not-allowed;
-}
+.ff-chat-wrap { display: contents; }
 
-.ff-root.dark .ff-chat-send {
-  background: var(--text-1);
-  color: var(--bg);
+.ff-chat-messages {
+  flex: 1; overflow-y: auto;
+  padding: 18px 18px 10px;
+  display: flex; flex-direction: column; gap: 14px;
 }
 
 .ff-chat-empty {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 40px 24px;
-  text-align: center;
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 20px 20px; text-align: center;
 }
 
-.ff-suggested-prompt {
-  background: var(--bg);
-  border: 1px solid var(--border);
-  color: var(--text-1);
-  font-family: var(--font-text);
-  font-size: 12.5px;
-  font-weight: 500;
-  padding: 9px 14px;
-  border-radius: var(--r-pill);
-  cursor: pointer;
-  letter-spacing: -0.005em;
-  transition: all var(--t-fast);
-  white-space: nowrap;
+.ff-chat-msg {
+  display: flex; gap: 9px;
+  animation: ff-fadeup 360ms cubic-bezier(0.16, 1, 0.3, 1) backwards;
 }
+.ff-chat-msg-user { flex-direction: row-reverse; }
 
-.ff-suggested-prompt:hover {
-  border-color: var(--accent);
-  color: var(--accent);
+.ff-chat-avatar {
+  width: 27px; height: 27px; border-radius: var(--r-pill);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; font-size: 10.5px; font-weight: 700;
+}
+.ff-chat-avatar-ai {
   background: var(--accent-bg-soft);
-  transform: translateY(-1px);
+  border: 1px solid var(--accent-border-soft); color: var(--accent);
+}
+.ff-chat-avatar-user { background: var(--accent); color: var(--accent-text-on); }
+
+.ff-chat-bubble {
+  max-width: min(440px, 78%); padding: 9px 12px;
+  border-radius: var(--r-lg); font-size: 13.5px; line-height: 1.6;
+  letter-spacing: -0.005em;
+}
+.ff-chat-bubble-ai {
+  background: var(--bg); border: 1px solid var(--border);
+  color: var(--text-1); border-bottom-left-radius: 4px; box-shadow: var(--sh-1);
+}
+.ff-chat-bubble-user {
+  background: var(--accent); color: var(--accent-text-on); border-bottom-right-radius: 4px;
+}
+.ff-chat-bubble pre, .ff-chat-bubble code {
+  font-family: var(--font-mono); font-size: 12px;
+  background: var(--bg-elev-2); padding: 2px 5px; border-radius: var(--r-sm);
+}
+.ff-chat-bubble-ai pre {
+  padding: 9px 11px; border-radius: var(--r-md); overflow-x: auto;
+  margin: 6px 0; white-space: pre-wrap; word-break: break-word;
+}
+
+.ff-chat-typing { display: flex; align-items: center; gap: 4px; padding: 2px 0; }
+.ff-chat-typing span {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--accent); animation: ff-typing-bounce 1.2s ease-in-out infinite;
+}
+.ff-chat-typing span:nth-child(2) { animation-delay: 0.15s; }
+.ff-chat-typing span:nth-child(3) { animation-delay: 0.3s; }
+@keyframes ff-typing-bounce {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
+  30% { transform: translateY(-4px); opacity: 1; }
 }
 
 .ff-chat-copy-btn {
-  background: transparent;
-  border: none;
-  color: var(--text-3);
-  cursor: pointer;
-  padding: 4px 6px;
-  border-radius: var(--r-sm);
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 11px;
-  font-family: var(--font-text);
-  font-weight: 500;
-  transition: all var(--t-fast);
-  margin-top: 8px;
+  background: transparent; border: none; color: var(--text-3); cursor: pointer;
+  padding: 3px 5px; border-radius: var(--r-sm);
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 10.5px; font-family: var(--font-text); font-weight: 500;
+  transition: all var(--t-fast); margin-top: 4px;
+}
+.ff-chat-copy-btn:hover { color: var(--text-1); background: var(--bg-elev-2); }
+
+.ff-chat-bubble-text { white-space: pre-wrap; }
+.ff-chat-bubble-text strong { font-weight: 700; }
+.ff-chat-bubble-text em { font-style: italic; }
+
+.ff-suggested-prompt {
+  background: var(--bg); border: 1px solid var(--border); color: var(--text-1);
+  font-family: var(--font-text); font-size: 11.5px; font-weight: 500;
+  padding: 6px 12px; border-radius: var(--r-pill); cursor: pointer;
+  letter-spacing: -0.005em; transition: all var(--t-fast); white-space: nowrap;
+}
+.ff-suggested-prompt:hover {
+  border-color: var(--accent); color: var(--accent);
+  background: var(--accent-bg-soft); transform: translateY(-1px);
 }
 
-.ff-chat-copy-btn:hover {
-  color: var(--text-1);
-  background: var(--bg-elev-2);
+.ff-chat-footer {
+  padding: 9px 12px 11px; border-top: 1px solid var(--border);
+  background: var(--bg); flex-shrink: 0;
 }
 
-.ff-chat-bubble-text {
-  white-space: pre-wrap;
+.ff-chat-input-box {
+  background: var(--bg-input); border: 1px solid var(--border-strong);
+  border-radius: 13px; transition: border-color var(--t-fast), box-shadow var(--t-fast);
+}
+.ff-chat-input-box:focus-within {
+  border-color: rgba(0,0,0,0.18); box-shadow: 0 0 0 3px rgba(0,0,0,0.04);
+}
+.ff-root.dark .ff-chat-input-box:focus-within {
+  border-color: rgba(255,255,255,0.18); box-shadow: 0 0 0 3px rgba(255,255,255,0.05);
 }
 
-.ff-chat-bubble-text strong {
-  font-weight: 700;
+.ff-chat-textarea {
+  display: block; width: 100%; background: transparent; border: none;
+  color: var(--text-1); font-family: var(--font-text); font-size: 16px;
+  line-height: 1.5; padding: 11px 13px 0; resize: none; outline: none;
+  letter-spacing: -0.005em; max-height: 110px; overflow-y: auto; min-height: 24px;
 }
+@media (min-width: 768px) { .ff-chat-textarea { font-size: 14px; } }
+.ff-chat-textarea::placeholder { color: var(--text-3); }
 
-.ff-chat-bubble-text em {
-  font-style: italic;
+.ff-chat-input-actions {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 5px 7px 7px;
 }
-
-/* ====================================================================== */
-/* CHAT ATTACHMENT STYLES                                                 */
-/* ====================================================================== */
 
 .ff-chat-attach-btn {
-  width: 38px;
-  height: 38px;
-  background: var(--bg-elev-1);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--r-md);
-  color: var(--text-2);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  transition: all var(--t-fast);
+  width: 27px; height: 27px; background: transparent; border: none;
+  border-radius: 7px; color: var(--text-3); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: all var(--t-fast);
 }
-.ff-chat-attach-btn:hover {
-  border-color: var(--accent);
-  color: var(--accent);
-  background: var(--accent-bg-soft);
+.ff-chat-attach-btn:hover { background: var(--bg-elev-2); color: var(--text-1); }
+
+.ff-chat-send {
+  width: 27px; height: 27px; background: var(--text-1); border: none;
+  border-radius: 7px; color: var(--bg); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: background var(--t-fast), transform var(--t-fast), opacity var(--t-fast);
 }
-.ff-chat-attachment-preview {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 10px;
-  background: var(--bg-elev-1);
-  border: 1px solid var(--border);
-  border-radius: var(--r-md);
-  margin-bottom: 8px;
-  font-size: 12px;
-  color: var(--text-2);
+.ff-chat-send:hover:not(:disabled) { background: var(--text-2); transform: scale(1.05); }
+.ff-chat-send:active:not(:disabled) { transform: scale(0.95); }
+.ff-chat-send:disabled { opacity: 0.2; cursor: not-allowed; }
+.ff-root.dark .ff-chat-send { background: var(--text-1); color: var(--bg); }
+
+/* Mobile: sidebar collapses to overlay */
+.ff-chat-sidebar-toggle {
+  display: none;
+  align-items: center; gap: 6px;
+  background: transparent; border: none;
+  color: var(--text-3); font-size: 11.5px; font-weight: 600;
+  font-family: var(--font-text); cursor: pointer; padding: 4px 0;
+  letter-spacing: 0.01em; transition: color var(--t-fast);
 }
-.ff-chat-attachment-preview img {
-  width: 36px;
-  height: 36px;
-  object-fit: cover;
-  border-radius: 4px;
-  flex-shrink: 0;
+.ff-chat-sidebar-toggle:hover { color: var(--text-1); }
+
+@media (max-width: 768px) {
+  .ff-ask-layout { grid-template-columns: 1fr; height: 520px; position: relative; }
+  .ff-chat-sidebar {
+    display: none; position: absolute; left: 0; top: 0; bottom: 0;
+    width: 230px; z-index: 30;
+    box-shadow: var(--sh-3); border-radius: 0 var(--r-lg) var(--r-lg) 0;
+  }
+  .ff-chat-sidebar.open { display: flex; }
+  .ff-chat-sidebar-toggle { display: flex; }
+  .ff-chat-messages { padding: 14px 13px 8px; gap: 12px; }
 }
+
+@media (max-width: 480px) {
+  .ff-ask-layout { height: 480px; border-radius: var(--r-lg); }
+}
+
 .ff-chat-attachment-preview-icon {
-  width: 36px;
-  height: 36px;
-  background: var(--accent-bg-soft);
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  color: var(--accent);
+  width: 30px; height: 30px; background: var(--accent-bg-soft); border-radius: 5px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; color: var(--accent);
 }
 .ff-chat-attachment-name {
-  flex: 1;
-  min-width: 0;
-  font-weight: 500;
-  color: var(--text-1);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  flex: 1; min-width: 0; font-weight: 500; color: var(--text-1);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 11.5px;
 }
 .ff-chat-user-attachment {
-  max-width: 200px;
-  border-radius: var(--r-md);
-  overflow: hidden;
-  margin-bottom: 6px;
+  max-width: 170px; border-radius: var(--r-md); overflow: hidden; margin-bottom: 5px;
 }
-.ff-chat-user-attachment img {
-  width: 100%;
-  display: block;
-  border-radius: var(--r-md);
-}
+.ff-chat-user-attachment img { width: 100%; display: block; border-radius: var(--r-md); }
 .ff-chat-user-attachment-file {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  background: rgba(255,255,255,0.15);
-  border-radius: var(--r-md);
-  font-size: 12px;
-  font-weight: 500;
-  margin-bottom: 6px;
+  display: flex; align-items: center; gap: 7px; padding: 6px 9px;
+  background: rgba(255,255,255,0.15); border-radius: var(--r-md);
+  font-size: 11px; font-weight: 500; margin-bottom: 5px;
 }
 
 `;
@@ -2135,60 +2021,113 @@ function formatMessageText(text) {
 }
 
 
-const CHAT_STORAGE_KEY = 'ff_chat_v1';
+const CHAT_STORAGE_KEY = 'ff_chat_v2';
 const CHAT_RETENTION_DAYS = 15;
 
-function loadChatFromStorage() {
+function genId() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+}
+
+function loadConversations() {
   try {
     const raw = localStorage.getItem(CHAT_STORAGE_KEY);
     if (!raw) return [];
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
     const cutoff = Date.now() - CHAT_RETENTION_DAYS * 24 * 60 * 60 * 1000;
-    return parsed.filter(m => {
-      if (!m || !m.role || !m.content) return false;
-      // Keep messages that have no ts (legacy) or are within retention window
-      return !m.ts || m.ts >= cutoff;
-    });
+    return parsed
+      .filter(c => c && c.id && Array.isArray(c.messages))
+      .map(c => ({
+        ...c,
+        messages: c.messages.filter(m => m && m.role && m.content && (!m.ts || m.ts >= cutoff)),
+      }))
+      .filter(c => c.messages.length > 0);
   } catch { return []; }
 }
 
-function saveChatToStorage(messages) {
+function saveConversations(convos) {
   try {
-    // Strip base64 attachment data before saving — keep preview URL and name only
-    const slim = messages.map(m => ({
-      ...m,
-      attachment: m.attachment ? { type: m.attachment.type, name: m.attachment.name, preview: null } : null,
+    const slim = convos.map(c => ({
+      ...c,
+      messages: c.messages.map(m => ({
+        ...m,
+        attachment: m.attachment ? { type: m.attachment.type, name: m.attachment.name, preview: null } : null,
+      })),
     }));
     localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(slim));
   } catch {}
 }
 
+function getConvoTitle(messages) {
+  const first = messages.find(m => m.role === 'user');
+  if (!first) return 'New conversation';
+  const text = first.content || '';
+  return text.length > 36 ? text.slice(0, 36).trimEnd() + '…' : text;
+}
+
+function timeAgo(ts) {
+  if (!ts) return '';
+  const diff = Math.floor((Date.now() - ts) / 1000);
+  if (diff < 60) return 'just now';
+  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+  return `${Math.floor(diff / 86400)}d ago`;
+}
+
 function AskAnythingTab() {
-  const [messages, setMessages] = useState(() => loadChatFromStorage());
+  const [convos, setConvos] = useState(() => loadConversations());
+  const [activeId, setActiveId] = useState(() => {
+    const loaded = loadConversations();
+    return loaded.length > 0 ? loaded[0].id : null;
+  });
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [copiedIdx, setCopiedIdx] = useState(null);
   const [attachment, setAttachment] = useState(null);
-  const isRestoredSession = useRef(loadChatFromStorage().length > 0);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
   const fileInputRef = useRef(null);
+
+  const messages = convos.find(c => c.id === activeId)?.messages || [];
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, loading]);
 
   useEffect(() => {
-    saveChatToStorage(messages);
-  }, [messages]);
+    saveConversations(convos);
+  }, [convos]);
+
+  const updateMessages = (id, updater) => {
+    setConvos(prev => prev.map(c => c.id === id ? { ...c, messages: updater(c.messages), updatedAt: Date.now() } : c));
+  };
+
+  const startNewChat = () => {
+    const id = genId();
+    setConvos(prev => [{ id, messages: [], createdAt: Date.now(), updatedAt: Date.now() }, ...prev]);
+    setActiveId(id);
+    setInput('');
+    setAttachment(null);
+    setError('');
+    setSidebarOpen(false);
+  };
+
+  const deleteConvo = (id, e) => {
+    e.stopPropagation();
+    setConvos(prev => {
+      const next = prev.filter(c => c.id !== id);
+      if (activeId === id) setActiveId(next.length > 0 ? next[0].id : null);
+      return next;
+    });
+  };
 
   const autoResize = () => {
     const ta = textareaRef.current;
     if (!ta) return;
     ta.style.height = 'auto';
-    ta.style.height = Math.min(ta.scrollHeight, 140) + 'px';
+    ta.style.height = Math.min(ta.scrollHeight, 110) + 'px';
   };
 
   const handleAttachFile = (file) => {
@@ -2200,13 +2139,7 @@ function AskAnythingTab() {
     const reader = new FileReader();
     reader.onload = (e) => {
       const dataUrl = e.target.result;
-      setAttachment({
-        type: isImage ? 'image' : (isPdf ? 'pdf' : 'file'),
-        data: dataUrl.split(',')[1],
-        mediaType: isPdf ? 'application/pdf' : file.type,
-        name: file.name,
-        preview: isImage ? dataUrl : null,
-      });
+      setAttachment({ type: isImage ? 'image' : (isPdf ? 'pdf' : 'file'), data: dataUrl.split(',')[1], mediaType: isPdf ? 'application/pdf' : file.type, name: file.name, preview: isImage ? dataUrl : null });
     };
     reader.readAsDataURL(file);
   };
@@ -2215,15 +2148,20 @@ function AskAnythingTab() {
     const trimmed = (text || input).trim();
     if ((!trimmed && !attachment) || loading) return;
 
-    const userMsg = {
-      role: 'user',
-      content: trimmed || (attachment ? `[Attached: ${attachment.name}]` : ''),
-      attachment: attachment ? { type: attachment.type, name: attachment.name, preview: attachment.preview } : null,
-      ts: Date.now(),
-    };
+    // Create conversation if none active
+    let currentId = activeId;
+    if (!currentId || !convos.find(c => c.id === currentId)) {
+      const id = genId();
+      currentId = id;
+      setConvos(prev => [{ id, messages: [], createdAt: Date.now(), updatedAt: Date.now() }, ...prev]);
+      setActiveId(id);
+    }
 
-    const updatedMessages = [...messages, userMsg];
-    setMessages(updatedMessages);
+    const userMsg = { role: 'user', content: trimmed || `[Attached: ${attachment?.name}]`, attachment: attachment ? { type: attachment.type, name: attachment.name, preview: attachment.preview } : null, ts: Date.now() };
+    const currentMsgs = convos.find(c => c.id === currentId)?.messages || [];
+    const updatedMsgs = [...currentMsgs, userMsg];
+
+    setConvos(prev => prev.map(c => c.id === currentId ? { ...c, messages: updatedMsgs, updatedAt: Date.now() } : c));
     setInput('');
     setAttachment(null);
     setError('');
@@ -2231,43 +2169,23 @@ function AskAnythingTab() {
     if (textareaRef.current) textareaRef.current.style.height = 'auto';
 
     try {
-      // Build API message content
-      const buildContent = (msg) => {
-        if (msg.role !== 'user') return msg.content;
+      const apiMessages = updatedMsgs.map((m, idx) => {
+        const isLast = idx === updatedMsgs.length - 1;
+        if (m.role !== 'user') return { role: m.role, content: m.content };
         const parts = [];
-        // For the current message, include attachment data
-        if (msg === userMsg && attachment) {
-          if (attachment.type === 'image') {
-            parts.push({ type: 'image', source: { type: 'base64', media_type: attachment.mediaType, data: attachment.data } });
-          } else if (attachment.type === 'pdf') {
-            parts.push({ type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: attachment.data } });
-          }
+        if (isLast && attachment) {
+          if (attachment.type === 'image') parts.push({ type: 'image', source: { type: 'base64', media_type: attachment.mediaType, data: attachment.data } });
+          else if (attachment.type === 'pdf') parts.push({ type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: attachment.data } });
         }
         if (trimmed) parts.push({ type: 'text', text: trimmed });
-        return parts.length === 1 && parts[0].type === 'text' ? parts[0].text : parts;
-      };
-
-      const apiMessages = updatedMessages.map(m => ({
-        role: m.role,
-        content: buildContent(m),
-      }));
+        return { role: 'user', content: parts.length === 1 && parts[0].type === 'text' ? parts[0].text : parts };
+      });
 
       const response = await fetch('/api/claude', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: 'claude-sonnet-4-5',
-          max_tokens: 1000,
-          system: `You are Forge AI, the expert assistant built into Freelancer's Forge. You specialize in helping freelancers, independent contractors, and solopreneurs with:
-- Positioning, pricing, and niche strategy
-- Writing copy (bios, proposals, pitches, profiles)
-- Client management (handling objections, scope creep, difficult conversations)
-- Rates, contracts, and negotiation
-- Platform-specific advice (Upwork, Fiverr, LinkedIn, portfolio sites)
-- Business development and pipeline strategy
-- Job applications, cover letters, and career moves
-
-You give direct, tactical advice. No fluff. No buzzwords. No "it depends" without immediately saying what it depends on and giving a concrete answer anyway. You write like a sharp mentor who has done this work, not like a consultant. Short sentences. Specific numbers when possible. Opinions that you'd defend.`,
+          model: 'claude-sonnet-4-5', max_tokens: 1000,
+          system: `You are Forge AI, the expert assistant built into Freelancer's Forge. You specialize in helping freelancers, independent contractors, and solopreneurs with positioning, pricing, niche strategy, writing copy, client management, rates, contracts, negotiation, platform-specific advice, business development, and career moves. You give direct, tactical advice. No fluff. No buzzwords. Short sentences. Specific numbers when possible. Opinions that you'd defend.`,
           messages: apiMessages,
         }),
       });
@@ -2276,13 +2194,15 @@ You give direct, tactical advice. No fluff. No buzzwords. No "it depends" withou
         const errBody = await response.text().catch(() => '');
         throw new Error(`Request failed (${response.status}). ${errBody.slice(0, 200)}`);
       }
-
       const data = await response.json();
       const replyText = data.content.filter(b => b.type === 'text').map(b => b.text).join('').trim();
-      setMessages(prev => [...prev, { role: 'assistant', content: replyText, ts: Date.now() }]);
+      setConvos(prev => prev.map(c => c.id === currentId
+        ? { ...c, messages: [...c.messages, { role: 'assistant', content: replyText, ts: Date.now() }], updatedAt: Date.now() }
+        : c
+      ));
     } catch (err) {
       setError(err.message || 'Something went wrong. Try again.');
-      setMessages(prev => prev.slice(0, -1));
+      setConvos(prev => prev.map(c => c.id === currentId ? { ...c, messages: c.messages.slice(0, -1) } : c));
     } finally {
       setLoading(false);
     }
@@ -2294,221 +2214,184 @@ You give direct, tactical advice. No fluff. No buzzwords. No "it depends" withou
 
   const copyMessage = async (text, idx) => {
     try {
-      if (navigator.clipboard && window.isSecureContext) {
-        await navigator.clipboard.writeText(text);
-      } else {
-        const ta = document.createElement('textarea');
-        ta.value = text; ta.style.position = 'fixed'; ta.style.left = '-9999px';
+      if (navigator.clipboard && window.isSecureContext) await navigator.clipboard.writeText(text);
+      else {
+        const ta = document.createElement('textarea'); ta.value = text; ta.style.position = 'fixed'; ta.style.left = '-9999px';
         document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
       }
-      setCopiedIdx(idx);
-      setTimeout(() => setCopiedIdx(null), 1800);
+      setCopiedIdx(idx); setTimeout(() => setCopiedIdx(null), 1800);
     } catch {}
   };
 
-  const clearChat = () => {
-    setMessages([]);
-    setAttachment(null);
-    setError('');
-    isRestoredSession.current = false;
-    try { localStorage.removeItem(CHAT_STORAGE_KEY); } catch {}
-  };
-
   const isEmpty = messages.length === 0;
+  const sortedConvos = [...convos].sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
 
   return (
     <div className="ff-fadeup">
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
+      {/* Header */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 16, flexWrap: 'wrap', gap: 10 }}>
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
-            <h2 className="ff-display ff-text-1" style={{ fontSize: 28, letterSpacing: '-0.02em' }}>
-              Ask anything
-            </h2>
-            {isRestoredSession.current && messages.length > 0 && (
-              <span style={{
-                fontSize: 11,
-                fontWeight: 600,
-                letterSpacing: '0.02em',
-                padding: '3px 9px',
-                borderRadius: 'var(--r-pill)',
-                background: 'var(--accent-bg-soft)',
-                color: 'var(--accent)',
-                border: '1px solid var(--accent-border-soft)',
-                whiteSpace: 'nowrap',
-              }}>
-                {Math.floor(messages.length / 2)} exchange{messages.length / 2 !== 1 ? 's' : ''} saved
-              </span>
-            )}
-          </div>
-          <p className="ff-text-2" style={{ fontSize: 14, lineHeight: 1.5 }}>
-            {isRestoredSession.current && messages.length > 0
-              ? 'Picking up where you left off. Your conversation is saved.'
-              : 'Freelance strategy, pricing, copy, clients. Direct answers, no fluff.'}
-          </p>
+          <h2 className="ff-display ff-text-1" style={{ fontSize: 26, letterSpacing: '-0.02em', marginBottom: 3 }}>Ask anything</h2>
+          <p className="ff-text-2" style={{ fontSize: 13.5, lineHeight: 1.5 }}>Freelance strategy, pricing, copy, clients. Direct answers.</p>
         </div>
-        {messages.length > 0 && (
-          <button type="button" className="ff-btn ff-btn-secondary" onClick={clearChat} style={{ width: 'auto', padding: '9px 15px' }}>
-            <RotateCcw size={13} /> New chat
+        <div style={{ display: 'flex', gap: 8 }}>
+          {/* Mobile history toggle */}
+          <button type="button" className="ff-chat-sidebar-toggle" onClick={() => setSidebarOpen(o => !o)}>
+            <MessageSquare size={13} /> History{convos.length > 0 ? ` (${convos.length})` : ''}
           </button>
-        )}
+          <button type="button" className="ff-btn ff-btn-secondary" onClick={startNewChat} style={{ width: 'auto', padding: '8px 14px', fontSize: 13 }}>
+            <Plus size={13} /> New chat
+          </button>
+        </div>
       </div>
 
-      <div className="ff-chat-wrap">
-        <div className="ff-chat-messages">
-          {isEmpty && !loading && (
-            <div className="ff-chat-empty">
-              <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'var(--accent-bg-soft)', border: '1px solid var(--accent-border-soft)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 14 }}>
-                <Bot size={20} style={{ color: 'var(--accent)' }} />
-              </div>
-              <p className="ff-display ff-text-1 mb-2" style={{ fontSize: 22, letterSpacing: '-0.02em' }}>
-                What do you want to know?
-              </p>
-              <p className="ff-text-3 mb-7" style={{ fontSize: 13.5, lineHeight: 1.55, maxWidth: '34ch' }}>
-                Ask about pricing, niches, client scripts, copy, or upload a file to review.
-              </p>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7, justifyContent: 'center', maxWidth: 520 }}>
-                {SUGGESTED_PROMPTS.map((p, i) => (
-                  <button key={i} type="button" className="ff-suggested-prompt" onClick={() => sendMessage(p.text)} style={{ animationDelay: `${i * 50}ms` }}>
-                    {p.label}
+      {/* Layout: sidebar + chat */}
+      <div className="ff-ask-layout" style={{ position: 'relative' }}>
+        {/* Sidebar overlay backdrop on mobile */}
+        {sidebarOpen && (
+          <div onClick={() => setSidebarOpen(false)} style={{ position: 'absolute', inset: 0, zIndex: 20, background: 'rgba(0,0,0,0.18)', backdropFilter: 'blur(2px)' }} />
+        )}
+
+        {/* Sidebar */}
+        <div className={`ff-chat-sidebar${sidebarOpen ? ' open' : ''}`}>
+          <div className="ff-chat-sidebar-head">
+            <span className="ff-chat-sidebar-title">Conversations</span>
+            <button className="ff-chat-new-btn" onClick={startNewChat} title="New chat" type="button">
+              <Plus size={13} />
+            </button>
+          </div>
+          <div className="ff-chat-sidebar-list">
+            {sortedConvos.length === 0 ? (
+              <div className="ff-chat-sidebar-empty">No conversations yet.<br/>Start chatting to save.</div>
+            ) : sortedConvos.map(c => (
+              <button
+                key={c.id}
+                type="button"
+                className={`ff-chat-sidebar-item${c.id === activeId ? ' ff-chat-sidebar-item-active' : ''}`}
+                onClick={() => { setActiveId(c.id); setSidebarOpen(false); setError(''); }}
+              >
+                <span className="ff-chat-sidebar-item-title">{getConvoTitle(c.messages)}</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span className="ff-chat-sidebar-item-meta">{timeAgo(c.updatedAt)} · {Math.floor(c.messages.length / 2)} msg{c.messages.length / 2 !== 1 ? 's' : ''}</span>
+                  <button
+                    type="button"
+                    onClick={(e) => deleteConvo(c.id, e)}
+                    style={{ background: 'none', border: 'none', color: 'var(--text-3)', cursor: 'pointer', padding: '1px 3px', borderRadius: 4, opacity: 0.6, display: 'flex', alignItems: 'center', flexShrink: 0 }}
+                    title="Delete"
+                  >
+                    <X size={11} />
                   </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Restored session divider */}
-          {isRestoredSession.current && messages.length > 0 && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '4px 0 8px' }}>
-              <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
-              <span style={{ fontSize: 11, color: 'var(--text-3)', fontWeight: 500, whiteSpace: 'nowrap', letterSpacing: '0.01em' }}>
-                Previous session
-              </span>
-              <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
-            </div>
-          )}
-
-          {messages.map((msg, i) => (
-            <div key={i} className={`ff-chat-msg ${msg.role === 'user' ? 'ff-chat-msg-user' : ''}`}>
-              <div className={`ff-chat-avatar ${msg.role === 'user' ? 'ff-chat-avatar-user' : 'ff-chat-avatar-ai'}`}>
-                {msg.role === 'user' ? 'You' : <Bot size={15} />}
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: msg.role === 'user' ? 'flex-end' : 'flex-start', maxWidth: 'min(560px, 80%)' }}>
-                {/* Attachment preview in message */}
-                {msg.attachment && msg.attachment.preview && (
-                  <div className="ff-chat-user-attachment">
-                    <img src={msg.attachment.preview} alt={msg.attachment.name} />
-                  </div>
-                )}
-                {msg.attachment && !msg.attachment.preview && (
-                  <div className="ff-chat-user-attachment-file" style={{ color: 'var(--accent-text-on)', background: 'rgba(255,255,255,0.15)', marginBottom: 6 }}>
-                    <FileText size={13} /> {msg.attachment.name}
-                  </div>
-                )}
-                {msg.content && (
-                  <div className={`ff-chat-bubble ${msg.role === 'user' ? 'ff-chat-bubble-user' : 'ff-chat-bubble-ai'}`}>
-                    <div className="ff-chat-bubble-text">{formatMessageText(msg.content)}</div>
-                  </div>
-                )}
-                {msg.role === 'assistant' && (
-                  <button type="button" className="ff-chat-copy-btn" onClick={() => copyMessage(msg.content, i)}>
-                    {copiedIdx === i ? <Check size={11} /> : <Copy size={11} />}
-                    {copiedIdx === i ? 'Copied' : 'Copy'}
-                  </button>
-                )}
-              </div>
-            </div>
-          ))}
-
-          {loading && (
-            <div className="ff-chat-msg ff-fadein">
-              <div className="ff-chat-avatar ff-chat-avatar-ai"><Bot size={15} /></div>
-              <div className="ff-chat-bubble ff-chat-bubble-ai">
-                <div className="ff-chat-typing"><span></span><span></span><span></span></div>
-              </div>
-            </div>
-          )}
-
-          {error && (
-            <div className="ff-fadeup" style={{ background: 'var(--danger-bg)', color: 'var(--danger)', padding: '10px 14px', borderRadius: 'var(--r-md)', fontSize: 13, fontWeight: 500, textAlign: 'center' }}>
-              {error}
-            </div>
-          )}
-
-          <div ref={messagesEndRef} />
+                </div>
+              </button>
+            ))}
+          </div>
         </div>
 
-        <div className="ff-chat-footer">
-          {messages.length > 0 && messages.length < 3 && (
-            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 10 }}>
-              {SUGGESTED_PROMPTS.slice(0, 3).map((p, i) => (
-                <button key={i} type="button" className="ff-suggested-prompt" onClick={() => sendMessage(p.text)} style={{ fontSize: 11.5, padding: '6px 11px' }}>
-                  {p.label}
-                </button>
-              ))}
-            </div>
-          )}
-
-          <div className="ff-chat-input-box">
-            {/* Attachment preview inside box */}
-            {attachment && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 12px 0', borderBottom: '1px solid var(--border)' }}>
-                {attachment.preview
-                  ? <img src={attachment.preview} alt={attachment.name} style={{ width: 32, height: 32, objectFit: 'cover', borderRadius: 6, flexShrink: 0 }} />
-                  : <div style={{ width: 32, height: 32, background: 'var(--accent-bg-soft)', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><FileText size={14} style={{ color: 'var(--accent)' }} /></div>
-                }
-                <span style={{ flex: 1, fontSize: 12, fontWeight: 500, color: 'var(--text-1)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{attachment.name}</span>
-                <button onClick={() => setAttachment(null)} style={{ background: 'none', border: 'none', color: 'var(--text-3)', cursor: 'pointer', padding: 4, display: 'flex', alignItems: 'center', borderRadius: 4, flexShrink: 0 }}>
-                  <X size={13} />
-                </button>
+        {/* Chat pane */}
+        <div className="ff-chat-pane">
+          <div className="ff-chat-messages">
+            {isEmpty && !loading && (
+              <div className="ff-chat-empty">
+                <div style={{ width: 42, height: 42, borderRadius: '50%', background: 'var(--accent-bg-soft)', border: '1px solid var(--accent-border-soft)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 12 }}>
+                  <Bot size={18} style={{ color: 'var(--accent)' }} />
+                </div>
+                <p className="ff-display ff-text-1" style={{ fontSize: 19, letterSpacing: '-0.02em', marginBottom: 6 }}>What do you want to know?</p>
+                <p className="ff-text-3" style={{ fontSize: 13, lineHeight: 1.5, maxWidth: '32ch', marginBottom: 18 }}>
+                  Ask about pricing, niches, client scripts, copy, or upload a file.
+                </p>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, justifyContent: 'center', maxWidth: 460 }}>
+                  {SUGGESTED_PROMPTS.map((p, i) => (
+                    <button key={i} type="button" className="ff-suggested-prompt" onClick={() => sendMessage(p.text)} style={{ animationDelay: `${i * 40}ms` }}>
+                      {p.label}
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
 
-            {/* Hidden file input */}
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*,application/pdf,.txt,.md,.csv,.json,.doc,.docx"
-              style={{ display: 'none' }}
-              onChange={e => { handleAttachFile(e.target.files?.[0]); e.target.value = ''; }}
-            />
+            {messages.map((msg, i) => (
+              <div key={i} className={`ff-chat-msg ${msg.role === 'user' ? 'ff-chat-msg-user' : ''}`}>
+                <div className={`ff-chat-avatar ${msg.role === 'user' ? 'ff-chat-avatar-user' : 'ff-chat-avatar-ai'}`}>
+                  {msg.role === 'user' ? 'You' : <Bot size={13} />}
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: msg.role === 'user' ? 'flex-end' : 'flex-start', minWidth: 0 }}>
+                  {msg.attachment && msg.attachment.preview && (
+                    <div className="ff-chat-user-attachment"><img src={msg.attachment.preview} alt={msg.attachment.name} /></div>
+                  )}
+                  {msg.attachment && !msg.attachment.preview && (
+                    <div className="ff-chat-user-attachment-file"><FileText size={12} /> {msg.attachment.name}</div>
+                  )}
+                  {msg.content && (
+                    <div className={`ff-chat-bubble ${msg.role === 'user' ? 'ff-chat-bubble-user' : 'ff-chat-bubble-ai'}`}>
+                      <div className="ff-chat-bubble-text">{formatMessageText(msg.content)}</div>
+                    </div>
+                  )}
+                  {msg.role === 'assistant' && (
+                    <button type="button" className="ff-chat-copy-btn" onClick={() => copyMessage(msg.content, i)}>
+                      {copiedIdx === i ? <Check size={10} /> : <Copy size={10} />}
+                      {copiedIdx === i ? 'Copied' : 'Copy'}
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
 
-            {/* Text input */}
-            <textarea
-              ref={textareaRef}
-              className="ff-chat-textarea"
-              placeholder="Ask anything about freelancing…"
-              value={input}
-              onChange={(e) => { setInput(e.target.value); autoResize(); }}
-              onKeyDown={handleKeyDown}
-              rows={1}
-              disabled={loading}
-            />
+            {loading && (
+              <div className="ff-chat-msg ff-fadein">
+                <div className="ff-chat-avatar ff-chat-avatar-ai"><Bot size={13} /></div>
+                <div className="ff-chat-bubble ff-chat-bubble-ai">
+                  <div className="ff-chat-typing"><span /><span /><span /></div>
+                </div>
+              </div>
+            )}
 
-            {/* Bottom actions bar */}
-            <div className="ff-chat-input-actions">
-              <button
-                type="button"
-                className="ff-chat-attach-btn"
-                onClick={() => fileInputRef.current?.click()}
-                aria-label="Attach file"
-                title="Attach image or file"
-              >
-                <Paperclip size={16} />
-              </button>
-              <button
-                type="button"
-                className="ff-chat-send"
-                onClick={() => sendMessage()}
-                disabled={loading || (!input.trim() && !attachment)}
-                aria-label="Send message"
-              >
-                {loading ? <Loader2 size={14} className="animate-spin" /> : <ArrowRight size={15} />}
-              </button>
-            </div>
+            {error && (
+              <div className="ff-fadeup" style={{ background: 'var(--danger-bg)', color: 'var(--danger)', padding: '9px 12px', borderRadius: 'var(--r-md)', fontSize: 12.5, fontWeight: 500, textAlign: 'center' }}>
+                {error}
+              </div>
+            )}
+
+            <div ref={messagesEndRef} />
           </div>
-          <p className="ff-text-3 mt-2" style={{ fontSize: 11, textAlign: 'center', letterSpacing: '-0.003em' }}>
-            Enter to send · Shift+Enter for new line · Chats saved 15 days
-          </p>
+
+          {/* Footer */}
+          <div className="ff-chat-footer">
+            {messages.length > 0 && messages.length < 3 && (
+              <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', marginBottom: 8 }}>
+                {SUGGESTED_PROMPTS.slice(0, 3).map((p, i) => (
+                  <button key={i} type="button" className="ff-suggested-prompt" onClick={() => sendMessage(p.text)} style={{ fontSize: 11, padding: '5px 10px' }}>{p.label}</button>
+                ))}
+              </div>
+            )}
+
+            <div className="ff-chat-input-box">
+              {attachment && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px 0', borderBottom: '1px solid var(--border)' }}>
+                  {attachment.preview
+                    ? <img src={attachment.preview} alt={attachment.name} style={{ width: 28, height: 28, objectFit: 'cover', borderRadius: 5, flexShrink: 0 }} />
+                    : <div className="ff-chat-attachment-preview-icon"><FileText size={13} style={{ color: 'var(--accent)' }} /></div>
+                  }
+                  <span className="ff-chat-attachment-name">{attachment.name}</span>
+                  <button onClick={() => setAttachment(null)} style={{ background: 'none', border: 'none', color: 'var(--text-3)', cursor: 'pointer', padding: 3, display: 'flex', alignItems: 'center', borderRadius: 3, flexShrink: 0 }}>
+                    <X size={12} />
+                  </button>
+                </div>
+              )}
+              <input ref={fileInputRef} type="file" accept="image/*,application/pdf,.txt,.md,.csv,.json,.doc,.docx" style={{ display: 'none' }} onChange={e => { handleAttachFile(e.target.files?.[0]); e.target.value = ''; }} />
+              <textarea ref={textareaRef} className="ff-chat-textarea" placeholder="Ask anything about freelancing…" value={input} onChange={(e) => { setInput(e.target.value); autoResize(); }} onKeyDown={handleKeyDown} rows={1} disabled={loading} />
+              <div className="ff-chat-input-actions">
+                <button type="button" className="ff-chat-attach-btn" onClick={() => fileInputRef.current?.click()} aria-label="Attach file">
+                  <Paperclip size={14} />
+                </button>
+                <button type="button" className="ff-chat-send" onClick={() => sendMessage()} disabled={loading || (!input.trim() && !attachment)} aria-label="Send">
+                  {loading ? <Loader2 size={13} className="animate-spin" /> : <ArrowRight size={13} />}
+                </button>
+              </div>
+            </div>
+            <p className="ff-text-3" style={{ fontSize: 10.5, textAlign: 'center', marginTop: 6, letterSpacing: '-0.003em' }}>
+              Enter to send · Chats saved 15 days
+            </p>
+          </div>
         </div>
       </div>
     </div>
