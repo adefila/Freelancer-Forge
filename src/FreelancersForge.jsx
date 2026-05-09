@@ -1638,17 +1638,25 @@ const CSS = `
 /* ASK ANYTHING — SIDEBAR + CHAT LAYOUT                                  */
 /* ====================================================================== */
 
+/* ====================================================================== */
+/* ASK ANYTHING — SIDEBAR + CHAT LAYOUT                                  */
+/* ====================================================================== */
+
 .ff-ask-layout {
   display: grid;
-  grid-template-columns: 210px 1fr;
+  grid-template-columns: 224px 1fr;
   border: 1px solid var(--border);
-  border-radius: var(--r-xl);
+  border-radius: 20px;
   overflow: hidden;
-  height: 560px;
+  height: 600px;
   background: var(--bg);
-  box-shadow: var(--sh-2);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.04);
+}
+.ff-root.dark .ff-ask-layout {
+  box-shadow: 0 4px 24px rgba(0,0,0,0.3), 0 1px 4px rgba(0,0,0,0.2);
 }
 
+/* ---- SIDEBAR ---- */
 .ff-chat-sidebar {
   display: flex;
   flex-direction: column;
@@ -1661,178 +1669,236 @@ const CSS = `
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 12px 9px;
-  border-bottom: 1px solid var(--border);
+  padding: 16px 14px 12px;
   flex-shrink: 0;
 }
 
 .ff-chat-sidebar-title {
-  font-size: 10.5px;
+  font-size: 11px;
   font-weight: 700;
-  letter-spacing: 0.07em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--text-3);
   font-family: var(--font-text);
 }
 
 .ff-chat-new-btn {
-  width: 24px; height: 24px;
-  background: var(--accent-bg-soft);
-  border: 1px solid var(--accent-border-soft);
-  border-radius: 7px;
-  color: var(--accent);
+  width: 28px; height: 28px;
+  background: var(--bg-elev-2);
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  color: var(--text-2);
   cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   transition: all var(--t-fast);
   flex-shrink: 0;
 }
-.ff-chat-new-btn:hover { background: var(--accent); color: var(--accent-text-on); border-color: var(--accent); }
+.ff-chat-new-btn:hover {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+  transform: scale(1.05);
+}
 
 .ff-chat-sidebar-list {
-  flex: 1; overflow-y: auto; padding: 5px;
+  flex: 1; overflow-y: auto; padding: 4px 8px 8px;
 }
 
 .ff-chat-sidebar-item {
   width: 100%; background: transparent; border: none;
-  border-radius: 8px; padding: 8px 9px; text-align: left;
+  border-radius: 10px; padding: 9px 10px; text-align: left;
   cursor: pointer; transition: background var(--t-fast);
-  display: flex; flex-direction: column; gap: 2px; margin-bottom: 1px;
+  display: flex; flex-direction: column; gap: 3px;
+  margin-bottom: 2px; position: relative;
 }
 .ff-chat-sidebar-item:hover { background: var(--bg-elev-2); }
-.ff-chat-sidebar-item-active { background: var(--accent-bg-soft) !important; }
+.ff-chat-sidebar-item-active {
+  background: var(--bg) !important;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+.ff-root.dark .ff-chat-sidebar-item-active {
+  background: var(--bg-elev-2) !important;
+  box-shadow: none;
+}
+
+.ff-chat-sidebar-item-dot {
+  position: absolute; top: 11px; right: 10px;
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--accent);
+  opacity: 0;
+  transition: opacity var(--t-fast);
+}
+.ff-chat-sidebar-item-active .ff-chat-sidebar-item-dot { opacity: 1; }
 
 .ff-chat-sidebar-item-title {
-  font-size: 12px; font-weight: 600; color: var(--text-1);
+  font-size: 12.5px; font-weight: 600; color: var(--text-1);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  letter-spacing: -0.005em; font-family: var(--font-text);
+  letter-spacing: -0.008em; font-family: var(--font-text);
+  padding-right: 14px;
 }
-.ff-chat-sidebar-item-active .ff-chat-sidebar-item-title { color: var(--accent); }
 
 .ff-chat-sidebar-item-meta {
-  font-size: 10.5px; color: var(--text-3);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  font-family: var(--font-text);
+  font-size: 11px; color: var(--text-3);
+  font-family: var(--font-text); letter-spacing: -0.003em;
 }
-.ff-chat-sidebar-item-active .ff-chat-sidebar-item-meta { color: var(--accent); opacity: 0.65; }
+
+.ff-chat-sidebar-item-del {
+  position: absolute; top: 50%; right: 8px; transform: translateY(-50%);
+  background: none; border: none; color: var(--text-3);
+  cursor: pointer; padding: 3px; border-radius: 5px;
+  display: flex; align-items: center;
+  opacity: 0; transition: opacity var(--t-fast), color var(--t-fast), background var(--t-fast);
+}
+.ff-chat-sidebar-item:hover .ff-chat-sidebar-item-del { opacity: 1; }
+.ff-chat-sidebar-item-del:hover { color: var(--danger); background: var(--danger-bg); }
+.ff-chat-sidebar-item-active .ff-chat-sidebar-item-dot { opacity: 0; }
+.ff-chat-sidebar-item-active:hover .ff-chat-sidebar-item-del { opacity: 1; }
 
 .ff-chat-sidebar-empty {
-  padding: 20px 10px; text-align: center;
-  color: var(--text-3); font-size: 11.5px; line-height: 1.5;
+  padding: 32px 14px; text-align: center;
+  color: var(--text-3); font-size: 12px; line-height: 1.6;
   font-family: var(--font-text);
 }
 
+/* ---- CHAT PANE ---- */
 .ff-chat-pane {
   display: flex; flex-direction: column; overflow: hidden; min-width: 0;
+  background: var(--bg);
 }
 
 .ff-chat-wrap { display: contents; }
 
 .ff-chat-messages {
   flex: 1; overflow-y: auto;
-  padding: 18px 18px 10px;
-  display: flex; flex-direction: column; gap: 14px;
+  padding: 22px 20px 8px;
+  display: flex; flex-direction: column; gap: 16px;
 }
 
 .ff-chat-empty {
   flex: 1; display: flex; flex-direction: column;
   align-items: center; justify-content: center;
-  padding: 20px 20px; text-align: center;
+  padding: 16px 24px 24px; text-align: center;
 }
 
+/* ---- MESSAGES ---- */
 .ff-chat-msg {
-  display: flex; gap: 9px;
-  animation: ff-fadeup 360ms cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  display: flex; gap: 10px;
+  animation: ff-fadeup 320ms cubic-bezier(0.16, 1, 0.3, 1) backwards;
 }
 .ff-chat-msg-user { flex-direction: row-reverse; }
 
 .ff-chat-avatar {
-  width: 27px; height: 27px; border-radius: var(--r-pill);
+  width: 28px; height: 28px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0; font-size: 10.5px; font-weight: 700;
+  flex-shrink: 0; font-size: 10px; font-weight: 800;
+  letter-spacing: 0.02em;
 }
 .ff-chat-avatar-ai {
-  background: var(--accent-bg-soft);
+  background: linear-gradient(135deg, var(--accent-bg-soft) 0%, #e0eaff 100%);
   border: 1px solid var(--accent-border-soft); color: var(--accent);
 }
-.ff-chat-avatar-user { background: var(--accent); color: var(--accent-text-on); }
+.ff-root.dark .ff-chat-avatar-ai {
+  background: linear-gradient(135deg, rgba(59,130,246,0.2) 0%, rgba(99,102,241,0.15) 100%);
+}
+.ff-chat-avatar-user {
+  background: var(--text-1); color: var(--bg);
+  font-size: 9px;
+}
 
 .ff-chat-bubble {
-  max-width: min(440px, 78%); padding: 9px 12px;
-  border-radius: var(--r-lg); font-size: 13.5px; line-height: 1.6;
+  max-width: min(460px, 80%); padding: 10px 14px;
+  border-radius: 16px; font-size: 13.5px; line-height: 1.65;
   letter-spacing: -0.005em;
 }
 .ff-chat-bubble-ai {
-  background: var(--bg); border: 1px solid var(--border);
-  color: var(--text-1); border-bottom-left-radius: 4px; box-shadow: var(--sh-1);
+  background: var(--bg-elev-1);
+  border: 1px solid var(--border);
+  color: var(--text-1);
+  border-bottom-left-radius: 5px;
 }
 .ff-chat-bubble-user {
-  background: var(--accent); color: var(--accent-text-on); border-bottom-right-radius: 4px;
+  background: var(--text-1); color: var(--bg);
+  border-bottom-right-radius: 5px;
 }
+.ff-root.dark .ff-chat-bubble-user { background: var(--text-1); color: var(--bg); }
+
 .ff-chat-bubble pre, .ff-chat-bubble code {
   font-family: var(--font-mono); font-size: 12px;
   background: var(--bg-elev-2); padding: 2px 5px; border-radius: var(--r-sm);
 }
 .ff-chat-bubble-ai pre {
-  padding: 9px 11px; border-radius: var(--r-md); overflow-x: auto;
-  margin: 6px 0; white-space: pre-wrap; word-break: break-word;
+  padding: 10px 12px; border-radius: 10px; overflow-x: auto;
+  margin: 8px 0; white-space: pre-wrap; word-break: break-word;
+  background: var(--bg-elev-2); border: 1px solid var(--border);
 }
 
-.ff-chat-typing { display: flex; align-items: center; gap: 4px; padding: 2px 0; }
+.ff-chat-typing { display: flex; align-items: center; gap: 4px; padding: 1px 0; }
 .ff-chat-typing span {
-  width: 6px; height: 6px; border-radius: 50%;
-  background: var(--accent); animation: ff-typing-bounce 1.2s ease-in-out infinite;
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--accent); animation: ff-typing-bounce 1.3s ease-in-out infinite;
 }
-.ff-chat-typing span:nth-child(2) { animation-delay: 0.15s; }
-.ff-chat-typing span:nth-child(3) { animation-delay: 0.3s; }
+.ff-chat-typing span:nth-child(2) { animation-delay: 0.18s; }
+.ff-chat-typing span:nth-child(3) { animation-delay: 0.36s; }
 @keyframes ff-typing-bounce {
-  0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
-  30% { transform: translateY(-4px); opacity: 1; }
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+  30% { transform: translateY(-5px); opacity: 1; }
 }
 
 .ff-chat-copy-btn {
   background: transparent; border: none; color: var(--text-3); cursor: pointer;
-  padding: 3px 5px; border-radius: var(--r-sm);
+  padding: 3px 6px; border-radius: 6px;
   display: inline-flex; align-items: center; gap: 4px;
   font-size: 10.5px; font-family: var(--font-text); font-weight: 500;
-  transition: all var(--t-fast); margin-top: 4px;
+  transition: all var(--t-fast); margin-top: 5px;
+  opacity: 0;
 }
-.ff-chat-copy-btn:hover { color: var(--text-1); background: var(--bg-elev-2); }
+.ff-chat-msg:hover .ff-chat-copy-btn { opacity: 1; }
+.ff-chat-copy-btn:hover { color: var(--text-1); background: var(--bg-elev-2); opacity: 1; }
 
 .ff-chat-bubble-text { white-space: pre-wrap; }
 .ff-chat-bubble-text strong { font-weight: 700; }
 .ff-chat-bubble-text em { font-style: italic; }
 
+/* ---- SUGGESTED PROMPTS ---- */
 .ff-suggested-prompt {
-  background: var(--bg); border: 1px solid var(--border); color: var(--text-1);
-  font-family: var(--font-text); font-size: 11.5px; font-weight: 500;
-  padding: 6px 12px; border-radius: var(--r-pill); cursor: pointer;
+  background: var(--bg); border: 1px solid var(--border-strong); color: var(--text-2);
+  font-family: var(--font-text); font-size: 12px; font-weight: 500;
+  padding: 7px 14px; border-radius: var(--r-pill); cursor: pointer;
   letter-spacing: -0.005em; transition: all var(--t-fast); white-space: nowrap;
+  animation: ff-fadein 400ms cubic-bezier(0.16, 1, 0.3, 1) backwards;
 }
 .ff-suggested-prompt:hover {
   border-color: var(--accent); color: var(--accent);
   background: var(--accent-bg-soft); transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(37,99,235,0.12);
 }
 
+/* ---- FOOTER + INPUT ---- */
 .ff-chat-footer {
-  padding: 9px 12px 11px; border-top: 1px solid var(--border);
+  padding: 10px 14px 13px; border-top: 1px solid var(--border);
   background: var(--bg); flex-shrink: 0;
 }
 
 .ff-chat-input-box {
-  background: var(--bg-input); border: 1px solid var(--border-strong);
-  border-radius: 13px; transition: border-color var(--t-fast), box-shadow var(--t-fast);
+  background: var(--bg-elev-1);
+  border: 1px solid var(--border-strong);
+  border-radius: 16px;
+  transition: border-color var(--t-fast), box-shadow var(--t-fast), background var(--t-fast);
 }
 .ff-chat-input-box:focus-within {
-  border-color: rgba(0,0,0,0.18); box-shadow: 0 0 0 3px rgba(0,0,0,0.04);
+  background: var(--bg);
+  border-color: var(--border-strong);
+  box-shadow: 0 0 0 4px rgba(0,0,0,0.04);
 }
 .ff-root.dark .ff-chat-input-box:focus-within {
-  border-color: rgba(255,255,255,0.18); box-shadow: 0 0 0 3px rgba(255,255,255,0.05);
+  background: var(--bg-elev-1);
+  box-shadow: 0 0 0 4px rgba(255,255,255,0.04);
 }
 
 .ff-chat-textarea {
   display: block; width: 100%; background: transparent; border: none;
   color: var(--text-1); font-family: var(--font-text); font-size: 16px;
-  line-height: 1.5; padding: 11px 13px 0; resize: none; outline: none;
+  line-height: 1.5; padding: 12px 14px 0; resize: none; outline: none;
   letter-spacing: -0.005em; max-height: 110px; overflow-y: auto; min-height: 24px;
 }
 @media (min-width: 768px) { .ff-chat-textarea { font-size: 14px; } }
@@ -1840,57 +1906,59 @@ const CSS = `
 
 .ff-chat-input-actions {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 5px 7px 7px;
+  padding: 5px 8px 8px;
 }
 
 .ff-chat-attach-btn {
-  width: 27px; height: 27px; background: transparent; border: none;
-  border-radius: 7px; color: var(--text-3); cursor: pointer;
+  width: 28px; height: 28px; background: transparent; border: none;
+  border-radius: 8px; color: var(--text-3); cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0; transition: all var(--t-fast);
 }
-.ff-chat-attach-btn:hover { background: var(--bg-elev-2); color: var(--text-1); }
+.ff-chat-attach-btn:hover { background: var(--bg-elev-2); color: var(--text-2); }
 
 .ff-chat-send {
-  width: 27px; height: 27px; background: var(--text-1); border: none;
-  border-radius: 7px; color: var(--bg); cursor: pointer;
+  width: 28px; height: 28px;
+  background: var(--text-1);
+  border: none; border-radius: 8px; color: var(--bg); cursor: pointer;
   display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0; transition: background var(--t-fast), transform var(--t-fast), opacity var(--t-fast);
+  flex-shrink: 0;
+  transition: background var(--t-fast), transform var(--t-fast), opacity var(--t-fast);
 }
-.ff-chat-send:hover:not(:disabled) { background: var(--text-2); transform: scale(1.05); }
-.ff-chat-send:active:not(:disabled) { transform: scale(0.95); }
-.ff-chat-send:disabled { opacity: 0.2; cursor: not-allowed; }
-.ff-root.dark .ff-chat-send { background: var(--text-1); color: var(--bg); }
+.ff-chat-send:hover:not(:disabled) { transform: scale(1.08); }
+.ff-chat-send:active:not(:disabled) { transform: scale(0.94); }
+.ff-chat-send:disabled { opacity: 0.18; cursor: not-allowed; }
 
-/* Mobile: sidebar collapses to overlay */
+/* ---- MOBILE ---- */
 .ff-chat-sidebar-toggle {
   display: none;
   align-items: center; gap: 6px;
-  background: transparent; border: none;
-  color: var(--text-3); font-size: 11.5px; font-weight: 600;
-  font-family: var(--font-text); cursor: pointer; padding: 4px 0;
-  letter-spacing: 0.01em; transition: color var(--t-fast);
+  background: var(--bg-elev-1); border: 1px solid var(--border-strong);
+  color: var(--text-2); font-size: 12px; font-weight: 600;
+  font-family: var(--font-text); cursor: pointer;
+  padding: 6px 12px; border-radius: var(--r-pill);
+  letter-spacing: -0.005em; transition: all var(--t-fast);
 }
-.ff-chat-sidebar-toggle:hover { color: var(--text-1); }
+.ff-chat-sidebar-toggle:hover { background: var(--bg-elev-2); color: var(--text-1); }
 
 @media (max-width: 768px) {
-  .ff-ask-layout { grid-template-columns: 1fr; height: 520px; position: relative; }
+  .ff-ask-layout { grid-template-columns: 1fr; height: 540px; border-radius: 16px; position: relative; }
   .ff-chat-sidebar {
     display: none; position: absolute; left: 0; top: 0; bottom: 0;
-    width: 230px; z-index: 30;
-    box-shadow: var(--sh-3); border-radius: 0 var(--r-lg) var(--r-lg) 0;
+    width: 240px; z-index: 30; border-right: none;
+    box-shadow: var(--sh-3); border-radius: 0 16px 16px 0;
   }
   .ff-chat-sidebar.open { display: flex; }
   .ff-chat-sidebar-toggle { display: flex; }
-  .ff-chat-messages { padding: 14px 13px 8px; gap: 12px; }
+  .ff-chat-messages { padding: 16px 14px 8px; gap: 14px; }
 }
-
 @media (max-width: 480px) {
-  .ff-ask-layout { height: 480px; border-radius: var(--r-lg); }
+  .ff-ask-layout { height: 500px; border-radius: 14px; }
 }
 
+/* ---- ATTACHMENTS ---- */
 .ff-chat-attachment-preview-icon {
-  width: 30px; height: 30px; background: var(--accent-bg-soft); border-radius: 5px;
+  width: 30px; height: 30px; background: var(--accent-bg-soft); border-radius: 6px;
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0; color: var(--accent);
 }
@@ -1899,12 +1967,12 @@ const CSS = `
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 11.5px;
 }
 .ff-chat-user-attachment {
-  max-width: 170px; border-radius: var(--r-md); overflow: hidden; margin-bottom: 5px;
+  max-width: 180px; border-radius: 12px; overflow: hidden; margin-bottom: 5px;
 }
-.ff-chat-user-attachment img { width: 100%; display: block; border-radius: var(--r-md); }
+.ff-chat-user-attachment img { width: 100%; display: block; border-radius: 12px; }
 .ff-chat-user-attachment-file {
-  display: flex; align-items: center; gap: 7px; padding: 6px 9px;
-  background: rgba(255,255,255,0.15); border-radius: var(--r-md);
+  display: flex; align-items: center; gap: 7px; padding: 7px 10px;
+  background: rgba(255,255,255,0.18); border-radius: 10px;
   font-size: 11px; font-weight: 500; margin-bottom: 5px;
 }
 
@@ -2228,41 +2296,43 @@ function AskAnythingTab() {
 
   return (
     <div className="ff-fadeup">
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 16, flexWrap: 'wrap', gap: 10 }}>
+      {/* Compact header */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14, gap: 10, flexWrap: 'wrap' }}>
         <div>
-          <h2 className="ff-display ff-text-1" style={{ fontSize: 26, letterSpacing: '-0.02em', marginBottom: 3 }}>Ask anything</h2>
-          <p className="ff-text-2" style={{ fontSize: 13.5, lineHeight: 1.5 }}>Freelance strategy, pricing, copy, clients. Direct answers.</p>
+          <h2 className="ff-display ff-text-1" style={{ fontSize: 24, letterSpacing: '-0.02em', marginBottom: 2 }}>Ask anything</h2>
+          <p className="ff-text-3" style={{ fontSize: 12.5, lineHeight: 1.4 }}>Strategy, pricing, copy, clients — direct answers.</p>
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
-          {/* Mobile history toggle */}
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
           <button type="button" className="ff-chat-sidebar-toggle" onClick={() => setSidebarOpen(o => !o)}>
-            <MessageSquare size={13} /> History{convos.length > 0 ? ` (${convos.length})` : ''}
+            <MessageSquare size={12} />
+            {convos.length > 0 ? `${convos.length} chat${convos.length !== 1 ? 's' : ''}` : 'History'}
           </button>
-          <button type="button" className="ff-btn ff-btn-secondary" onClick={startNewChat} style={{ width: 'auto', padding: '8px 14px', fontSize: 13 }}>
-            <Plus size={13} /> New chat
+          <button type="button" className="ff-btn ff-btn-secondary" onClick={startNewChat} style={{ width: 'auto', padding: '7px 13px', fontSize: 12.5, gap: 6 }}>
+            <Plus size={12} /> New chat
           </button>
         </div>
       </div>
 
-      {/* Layout: sidebar + chat */}
+      {/* Main layout */}
       <div className="ff-ask-layout" style={{ position: 'relative' }}>
-        {/* Sidebar overlay backdrop on mobile */}
         {sidebarOpen && (
-          <div onClick={() => setSidebarOpen(false)} style={{ position: 'absolute', inset: 0, zIndex: 20, background: 'rgba(0,0,0,0.18)', backdropFilter: 'blur(2px)' }} />
+          <div onClick={() => setSidebarOpen(false)} style={{ position: 'absolute', inset: 0, zIndex: 20, background: 'rgba(0,0,0,0.2)', backdropFilter: 'blur(3px)', borderRadius: 'inherit' }} />
         )}
 
         {/* Sidebar */}
         <div className={`ff-chat-sidebar${sidebarOpen ? ' open' : ''}`}>
           <div className="ff-chat-sidebar-head">
-            <span className="ff-chat-sidebar-title">Conversations</span>
+            <span className="ff-chat-sidebar-title">Chats</span>
             <button className="ff-chat-new-btn" onClick={startNewChat} title="New chat" type="button">
-              <Plus size={13} />
+              <Plus size={12} />
             </button>
           </div>
           <div className="ff-chat-sidebar-list">
             {sortedConvos.length === 0 ? (
-              <div className="ff-chat-sidebar-empty">No conversations yet.<br/>Start chatting to save.</div>
+              <div className="ff-chat-sidebar-empty">
+                <div style={{ fontSize: 22, marginBottom: 6 }}>💬</div>
+                No chats yet.<br />Start a conversation.
+              </div>
             ) : sortedConvos.map(c => (
               <button
                 key={c.id}
@@ -2270,18 +2340,17 @@ function AskAnythingTab() {
                 className={`ff-chat-sidebar-item${c.id === activeId ? ' ff-chat-sidebar-item-active' : ''}`}
                 onClick={() => { setActiveId(c.id); setSidebarOpen(false); setError(''); }}
               >
+                <span className="ff-chat-sidebar-item-dot" />
                 <span className="ff-chat-sidebar-item-title">{getConvoTitle(c.messages)}</span>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span className="ff-chat-sidebar-item-meta">{timeAgo(c.updatedAt)} · {Math.floor(c.messages.length / 2)} msg{c.messages.length / 2 !== 1 ? 's' : ''}</span>
-                  <button
-                    type="button"
-                    onClick={(e) => deleteConvo(c.id, e)}
-                    style={{ background: 'none', border: 'none', color: 'var(--text-3)', cursor: 'pointer', padding: '1px 3px', borderRadius: 4, opacity: 0.6, display: 'flex', alignItems: 'center', flexShrink: 0 }}
-                    title="Delete"
-                  >
-                    <X size={11} />
-                  </button>
-                </div>
+                <span className="ff-chat-sidebar-item-meta">{timeAgo(c.updatedAt)}</span>
+                <button
+                  type="button"
+                  className="ff-chat-sidebar-item-del"
+                  onClick={(e) => deleteConvo(c.id, e)}
+                  title="Delete"
+                >
+                  <X size={10} />
+                </button>
               </button>
             ))}
           </div>
@@ -2292,16 +2361,23 @@ function AskAnythingTab() {
           <div className="ff-chat-messages">
             {isEmpty && !loading && (
               <div className="ff-chat-empty">
-                <div style={{ width: 42, height: 42, borderRadius: '50%', background: 'var(--accent-bg-soft)', border: '1px solid var(--accent-border-soft)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 12 }}>
-                  <Bot size={18} style={{ color: 'var(--accent)' }} />
+                <div style={{
+                  width: 44, height: 44, borderRadius: '50%',
+                  background: 'linear-gradient(135deg, var(--accent-bg-soft) 0%, #e8f0fe 100%)',
+                  border: '1px solid var(--accent-border-soft)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 14,
+                }}>
+                  <Bot size={19} style={{ color: 'var(--accent)' }} />
                 </div>
-                <p className="ff-display ff-text-1" style={{ fontSize: 19, letterSpacing: '-0.02em', marginBottom: 6 }}>What do you want to know?</p>
-                <p className="ff-text-3" style={{ fontSize: 13, lineHeight: 1.5, maxWidth: '32ch', marginBottom: 18 }}>
-                  Ask about pricing, niches, client scripts, copy, or upload a file.
+                <p className="ff-display ff-text-1" style={{ fontSize: 18, letterSpacing: '-0.02em', marginBottom: 6, lineHeight: 1.2 }}>
+                  What do you want to know?
                 </p>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, justifyContent: 'center', maxWidth: 460 }}>
+                <p className="ff-text-3" style={{ fontSize: 12.5, lineHeight: 1.55, maxWidth: '30ch', marginBottom: 20 }}>
+                  Ask about rates, niches, client scripts, or upload a file.
+                </p>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, justifyContent: 'center', maxWidth: 420 }}>
                   {SUGGESTED_PROMPTS.map((p, i) => (
-                    <button key={i} type="button" className="ff-suggested-prompt" onClick={() => sendMessage(p.text)} style={{ animationDelay: `${i * 40}ms` }}>
+                    <button key={i} type="button" className="ff-suggested-prompt" onClick={() => sendMessage(p.text)} style={{ animationDelay: `${i * 50}ms` }}>
                       {p.label}
                     </button>
                   ))}
@@ -2312,14 +2388,14 @@ function AskAnythingTab() {
             {messages.map((msg, i) => (
               <div key={i} className={`ff-chat-msg ${msg.role === 'user' ? 'ff-chat-msg-user' : ''}`}>
                 <div className={`ff-chat-avatar ${msg.role === 'user' ? 'ff-chat-avatar-user' : 'ff-chat-avatar-ai'}`}>
-                  {msg.role === 'user' ? 'You' : <Bot size={13} />}
+                  {msg.role === 'user' ? 'You' : <Bot size={12} />}
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: msg.role === 'user' ? 'flex-end' : 'flex-start', minWidth: 0 }}>
                   {msg.attachment && msg.attachment.preview && (
                     <div className="ff-chat-user-attachment"><img src={msg.attachment.preview} alt={msg.attachment.name} /></div>
                   )}
                   {msg.attachment && !msg.attachment.preview && (
-                    <div className="ff-chat-user-attachment-file"><FileText size={12} /> {msg.attachment.name}</div>
+                    <div className="ff-chat-user-attachment-file"><FileText size={11} /> {msg.attachment.name}</div>
                   )}
                   {msg.content && (
                     <div className={`ff-chat-bubble ${msg.role === 'user' ? 'ff-chat-bubble-user' : 'ff-chat-bubble-ai'}`}>
@@ -2338,7 +2414,7 @@ function AskAnythingTab() {
 
             {loading && (
               <div className="ff-chat-msg ff-fadein">
-                <div className="ff-chat-avatar ff-chat-avatar-ai"><Bot size={13} /></div>
+                <div className="ff-chat-avatar ff-chat-avatar-ai"><Bot size={12} /></div>
                 <div className="ff-chat-bubble ff-chat-bubble-ai">
                   <div className="ff-chat-typing"><span /><span /><span /></div>
                 </div>
@@ -2346,7 +2422,7 @@ function AskAnythingTab() {
             )}
 
             {error && (
-              <div className="ff-fadeup" style={{ background: 'var(--danger-bg)', color: 'var(--danger)', padding: '9px 12px', borderRadius: 'var(--r-md)', fontSize: 12.5, fontWeight: 500, textAlign: 'center' }}>
+              <div className="ff-fadeup" style={{ background: 'var(--danger-bg)', color: 'var(--danger)', padding: '8px 12px', borderRadius: 10, fontSize: 12.5, fontWeight: 500, textAlign: 'center' }}>
                 {error}
               </div>
             )}
@@ -2356,7 +2432,7 @@ function AskAnythingTab() {
 
           {/* Footer */}
           <div className="ff-chat-footer">
-            {messages.length > 0 && messages.length < 3 && (
+            {isEmpty && messages.length < 1 && (
               <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', marginBottom: 8 }}>
                 {SUGGESTED_PROMPTS.slice(0, 3).map((p, i) => (
                   <button key={i} type="button" className="ff-suggested-prompt" onClick={() => sendMessage(p.text)} style={{ fontSize: 11, padding: '5px 10px' }}>{p.label}</button>
@@ -2366,13 +2442,13 @@ function AskAnythingTab() {
 
             <div className="ff-chat-input-box">
               {attachment && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px 0', borderBottom: '1px solid var(--border)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px 0' }}>
                   {attachment.preview
-                    ? <img src={attachment.preview} alt={attachment.name} style={{ width: 28, height: 28, objectFit: 'cover', borderRadius: 5, flexShrink: 0 }} />
-                    : <div className="ff-chat-attachment-preview-icon"><FileText size={13} style={{ color: 'var(--accent)' }} /></div>
+                    ? <img src={attachment.preview} alt={attachment.name} style={{ width: 28, height: 28, objectFit: 'cover', borderRadius: 7, flexShrink: 0 }} />
+                    : <div className="ff-chat-attachment-preview-icon"><FileText size={13} /></div>
                   }
                   <span className="ff-chat-attachment-name">{attachment.name}</span>
-                  <button onClick={() => setAttachment(null)} style={{ background: 'none', border: 'none', color: 'var(--text-3)', cursor: 'pointer', padding: 3, display: 'flex', alignItems: 'center', borderRadius: 3, flexShrink: 0 }}>
+                  <button onClick={() => setAttachment(null)} style={{ background: 'none', border: 'none', color: 'var(--text-3)', cursor: 'pointer', padding: 3, display: 'flex', alignItems: 'center', borderRadius: 4, flexShrink: 0 }}>
                     <X size={12} />
                   </button>
                 </div>
@@ -2384,11 +2460,11 @@ function AskAnythingTab() {
                   <Paperclip size={14} />
                 </button>
                 <button type="button" className="ff-chat-send" onClick={() => sendMessage()} disabled={loading || (!input.trim() && !attachment)} aria-label="Send">
-                  {loading ? <Loader2 size={13} className="animate-spin" /> : <ArrowRight size={13} />}
+                  {loading ? <Loader2 size={12} className="animate-spin" /> : <ArrowRight size={13} />}
                 </button>
               </div>
             </div>
-            <p className="ff-text-3" style={{ fontSize: 10.5, textAlign: 'center', marginTop: 6, letterSpacing: '-0.003em' }}>
+            <p className="ff-text-3" style={{ fontSize: 10, textAlign: 'center', marginTop: 5, letterSpacing: '-0.003em' }}>
               Enter to send · Chats saved 15 days
             </p>
           </div>
