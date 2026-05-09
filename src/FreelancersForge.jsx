@@ -1,9 +1,9 @@
-import { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   ArrowRight, Copy, Check, Loader2, Sparkles, Paperclip, X, ImageIcon,
   Sun, Moon, Plus, ExternalLink, Link as LinkIcon, ChevronDown,
   Mail, MessageSquare, FileText, Reply, Type, Image as ImgIcon,
-  Target, Award, Briefcase, User, Layers, Wand2,
+  Target, Award, Briefcase, User, Layers, Wand2, Monitor,
   TrendingUp, Trash2, HelpCircle, PenLine, Bot, Send, RotateCcw,
   ChevronUp
 } from 'lucide-react';
@@ -449,11 +449,104 @@ const CSS = `
   align-items: center;
   gap: 6px;
   transition: all var(--t-fast);
+  position: relative;
 }
 .ff-theme-toggle:hover {
   border-color: var(--border-strong);
   color: var(--text-1);
   background-color: var(--bg-elev-2);
+}
+
+/* Theme dropdown */
+.ff-theme-dropdown {
+  position: relative;
+  display: inline-block;
+}
+.ff-theme-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: var(--bg);
+  border: 1px solid var(--border-strong);
+  border-radius: 14px;
+  box-shadow: 0 12px 36px rgba(0,0,0,0.10), 0 3px 10px rgba(0,0,0,0.06);
+  padding: 6px;
+  min-width: 210px;
+  z-index: 200;
+  animation: ff-scalein 140ms cubic-bezier(0.16,1,0.3,1);
+  transform-origin: top right;
+}
+.ff-root.dark .ff-theme-menu {
+  box-shadow: 0 12px 36px rgba(0,0,0,0.45), 0 3px 10px rgba(0,0,0,0.3);
+}
+
+/* Each row: [check] [icon] [label + desc] */
+.ff-theme-option {
+  display: grid;
+  grid-template-columns: 18px 20px 1fr;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 9px 10px;
+  border-radius: 9px;
+  cursor: pointer;
+  font-family: var(--font-text);
+  letter-spacing: -0.005em;
+  text-align: left;
+  transition: background var(--t-fast);
+}
+.ff-theme-option:hover { background: var(--bg-elev-1); }
+
+/* Left check slot */
+.ff-theme-option-check {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-1);
+  opacity: 0;
+  transition: opacity var(--t-fast);
+  flex-shrink: 0;
+}
+.ff-theme-option-active .ff-theme-option-check { opacity: 1; }
+
+/* Middle icon slot — bare, no box */
+.ff-theme-option-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-2);
+  flex-shrink: 0;
+  transition: color var(--t-fast);
+}
+.ff-theme-option:hover .ff-theme-option-icon { color: var(--text-1); }
+.ff-theme-option-active .ff-theme-option-icon { color: var(--text-1); }
+
+/* Right text stack */
+.ff-theme-option-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+.ff-theme-option-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-1);
+  line-height: 1.3;
+}
+.ff-theme-option-desc {
+  font-size: 11.5px;
+  color: var(--text-3);
+  line-height: 1.3;
+  font-weight: 400;
+}
+
+.ff-theme-menu-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 4px 4px;
 }
 
 .ff-attach-btn {
@@ -1976,15 +2069,385 @@ const CSS = `
   font-size: 11px; font-weight: 500; margin-bottom: 5px;
 }
 
+/* ====================================================================== */
+/* PRELOADER — THEME ADAPTIVE                                             */
+/* ====================================================================== */
+
+.ff-preloader {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  overflow: hidden;
+  transition: background 0ms;
+}
+
+/* Light mode preloader */
+.ff-preloader.light {
+  background: #ffffff;
+}
+
+/* Dark mode preloader */
+.ff-preloader.dark {
+  background: #080810;
+}
+
+.ff-preloader-exit {
+  animation: ff-preloader-out 600ms cubic-bezier(0.4,0,0.6,1) forwards;
+  pointer-events: none;
+}
+@keyframes ff-preloader-out {
+  0%   { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* Glow blobs — adapt to theme */
+.ff-preloader-glow {
+  position: absolute; border-radius: 50%;
+  pointer-events: none;
+}
+
+.ff-preloader.light .ff-preloader-glow-1 {
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(37,99,235,0.07) 0%, transparent 65%);
+  filter: blur(60px);
+  top: -200px; left: -100px;
+  animation: ff-glow-drift1 12s ease-in-out infinite alternate;
+}
+.ff-preloader.light .ff-preloader-glow-2 {
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(99,102,241,0.06) 0%, transparent 65%);
+  filter: blur(60px);
+  bottom: -160px; right: -80px;
+  animation: ff-glow-drift2 14s ease-in-out infinite alternate;
+}
+.ff-preloader.dark .ff-preloader-glow-1 {
+  width: 700px; height: 700px;
+  background: radial-gradient(circle, rgba(37,99,235,0.22) 0%, transparent 65%);
+  filter: blur(90px);
+  top: -280px; left: -160px;
+  animation: ff-glow-drift1 10s ease-in-out infinite alternate;
+}
+.ff-preloader.dark .ff-preloader-glow-2 {
+  width: 520px; height: 520px;
+  background: radial-gradient(circle, rgba(99,102,241,0.18) 0%, transparent 65%);
+  filter: blur(90px);
+  bottom: -180px; right: -80px;
+  animation: ff-glow-drift2 12s ease-in-out infinite alternate;
+}
+
+@keyframes ff-glow-drift1 { from { transform:translate(0,0); } to { transform:translate(36px,22px); } }
+@keyframes ff-glow-drift2 { from { transform:translate(0,0); } to { transform:translate(-28px,-18px); } }
+
+/* Wordmark top-centre */
+.ff-preloader-wordmark {
+  position: absolute; top: 28px; left: 50%; transform: translateX(-50%);
+  display: flex; align-items: center; gap: 9px;
+  animation: ff-fadein 500ms ease backwards;
+  white-space: nowrap;
+}
+.ff-preloader-dot {
+  width: 6px; height: 6px; border-radius: 50%; background: #3b82f6;
+  animation: ff-dot-pulse 2.4s ease-in-out infinite;
+}
+.ff-preloader.light .ff-preloader-dot {
+  box-shadow: 0 0 10px rgba(37,99,235,0.5);
+}
+.ff-preloader.dark .ff-preloader-dot {
+  box-shadow: 0 0 16px rgba(59,130,246,0.9);
+}
+@keyframes ff-dot-pulse {
+  0%,100% { transform:scale(1); opacity:0.55; }
+  50%     { transform:scale(1.4); opacity:1; }
+}
+.ff-preloader-brand {
+  font-size: 12px; font-weight: 600; letter-spacing: 0.05em;
+  font-family: system-ui, sans-serif;
+}
+.ff-preloader.light .ff-preloader-brand { color: rgba(0,0,0,0.35); }
+.ff-preloader.dark  .ff-preloader-brand { color: rgba(255,255,255,0.32); }
+
+/* Skip button — top right */
+.ff-preloader-skip {
+  position: absolute; top: 22px; right: 24px;
+  font-size: 11.5px; font-weight: 500; padding: 5px 13px;
+  border-radius: 20px; cursor: pointer;
+  letter-spacing: 0.01em; transition: all 180ms ease;
+  font-family: system-ui, sans-serif;
+  animation: ff-fadein 600ms ease 700ms backwards;
+}
+.ff-preloader.light .ff-preloader-skip {
+  background: rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.1);
+  color: rgba(0,0,0,0.35);
+}
+.ff-preloader.light .ff-preloader-skip:hover {
+  background: rgba(0,0,0,0.08); color: rgba(0,0,0,0.6); border-color: rgba(0,0,0,0.18);
+}
+.ff-preloader.dark .ff-preloader-skip {
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.28);
+}
+.ff-preloader.dark .ff-preloader-skip:hover {
+  background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.6); border-color: rgba(255,255,255,0.18);
+}
+
+/* Slide content */
+.ff-preloader-content {
+  position: relative; z-index: 2;
+  text-align: center; max-width: 540px; width: 100%;
+}
+
+/* Icon pill — small, elegant */
+.ff-preloader-icon-pill {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 7px 16px; border-radius: 24px;
+  margin-bottom: 28px; font-size: 11.5px; font-weight: 600;
+  letter-spacing: 0.03em; font-family: system-ui, sans-serif;
+  text-transform: uppercase;
+}
+.ff-preloader.light .ff-preloader-icon-pill {
+  background: rgba(37,99,235,0.07); border: 1px solid rgba(37,99,235,0.18);
+  color: rgba(37,99,235,0.8);
+}
+.ff-preloader.dark .ff-preloader-icon-pill {
+  background: rgba(59,130,246,0.12); border: 1px solid rgba(59,130,246,0.26);
+  color: rgba(96,165,250,0.9);
+}
+
+/* Headline */
+.ff-preloader-headline {
+  font-size: clamp(32px, 5.5vw, 54px);
+  font-weight: 400; line-height: 1.06;
+  letter-spacing: -0.024em; margin-bottom: 16px;
+  font-family: 'DM Serif Display', Georgia, serif;
+}
+.ff-preloader.light .ff-preloader-headline { color: #0a0a0a; }
+.ff-preloader.dark  .ff-preloader-headline { color: #f5f5f7; }
+.ff-preloader-headline em {
+  font-style: italic; color: #3b82f6;
+}
+.ff-preloader.light .ff-preloader-headline em { color: #2563eb; }
+
+/* Sub */
+.ff-preloader-sub {
+  font-size: clamp(14px, 1.6vw, 16.5px);
+  line-height: 1.6; letter-spacing: -0.005em; max-width: 44ch; margin: 0 auto;
+  font-family: system-ui, sans-serif;
+}
+.ff-preloader.light .ff-preloader-sub { color: rgba(0,0,0,0.42); }
+.ff-preloader.dark  .ff-preloader-sub { color: rgba(255,255,255,0.38); }
+
+/* Slide animations */
+.ff-preloader-slide-in .ff-preloader-icon-pill { animation: ff-pl-in-icon 480ms cubic-bezier(0.16,1,0.3,1) both; }
+.ff-preloader-slide-in .ff-preloader-headline  { animation: ff-pl-in-text 540ms cubic-bezier(0.16,1,0.3,1) 50ms both; }
+.ff-preloader-slide-in .ff-preloader-sub       { animation: ff-pl-in-text 540ms cubic-bezier(0.16,1,0.3,1) 110ms both; }
+@keyframes ff-pl-in-icon { from { opacity:0; transform:scale(0.8) translateY(6px); } to { opacity:1; transform:scale(1) translateY(0); } }
+@keyframes ff-pl-in-text { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
+
+.ff-preloader-slide-out .ff-preloader-icon-pill,
+.ff-preloader-slide-out .ff-preloader-headline,
+.ff-preloader-slide-out .ff-preloader-sub {
+  animation: ff-pl-out 360ms cubic-bezier(0.4,0,1,1) forwards !important;
+}
+@keyframes ff-pl-out { from { opacity:1; transform:translateY(0); } to { opacity:0; transform:translateY(-10px); } }
+
+/* Footer */
+.ff-preloader-footer {
+  position: absolute; bottom: 36px; left: 50%; transform: translateX(-50%);
+  z-index: 2; width: min(360px, 78vw);
+  animation: ff-fadein 500ms ease 200ms backwards;
+}
+
+.ff-preloader-bar-track {
+  width: 100%; height: 1px; border-radius: 1px;
+  overflow: hidden; margin-bottom: 18px;
+}
+.ff-preloader.light .ff-preloader-bar-track { background: rgba(0,0,0,0.08); }
+.ff-preloader.dark  .ff-preloader-bar-track { background: rgba(255,255,255,0.07); }
+
+.ff-preloader-bar-fill {
+  height: 100%; border-radius: 1px;
+  background: linear-gradient(90deg, #2563eb 0%, #818cf8 100%);
+  transition: width 100ms linear;
+}
+.ff-preloader.dark .ff-preloader-bar-fill {
+  box-shadow: 0 0 6px rgba(59,130,246,0.6);
+}
+
+.ff-preloader-steps {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.ff-preloader-step {
+  width: 5px; height: 5px; border-radius: 50%;
+  transition: all 380ms cubic-bezier(0.16,1,0.3,1); flex-shrink: 0;
+}
+.ff-preloader.light .ff-preloader-step { background: rgba(0,0,0,0.12); }
+.ff-preloader.dark  .ff-preloader-step { background: rgba(255,255,255,0.14); }
+.ff-preloader-step-active {
+  background: #3b82f6 !important; width: 20px; border-radius: 3px;
+}
+.ff-preloader.dark .ff-preloader-step-active {
+  box-shadow: 0 0 8px rgba(59,130,246,0.65);
+}
+
 `;
 
+const PRELOADER_SLIDES = [
+  {
+    label: 'Optimize',
+    icon: <Sparkles size={13} />,
+    headline: <>Audit any page.<br /><em>Rewrite it like the top 1%.</em></>,
+    sub: 'Score your portfolio, Upwork profile, LinkedIn, or CV against expert criteria — then get a complete rewrite in one click.',
+  },
+  {
+    label: 'Close Client',
+    icon: <Target size={13} />,
+    headline: <>Close clients with<br /><em>proposals that convert.</em></>,
+    sub: 'Generate tight, scannable proposals, cold DMs, follow-ups, and cover letters tailored to the exact lead in front of you.',
+  },
+  {
+    label: 'Pipeline',
+    icon: <TrendingUp size={13} />,
+    headline: <>Track every pitch.<br /><em>See what works.</em></>,
+    sub: 'Log proposals, DMs, and emails. Watch reply rate and win rate build over time. Saved in your browser — no account needed.',
+  },
+  {
+    label: 'Ask Anything',
+    icon: <Bot size={13} />,
+    headline: <>Ask anything.<br /><em>Get tactical answers fast.</em></>,
+    sub: 'Pricing strategy, scope creep scripts, rate increases, niche advice — your freelance mentor is one message away.',
+  },
+];
+
+const SLIDE_DURATION = 2200;
+const TICK = 50;
+
+function Preloader({ onDone, theme }) {
+  const [slide, setSlide] = useState(0);
+  const [phase, setPhase] = useState('in');
+  const [progress, setProgress] = useState(0);
+  const [exiting, setExiting] = useState(false);
+  const totalDuration = SLIDE_DURATION * PRELOADER_SLIDES.length;
+  const startTime = useRef(Date.now());
+
+  const finish = () => {
+    setExiting(true);
+    setTimeout(onDone, 620);
+  };
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      const elapsed = Date.now() - startTime.current;
+      setProgress(Math.min((elapsed / totalDuration) * 100, 100));
+      if (elapsed >= totalDuration) { clearInterval(id); finish(); }
+    }, TICK);
+    return () => clearInterval(id);
+  }, []);
+
+  useEffect(() => {
+    if (slide >= PRELOADER_SLIDES.length - 1) return;
+    const holdId = setTimeout(() => {
+      setPhase('out');
+      setTimeout(() => { setSlide(s => s + 1); setPhase('in'); }, 380);
+    }, SLIDE_DURATION - 400);
+    return () => clearTimeout(holdId);
+  }, [slide]);
+
+  const s = PRELOADER_SLIDES[slide];
+  const slideClass = phase === 'out' ? 'ff-preloader-slide-out' : 'ff-preloader-slide-in';
+  const isDark = theme === 'dark';
+  const iconColor = isDark ? '#60a5fa' : '#2563eb';
+
+  return (
+    <div className={`ff-preloader ${theme}${exiting ? ' ff-preloader-exit' : ''}`}>
+      <div className="ff-preloader-glow ff-preloader-glow-1" />
+      <div className="ff-preloader-glow ff-preloader-glow-2" />
+
+      {/* Wordmark */}
+      <div className="ff-preloader-wordmark">
+        <span className="ff-preloader-dot" />
+        <span className="ff-preloader-brand">Freelancer's Forge</span>
+      </div>
+
+      {/* Skip */}
+      <button type="button" className="ff-preloader-skip" onClick={finish}>Skip</button>
+
+      {/* Slide */}
+      <div className={`ff-preloader-content ${slideClass}`} key={slide}>
+        <div className="ff-preloader-icon-pill">
+          <span style={{ color: iconColor, display: 'flex', alignItems: 'center' }}>
+            {React.cloneElement(s.icon, { color: iconColor })}
+          </span>
+          {s.label}
+        </div>
+        <p className="ff-preloader-headline">{s.headline}</p>
+        <p className="ff-preloader-sub">{s.sub}</p>
+      </div>
+
+      {/* Footer */}
+      <div className="ff-preloader-footer">
+        <div className="ff-preloader-bar-track">
+          <div className="ff-preloader-bar-fill" style={{ width: `${progress}%` }} />
+        </div>
+        <div className="ff-preloader-steps">
+          {PRELOADER_SLIDES.map((_, i) => (
+            <div key={i} className={`ff-preloader-step${i === slide ? ' ff-preloader-step-active' : ''}`} />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Detect system preference
+function getSystemTheme() {
+  try { return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'; } catch { return 'light'; }
+}
+
 export default function FreelancersForge() {
-  const [theme, setTheme] = useState('light');
+  const [themeMode, setThemeMode] = useState('system'); // 'light' | 'dark' | 'system'
+  const [systemTheme, setSystemTheme] = useState(getSystemTheme);
+  const [themeMenuOpen, setThemeMenuOpen] = useState(false);
   const [tab, setTab] = useState('optimize');
+  const [preloading, setPreloading] = useState(true);
+  const themeMenuRef = useRef(null);
+
+  // Resolved theme: 'light' or 'dark'
+  const theme = themeMode === 'system' ? systemTheme : themeMode;
+
+  // Sync system preference changes
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    const handler = (e) => setSystemTheme(e.matches ? 'dark' : 'light');
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    if (!themeMenuOpen) return;
+    const handler = (e) => { if (themeMenuRef.current && !themeMenuRef.current.contains(e.target)) setThemeMenuOpen(false); };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [themeMenuOpen]);
+
+  const themeOptions = [
+    { id: 'system', label: 'Auto',  desc: 'Follows your device',        icon: <Monitor size={14} /> },
+    { id: 'light',  label: 'Light', desc: 'Light background, dark text', icon: <Sun size={14} /> },
+    { id: 'dark',   label: 'Dark',  desc: 'Dark background, light text', icon: <Moon size={14} /> },
+  ];
+
+  const activeOption = themeOptions.find(o => o.id === themeMode);
 
   return (
     <div className={`ff-root ${theme}`}>
       <style>{CSS}</style>
+
+      {preloading && <Preloader onDone={() => setPreloading(false)} theme={theme} />}
 
       <div className="ff-gradient-bg" aria-hidden="true"></div>
       <div className="ff-root-inner" style={{ position: 'relative', zIndex: 1 }}>
@@ -1995,14 +2458,61 @@ export default function FreelancersForge() {
             <span className="ff-status-dot"></span>
             <span className="ff-meta-text">Freelancer's Forge</span>
           </div>
-          <button
-            type="button"
-            className="ff-theme-toggle"
-            onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}
-          >
-            {theme === 'dark' ? <Sun size={13} /> : <Moon size={13} />}
-            {theme === 'dark' ? 'Light' : 'Dark'}
-          </button>
+
+          {/* Theme dropdown */}
+          <div className="ff-theme-dropdown" ref={themeMenuRef}>
+            <button
+              type="button"
+              className="ff-theme-toggle"
+              onClick={() => setThemeMenuOpen(o => !o)}
+              aria-label="Change theme"
+            >
+              {activeOption && React.cloneElement(activeOption.icon, { size: 13 })}
+              <span style={{ color: 'var(--text-3)', fontWeight: 400 }}>Theme:</span>
+              {activeOption?.label}
+              <ChevronDown size={10} style={{
+                opacity: 0.4,
+                transition: 'transform 160ms ease',
+                transform: themeMenuOpen ? 'rotate(180deg)' : 'none',
+                marginLeft: -2,
+              }} />
+            </button>
+
+            {themeMenuOpen && (
+              <div className="ff-theme-menu">
+                <div style={{
+                  padding: '6px 10px 4px',
+                  fontSize: 10.5,
+                  fontWeight: 700,
+                  letterSpacing: '0.07em',
+                  textTransform: 'uppercase',
+                  color: 'var(--text-3)',
+                  fontFamily: 'var(--font-text)',
+                }}>
+                  Theme
+                </div>
+                {themeOptions.map((opt, i) => (
+                  <React.Fragment key={opt.id}>
+                    {i === 1 && <div className="ff-theme-menu-divider" />}
+                    <button
+                      type="button"
+                      className={`ff-theme-option${themeMode === opt.id ? ' ff-theme-option-active' : ''}`}
+                      onClick={() => { setThemeMode(opt.id); setThemeMenuOpen(false); }}
+                    >
+                      <span className="ff-theme-option-check">
+                        <Check size={13} strokeWidth={2.5} />
+                      </span>
+                      <span className="ff-theme-option-icon">{opt.icon}</span>
+                      <span className="ff-theme-option-text">
+                        <span className="ff-theme-option-label">{opt.label}</span>
+                        <span className="ff-theme-option-desc">{opt.desc}</span>
+                      </span>
+                    </button>
+                  </React.Fragment>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* TITLE */}
