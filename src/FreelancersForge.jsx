@@ -537,7 +537,7 @@ const CSS = `
   line-height: 1.3;
 }
 .ff-theme-option-desc {
-  font-size: 11.5px;
+  font-size: 13px;
   color: var(--text-3);
   line-height: 1.3;
   font-weight: 400;
@@ -589,7 +589,7 @@ const CSS = `
   color: var(--text-2);
   padding: 7px 14px;
   font-family: var(--font-text);
-  font-size: 12.5px;
+  font-size: 13px;
   font-weight: 500;
   cursor: pointer;
   border-radius: var(--r-sm);
@@ -676,7 +676,7 @@ const CSS = `
   font-weight: 600;
 }
 .ff-tab-badge {
-  font-size: 9.5px;
+  font-size: 12px;
   font-weight: 700;
   padding: 2px 6px;
   border-radius: var(--r-pill);
@@ -826,7 +826,7 @@ const CSS = `
   background-color: var(--accent-bg-soft);
   color: var(--accent);
   font-family: var(--font-text);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 500;
   border-radius: var(--r-pill);
   letter-spacing: -0.005em;
@@ -861,7 +861,7 @@ const CSS = `
 }
 .ff-score-ring-label {
   font-family: var(--font-text);
-  font-size: 10px;
+  font-size: 12px;
   color: var(--text-3);
   font-weight: 500;
   margin-top: 3px;
@@ -890,7 +890,7 @@ const CSS = `
 .ff-score-bar-high { background-color: var(--danger); }
 .ff-score-num-mini {
   font-family: var(--font-text);
-  font-size: 12.5px;
+  font-size: 13px;
   font-weight: 600;
   font-feature-settings: 'tnum';
   width: 44px;
@@ -908,7 +908,7 @@ const CSS = `
 .ff-rec-item + .ff-rec-item { border-top: 1px solid var(--border); }
 .ff-rec-prio {
   font-family: var(--font-text);
-  font-size: 10.5px;
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.02em;
   text-transform: uppercase;
@@ -940,7 +940,7 @@ const CSS = `
 }
 .ff-rec-fix-label {
   font-family: var(--font-text);
-  font-size: 10.5px;
+  font-size: 12px;
   color: var(--accent);
   font-weight: 600;
   letter-spacing: 0.02em;
@@ -959,7 +959,7 @@ const CSS = `
 .ff-rewrite-card:last-child { margin-bottom: 0; }
 .ff-rewrite-section {
   font-family: var(--font-text);
-  font-size: 11px;
+  font-size: 12px;
   color: var(--accent);
   font-weight: 600;
   letter-spacing: 0.02em;
@@ -1013,7 +1013,7 @@ const CSS = `
   gap: 6px;
   padding: 4px 10px;
   font-family: var(--font-text);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.02em;
   text-transform: uppercase;
@@ -1088,7 +1088,7 @@ const CSS = `
   align-items: center;
   gap: 6px;
   font-family: var(--font-text);
-  font-size: 12.5px;
+  font-size: 13px;
   color: var(--accent);
   text-decoration: none;
   word-break: break-all;
@@ -1117,7 +1117,7 @@ const CSS = `
 .ff-context-strip-item { display: flex; flex-direction: column; gap: 2px; }
 .ff-context-strip-label {
   font-family: var(--font-text);
-  font-size: 10.5px;
+  font-size: 12px;
   font-weight: 500;
   color: var(--text-3);
   letter-spacing: 0.02em;
@@ -1142,7 +1142,7 @@ const CSS = `
 
 .ff-section-label {
   font-family: var(--font-text);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--text-3);
   letter-spacing: 0.06em;
@@ -1767,7 +1767,7 @@ const CSS = `
 }
 
 .ff-chat-sidebar-title {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -1824,14 +1824,14 @@ const CSS = `
 .ff-chat-sidebar-item-active .ff-chat-sidebar-item-dot { opacity: 1; }
 
 .ff-chat-sidebar-item-title {
-  font-size: 12.5px; font-weight: 600; color: var(--text-1);
+  font-size: 13px; font-weight: 600; color: var(--text-1);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   letter-spacing: -0.008em; font-family: var(--font-text);
   padding-right: 14px;
 }
 
 .ff-chat-sidebar-item-meta {
-  font-size: 11px; color: var(--text-3);
+  font-size: 12px; color: var(--text-3);
   font-family: var(--font-text); letter-spacing: -0.003em;
 }
 
@@ -1883,7 +1883,7 @@ const CSS = `
 .ff-chat-avatar {
   width: 28px; height: 28px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0; font-size: 10px; font-weight: 800;
+  flex-shrink: 0; font-size: 12px; font-weight: 800;
   letter-spacing: 0.02em;
 }
 .ff-chat-avatar-ai {
@@ -1895,7 +1895,7 @@ const CSS = `
 }
 .ff-chat-avatar-user {
   background: var(--text-1); color: var(--bg);
-  font-size: 9px;
+  font-size: 12px;
 }
 
 .ff-chat-bubble {
@@ -1941,7 +1941,7 @@ const CSS = `
   background: transparent; border: none; color: var(--text-3); cursor: pointer;
   padding: 3px 6px; border-radius: 6px;
   display: inline-flex; align-items: center; gap: 4px;
-  font-size: 10.5px; font-family: var(--font-text); font-weight: 500;
+  font-size: 12px; font-family: var(--font-text); font-weight: 500;
   transition: all var(--t-fast); margin-top: 5px;
   opacity: 0;
 }
@@ -2025,28 +2025,185 @@ const CSS = `
 /* ---- MOBILE ---- */
 .ff-chat-sidebar-toggle {
   display: none;
-  align-items: center; gap: 6px;
+  align-items: center; gap: 7px;
   background: var(--bg-elev-1); border: 1px solid var(--border-strong);
-  color: var(--text-2); font-size: 12px; font-weight: 600;
+  color: var(--text-2); font-size: 13px; font-weight: 600;
   font-family: var(--font-text); cursor: pointer;
-  padding: 6px 12px; border-radius: var(--r-pill);
+  padding: 8px 14px; border-radius: var(--r-pill);
   letter-spacing: -0.005em; transition: all var(--t-fast);
 }
 .ff-chat-sidebar-toggle:hover { background: var(--bg-elev-2); color: var(--text-1); }
 
+/* Mobile bottom sheet backdrop */
+.ff-sheet-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  animation: ff-fadein 200ms ease;
+}
+.ff-sheet-backdrop.open { display: block; }
+
+/* Bottom sheet drawer */
+.ff-chat-sheet {
+  display: none;
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  z-index: 50;
+  background: var(--bg);
+  border-radius: 20px 20px 0 0;
+  border-top: 1px solid var(--border);
+  box-shadow: 0 -8px 40px rgba(0,0,0,0.18);
+  flex-direction: column;
+  max-height: 72vh;
+  animation: ff-sheet-in 320ms cubic-bezier(0.16,1,0.3,1);
+}
+.ff-chat-sheet.open { display: flex; }
+@keyframes ff-sheet-in {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
+/* Sheet handle */
+.ff-chat-sheet-handle {
+  width: 36px; height: 4px;
+  background: var(--border-strong);
+  border-radius: 2px;
+  margin: 12px auto 0;
+  flex-shrink: 0;
+}
+
+/* Sheet header */
+.ff-chat-sheet-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px 10px;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--border);
+}
+.ff-chat-sheet-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-1);
+  letter-spacing: -0.01em;
+  font-family: var(--font-text);
+}
+.ff-chat-sheet-close {
+  width: 30px; height: 30px;
+  background: var(--bg-elev-2);
+  border: none; border-radius: 50%;
+  color: var(--text-2); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all var(--t-fast);
+}
+.ff-chat-sheet-close:hover { background: var(--bg-elev-1); color: var(--text-1); }
+
+/* Sheet new chat button */
+.ff-chat-sheet-new {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 10px 14px;
+  padding: 12px 14px;
+  background: var(--accent-bg-soft);
+  border: 1px solid var(--accent-border-soft);
+  border-radius: 12px;
+  cursor: pointer;
+  font-family: var(--font-text);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent);
+  transition: all var(--t-fast);
+  flex-shrink: 0;
+}
+.ff-chat-sheet-new:hover { background: var(--accent); color: white; border-color: var(--accent); }
+
+/* Sheet list */
+.ff-chat-sheet-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 6px 10px 24px;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Sheet conversation row */
+.ff-chat-sheet-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 10px;
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--t-fast);
+  margin-bottom: 2px;
+}
+.ff-chat-sheet-item:hover { background: var(--bg-elev-1); }
+.ff-chat-sheet-item-active { background: var(--accent-bg-soft) !important; }
+
+.ff-chat-sheet-item-icon {
+  width: 38px; height: 38px;
+  border-radius: 10px;
+  background: var(--bg-elev-2);
+  border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; color: var(--text-3);
+  transition: all var(--t-fast);
+}
+.ff-chat-sheet-item-active .ff-chat-sheet-item-icon {
+  background: var(--accent-bg-soft);
+  border-color: var(--accent-border-soft);
+  color: var(--accent);
+}
+
+.ff-chat-sheet-item-body {
+  flex: 1; min-width: 0;
+}
+.ff-chat-sheet-item-title {
+  font-size: 14px; font-weight: 600; color: var(--text-1);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  letter-spacing: -0.008em; font-family: var(--font-text);
+  margin-bottom: 2px;
+}
+.ff-chat-sheet-item-active .ff-chat-sheet-item-title { color: var(--accent); }
+.ff-chat-sheet-item-meta {
+  font-size: 12px; color: var(--text-3); font-family: var(--font-text);
+}
+
+.ff-chat-sheet-item-del {
+  width: 28px; height: 28px;
+  background: transparent; border: none; border-radius: 8px;
+  color: var(--text-3); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: all var(--t-fast);
+}
+.ff-chat-sheet-item-del:hover { background: var(--danger-bg); color: var(--danger); }
+
+.ff-chat-sheet-empty {
+  padding: 32px 16px;
+  text-align: center;
+  color: var(--text-3);
+  font-size: 14px;
+  line-height: 1.6;
+  font-family: var(--font-text);
+}
+
 @media (max-width: 768px) {
   .ff-ask-layout { grid-template-columns: 1fr; height: 540px; border-radius: 16px; position: relative; }
-  .ff-chat-sidebar {
-    display: none; position: absolute; left: 0; top: 0; bottom: 0;
-    width: 240px; z-index: 30; border-right: none;
-    box-shadow: var(--sh-3); border-radius: 0 16px 16px 0;
-  }
-  .ff-chat-sidebar.open { display: flex; }
+  .ff-chat-sidebar { display: none !important; }
   .ff-chat-sidebar-toggle { display: flex; }
   .ff-chat-messages { padding: 16px 14px 8px; gap: 14px; }
 }
 @media (max-width: 480px) {
   .ff-ask-layout { height: 500px; border-radius: 14px; }
+  .ff-chat-sheet { max-height: 80vh; }
 }
 
 /* ---- ATTACHMENTS ---- */
@@ -2057,7 +2214,7 @@ const CSS = `
 }
 .ff-chat-attachment-name {
   flex: 1; min-width: 0; font-weight: 500; color: var(--text-1);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 11.5px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 13px;
 }
 .ff-chat-user-attachment {
   max-width: 180px; border-radius: 12px; overflow: hidden; margin-bottom: 5px;
@@ -2066,7 +2223,7 @@ const CSS = `
 .ff-chat-user-attachment-file {
   display: flex; align-items: center; gap: 7px; padding: 7px 10px;
   background: rgba(255,255,255,0.18); border-radius: 10px;
-  font-size: 11px; font-weight: 500; margin-bottom: 5px;
+  font-size: 12px; font-weight: 500; margin-bottom: 5px;
 }
 
 /* ====================================================================== */
@@ -2174,7 +2331,7 @@ const CSS = `
 /* Skip button — top right */
 .ff-preloader-skip {
   position: absolute; top: 22px; right: 24px;
-  font-size: 11.5px; font-weight: 500; padding: 5px 13px;
+  font-size: 13px; font-weight: 500; padding: 5px 13px;
   border-radius: 20px; cursor: pointer;
   letter-spacing: 0.01em; transition: all 180ms ease;
   font-family: system-ui, sans-serif;
@@ -2205,7 +2362,7 @@ const CSS = `
 .ff-preloader-icon-pill {
   display: inline-flex; align-items: center; gap: 7px;
   padding: 7px 16px; border-radius: 24px;
-  margin-bottom: 28px; font-size: 11.5px; font-weight: 600;
+  margin-bottom: 28px; font-size: 13px; font-weight: 600;
   letter-spacing: 0.03em; font-family: system-ui, sans-serif;
   text-transform: uppercase;
 }
@@ -2482,7 +2639,7 @@ export default function FreelancersForge() {
               <div className="ff-theme-menu">
                 <div style={{
                   padding: '6px 10px 4px',
-                  fontSize: 10.5,
+                  fontSize: 12,
                   fontWeight: 700,
                   letterSpacing: '0.07em',
                   textTransform: 'uppercase',
@@ -2810,27 +2967,73 @@ function AskAnythingTab() {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14, gap: 10, flexWrap: 'wrap' }}>
         <div>
           <h2 className="ff-display ff-text-1" style={{ fontSize: 24, letterSpacing: '-0.02em', marginBottom: 2 }}>Ask anything</h2>
-          <p className="ff-text-3" style={{ fontSize: 12.5, lineHeight: 1.4 }}>Strategy, pricing, copy, clients — direct answers.</p>
+          <p className="ff-text-3" style={{ fontSize: 13, lineHeight: 1.4 }}>Strategy, pricing, copy, clients — direct answers.</p>
         </div>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-          <button type="button" className="ff-chat-sidebar-toggle" onClick={() => setSidebarOpen(o => !o)}>
-            <MessageSquare size={12} />
-            {convos.length > 0 ? `${convos.length} chat${convos.length !== 1 ? 's' : ''}` : 'History'}
+          <button type="button" className="ff-chat-sidebar-toggle" onClick={() => setSidebarOpen(true)}>
+            <MessageSquare size={14} />
+            Chats{convos.length > 0 ? ` (${convos.length})` : ''}
           </button>
-          <button type="button" className="ff-btn ff-btn-secondary" onClick={startNewChat} style={{ width: 'auto', padding: '7px 13px', fontSize: 12.5, gap: 6 }}>
-            <Plus size={12} /> New chat
+          <button type="button" className="ff-btn ff-btn-secondary" onClick={startNewChat} style={{ width: 'auto', padding: '7px 13px', fontSize: 13, gap: 6 }}>
+            <Plus size={13} /> New chat
           </button>
+        </div>
+      </div>
+
+      {/* Mobile bottom sheet backdrop */}
+      <div className={`ff-sheet-backdrop${sidebarOpen ? ' open' : ''}`} onClick={() => setSidebarOpen(false)} />
+
+      {/* Mobile bottom sheet */}
+      <div className={`ff-chat-sheet${sidebarOpen ? ' open' : ''}`}>
+        <div className="ff-chat-sheet-handle" />
+        <div className="ff-chat-sheet-head">
+          <span className="ff-chat-sheet-title">Your Chats</span>
+          <button type="button" className="ff-chat-sheet-close" onClick={() => setSidebarOpen(false)}>
+            <X size={14} />
+          </button>
+        </div>
+        <button type="button" className="ff-chat-sheet-new" onClick={() => { startNewChat(); setSidebarOpen(false); }}>
+          <Plus size={15} />
+          Start a new chat
+        </button>
+        <div className="ff-chat-sheet-list">
+          {sortedConvos.length === 0 ? (
+            <div className="ff-chat-sheet-empty">
+              <div style={{ fontSize: 28, marginBottom: 8 }}>💬</div>
+              No conversations yet.<br />Start chatting to save history.
+            </div>
+          ) : sortedConvos.map(c => (
+            <button
+              key={c.id}
+              type="button"
+              className={`ff-chat-sheet-item${c.id === activeId ? ' ff-chat-sheet-item-active' : ''}`}
+              onClick={() => { setActiveId(c.id); setSidebarOpen(false); setError(''); }}
+            >
+              <div className="ff-chat-sheet-item-icon">
+                <MessageSquare size={15} />
+              </div>
+              <div className="ff-chat-sheet-item-body">
+                <div className="ff-chat-sheet-item-title">{getConvoTitle(c.messages)}</div>
+                <div className="ff-chat-sheet-item-meta">{timeAgo(c.updatedAt)} · {Math.floor(c.messages.length / 2)} message{c.messages.length / 2 !== 1 ? 's' : ''}</div>
+              </div>
+              <button
+                type="button"
+                className="ff-chat-sheet-item-del"
+                onClick={(e) => deleteConvo(c.id, e)}
+                title="Delete"
+              >
+                <Trash2 size={13} />
+              </button>
+            </button>
+          ))}
         </div>
       </div>
 
       {/* Main layout */}
       <div className="ff-ask-layout" style={{ position: 'relative' }}>
-        {sidebarOpen && (
-          <div onClick={() => setSidebarOpen(false)} style={{ position: 'absolute', inset: 0, zIndex: 20, background: 'rgba(0,0,0,0.2)', backdropFilter: 'blur(3px)', borderRadius: 'inherit' }} />
-        )}
 
-        {/* Sidebar */}
-        <div className={`ff-chat-sidebar${sidebarOpen ? ' open' : ''}`}>
+        {/* Sidebar (desktop only) */}
+        <div className="ff-chat-sidebar">
           <div className="ff-chat-sidebar-head">
             <span className="ff-chat-sidebar-title">Chats</span>
             <button className="ff-chat-new-btn" onClick={startNewChat} title="New chat" type="button">
@@ -2882,7 +3085,7 @@ function AskAnythingTab() {
                 <p className="ff-display ff-text-1" style={{ fontSize: 18, letterSpacing: '-0.02em', marginBottom: 6, lineHeight: 1.2 }}>
                   What do you want to know?
                 </p>
-                <p className="ff-text-3" style={{ fontSize: 12.5, lineHeight: 1.55, maxWidth: '30ch', marginBottom: 20 }}>
+                <p className="ff-text-3" style={{ fontSize: 13, lineHeight: 1.55, maxWidth: '30ch', marginBottom: 20 }}>
                   Ask about rates, niches, client scripts, or upload a file.
                 </p>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, justifyContent: 'center', maxWidth: 420 }}>
@@ -2932,7 +3135,7 @@ function AskAnythingTab() {
             )}
 
             {error && (
-              <div className="ff-fadeup" style={{ background: 'var(--danger-bg)', color: 'var(--danger)', padding: '8px 12px', borderRadius: 10, fontSize: 12.5, fontWeight: 500, textAlign: 'center' }}>
+              <div className="ff-fadeup" style={{ background: 'var(--danger-bg)', color: 'var(--danger)', padding: '8px 12px', borderRadius: 10, fontSize: 13, fontWeight: 500, textAlign: 'center' }}>
                 {error}
               </div>
             )}
@@ -2945,7 +3148,7 @@ function AskAnythingTab() {
             {isEmpty && messages.length < 1 && (
               <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', marginBottom: 8 }}>
                 {SUGGESTED_PROMPTS.slice(0, 3).map((p, i) => (
-                  <button key={i} type="button" className="ff-suggested-prompt" onClick={() => sendMessage(p.text)} style={{ fontSize: 11, padding: '5px 10px' }}>{p.label}</button>
+                  <button key={i} type="button" className="ff-suggested-prompt" onClick={() => sendMessage(p.text)} style={{ fontSize: 12, padding: '5px 10px' }}>{p.label}</button>
                 ))}
               </div>
             )}
@@ -2974,7 +3177,7 @@ function AskAnythingTab() {
                 </button>
               </div>
             </div>
-            <p className="ff-text-3" style={{ fontSize: 10, textAlign: 'center', marginTop: 5, letterSpacing: '-0.003em' }}>
+            <p className="ff-text-3" style={{ fontSize: 12, textAlign: 'center', marginTop: 5, letterSpacing: '-0.003em' }}>
               Enter to send · Chats saved 15 days
             </p>
           </div>
@@ -3435,7 +3638,7 @@ function OptimizeOutput({ result, pageType, optimized, onOptimize, optimizing, c
             </div>
           </div>
           <div className="flex-1 min-w-[200px]">
-            <p className="ff-mono mb-2" style={{ fontSize: 11, color: 'var(--accent)', fontWeight: 600, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+            <p className="ff-mono mb-2" style={{ fontSize: 12, color: 'var(--accent)', fontWeight: 600, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
               {result.overall?.headline}
             </p>
             <p className="ff-verdict">{result.overall?.verdict}</p>
@@ -3459,7 +3662,7 @@ function OptimizeOutput({ result, pageType, optimized, onOptimize, optimizing, c
                   {s.score}/10
                 </span>
               </div>
-              {s.note && <p className="ff-text-3" style={{ fontSize: 12.5, marginTop: -2, marginBottom: 6 }}>{s.note}</p>}
+              {s.note && <p className="ff-text-3" style={{ fontSize: 13, marginTop: -2, marginBottom: 6 }}>{s.note}</p>}
             </div>
           ))}
         </div>
@@ -3533,7 +3736,7 @@ function OptimizeOutput({ result, pageType, optimized, onOptimize, optimizing, c
 
           {optimized.summary && (
             <div className="ff-card mb-4">
-              <p className="ff-mono mb-3" style={{ fontSize: 11, color: 'var(--accent)', fontWeight: 600, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+              <p className="ff-mono mb-3" style={{ fontSize: 12, color: 'var(--accent)', fontWeight: 600, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
                 {optimized.summary.headline}
               </p>
               {optimized.summary.niche && (
@@ -4461,7 +4664,7 @@ function PipelineTab() {
             Add an entry every time you send a proposal, DM, or email.<br/>
             Track replies and close rates over time.
           </p>
-          <p className="ff-text-3 mt-4" style={{ fontSize: 11, lineHeight: 1.5, fontStyle: 'italic' }}>
+          <p className="ff-text-3 mt-4" style={{ fontSize: 12, lineHeight: 1.5, fontStyle: 'italic' }}>
             Saved in your browser for 15 days. No account needed.
           </p>
         </div>
@@ -4470,11 +4673,11 @@ function PipelineTab() {
       {entries.length > 0 && (
         <div className="ff-card" style={{ padding: 0 }}>
           <div className="ff-pipeline-table-header">
-            <span className="ff-section-label" style={{ fontSize: 10 }}>Date</span>
-            <span className="ff-section-label" style={{ fontSize: 10 }}>Client</span>
-            <span className="ff-section-label ff-pipeline-col-type" style={{ fontSize: 10 }}>Type</span>
-            <span className="ff-section-label" style={{ fontSize: 10 }}>Status</span>
-            <span className="ff-section-label ff-pipeline-col-value" style={{ fontSize: 10 }}>Value</span>
+            <span className="ff-section-label" style={{ fontSize: 12 }}>Date</span>
+            <span className="ff-section-label" style={{ fontSize: 12 }}>Client</span>
+            <span className="ff-section-label ff-pipeline-col-type" style={{ fontSize: 12 }}>Type</span>
+            <span className="ff-section-label" style={{ fontSize: 12 }}>Status</span>
+            <span className="ff-section-label ff-pipeline-col-value" style={{ fontSize: 12 }}>Value</span>
             <span></span>
           </div>
           {entries.map((entry, i) => (
@@ -4505,7 +4708,7 @@ function PipelineTab() {
 function StatCard({ label, value, sub, accent }) {
   return (
     <div className="ff-card ff-fadeup" style={{ padding: 18 }}>
-      <p className="ff-section-label mb-2" style={{ fontSize: 10.5 }}>{label}</p>
+      <p className="ff-section-label mb-2" style={{ fontSize: 12 }}>{label}</p>
       <p style={{
         fontFamily: 'var(--font-display)',
         fontSize: 28,
@@ -4517,7 +4720,7 @@ function StatCard({ label, value, sub, accent }) {
       }}>
         {value}
       </p>
-      {sub && <p className="ff-text-3 mt-1" style={{ fontSize: 11.5 }}>{sub}</p>}
+      {sub && <p className="ff-text-3 mt-1" style={{ fontSize: 13 }}>{sub}</p>}
     </div>
   );
 }
@@ -4589,7 +4792,7 @@ function ActivityModal({ open, onClose, period, setPeriod, week, month, year }) 
                     background: active ? 'var(--bg-elev-1)' : 'transparent',
                     color: active ? 'var(--text-1)' : 'var(--text-3)',
                     padding: '7px 16px', borderRadius: 7,
-                    fontSize: 12.5, fontWeight: 600, fontFamily: 'var(--font-text)',
+                    fontSize: 13, fontWeight: 600, fontFamily: 'var(--font-text)',
                     cursor: 'pointer',
                     transition: 'background 220ms, color 220ms',
                     boxShadow: active ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
@@ -4610,8 +4813,8 @@ function ActivityModal({ open, onClose, period, setPeriod, week, month, year }) 
 
           <div>
             <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 18 }}>
-              <span className="ff-section-label" style={{ fontSize: 10.5 }}>Breakdown</span>
-              <span style={{ fontSize: 11.5, color: 'var(--text-3)', fontFeatureSettings: "'tnum'" }}>{data.sent} {data.sent === 1 ? 'entry' : 'entries'}</span>
+              <span className="ff-section-label" style={{ fontSize: 12 }}>Breakdown</span>
+              <span style={{ fontSize: 13, color: 'var(--text-3)', fontFeatureSettings: "'tnum'" }}>{data.sent} {data.sent === 1 ? 'entry' : 'entries'}</span>
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -4619,7 +4822,7 @@ function ActivityModal({ open, onClose, period, setPeriod, week, month, year }) 
                 const widthPct = data.sent > 0 ? (bar.value / maxBarValue) * 100 : 0;
                 return (
                   <div key={bar.label} style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                    <div style={{ width: 72, fontSize: 12.5, color: 'var(--text-2)', fontWeight: 500, flexShrink: 0 }}>{bar.label}</div>
+                    <div style={{ width: 72, fontSize: 13, color: 'var(--text-2)', fontWeight: 500, flexShrink: 0 }}>{bar.label}</div>
                     <div style={{ flex: 1, height: 26, background: 'var(--bg-elev-2)', borderRadius: 7, overflow: 'hidden' }}>
                       <div
                         key={`${period}-${bar.label}`}
@@ -4646,7 +4849,7 @@ function ActivityModal({ open, onClose, period, setPeriod, week, month, year }) 
 function SummaryStat({ label, value, accent, muted }) {
   return (
     <div>
-      <p className="ff-section-label" style={{ fontSize: 10, marginBottom: 6 }}>{label}</p>
+      <p className="ff-section-label" style={{ fontSize: 12, marginBottom: 6 }}>{label}</p>
       <p style={{ fontFamily: 'var(--font-display)', fontSize: 22, fontWeight: 400, letterSpacing: '-0.02em', color: accent ? 'var(--accent)' : (muted ? 'var(--text-2)' : 'var(--text-1)'), margin: 0, lineHeight: 1.1 }}>
         {value}
       </p>
@@ -4679,7 +4882,7 @@ function PipelineRow({ entry, onStatusChange, onRemove, delay }) {
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
         <span className="ff-mono" style={{ fontSize: 12, color: 'var(--text-2)', fontWeight: 500 }}>{formatShortDate(entry.date)}</span>
-        <span style={{ fontSize: 11, color: 'var(--text-3)' }}>{daysAgoLabel(entry.date)}</span>
+        <span style={{ fontSize: 12, color: 'var(--text-3)' }}>{daysAgoLabel(entry.date)}</span>
       </div>
       <div style={{ minWidth: 0 }}>
         <p style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--text-1)', letterSpacing: '-0.005em' }} className="truncate">{entry.client}</p>
@@ -4695,7 +4898,7 @@ function PipelineRow({ entry, onStatusChange, onRemove, delay }) {
             color: status?.color || 'var(--text-2)',
             border: 'none', padding: '4px 10px',
             borderRadius: 'var(--r-pill)',
-            fontSize: 11, fontWeight: 600, letterSpacing: '0.02em', textTransform: 'uppercase',
+            fontSize: 12, fontWeight: 600, letterSpacing: '0.02em', textTransform: 'uppercase',
             cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 4,
           }}
         >
@@ -4999,7 +5202,7 @@ function ProposalOutput({ result, pillClass, portfolio, copied, copyText, select
                   <ol style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 8 }}>
                     {proposal.process.map((s, i) => (
                       <li key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-                        <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--accent)', fontFamily: 'var(--font-mono)', flexShrink: 0, width: 18, paddingTop: 2 }}>{String(i + 1).padStart(2, '0')}</span>
+                        <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--accent)', fontFamily: 'var(--font-mono)', flexShrink: 0, width: 18, paddingTop: 2 }}>{String(i + 1).padStart(2, '0')}</span>
                         <span style={{ fontSize: 14, lineHeight: 1.5, color: 'var(--text-1)', letterSpacing: '-0.005em' }}>{s}</span>
                       </li>
                     ))}
@@ -5235,7 +5438,7 @@ function OutputBlock({ title, text, copyKey, copied, copyText, selectAllText, de
 function Cell({ label, value, children, wide, accent }) {
   return (
     <div className={wide ? 'col-span-2' : ''}>
-      <div className="ff-section-label mb-1.5" style={{ fontSize: 10.5 }}>{label}</div>
+      <div className="ff-section-label mb-1.5" style={{ fontSize: 12 }}>{label}</div>
       {children || (
         <p style={{ fontSize: 13.5, lineHeight: 1.5, color: accent ? 'var(--accent)' : 'var(--text-1)', fontWeight: accent ? 600 : 400, letterSpacing: '-0.005em' }}>
           {value || '...'}
@@ -5248,7 +5451,7 @@ function Cell({ label, value, children, wide, accent }) {
 function OptimizeEmpty() {
   return (
     <div className="ff-empty-state">
-      <div className="ff-mono ff-pulse mb-4" style={{ fontSize: 11, color: 'var(--text-3)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+      <div className="ff-mono ff-pulse mb-4" style={{ fontSize: 12, color: 'var(--text-3)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
         Awaiting Page
       </div>
       <p className="ff-display ff-text-1 mb-4" style={{ fontSize: 22, lineHeight: 1.3, fontWeight: 400, letterSpacing: '-0.02em' }}>
@@ -5266,7 +5469,7 @@ function OptimizeLoading({ message }) {
     <div className="ff-card">
       <div className="flex items-center gap-2 mb-5">
         <span className="ff-status-dot ff-pulse"></span>
-        <span className="ff-mono" style={{ fontSize: 11, color: 'var(--accent)', fontWeight: 600, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+        <span className="ff-mono" style={{ fontSize: 12, color: 'var(--accent)', fontWeight: 600, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
           Working
         </span>
       </div>
@@ -5296,7 +5499,7 @@ function CloserEmpty({ mode }) {
   const kicker = kickers[mode] || 'Awaiting Intel';
   return (
     <div className="ff-empty-state">
-      <div className="ff-mono ff-pulse mb-4" style={{ fontSize: 11, color: 'var(--text-3)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+      <div className="ff-mono ff-pulse mb-4" style={{ fontSize: 12, color: 'var(--text-3)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
         {kicker}
       </div>
       <p className="ff-display ff-text-1" style={{ fontSize: 22, lineHeight: 1.3, fontWeight: 400, letterSpacing: '-0.02em', whiteSpace: 'pre-line' }}>
