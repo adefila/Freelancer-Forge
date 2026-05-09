@@ -2145,13 +2145,22 @@ function loadChatFromStorage() {
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
     const cutoff = Date.now() - CHAT_RETENTION_DAYS * 24 * 60 * 60 * 1000;
-    return parsed.filter(m => m && m.role && m.content && (m.ts || 0) >= cutoff);
+    return parsed.filter(m => {
+      if (!m || !m.role || !m.content) return false;
+      // Keep messages that have no ts (legacy) or are within retention window
+      return !m.ts || m.ts >= cutoff;
+    });
   } catch { return []; }
 }
 
 function saveChatToStorage(messages) {
   try {
-    localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(messages));
+    // Strip base64 attachment data before saving — keep preview URL and name only
+    const slim = messages.map(m => ({
+      ...m,
+      attachment: m.attachment ? { type: m.attachment.type, name: m.attachment.name, preview: null } : null,
+    }));
+    localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(slim));
   } catch {}
 }
 
@@ -2161,7 +2170,8 @@ function AskAnythingTab() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [copiedIdx, setCopiedIdx] = useState(null);
-  const [attachment, setAttachment] = useState(null); // { type: 'image'|'file', data, mediaType, name, preview }
+  const [attachment, setAttachment] = useState(null);
+  const isRestoredSession = useRef(loadChatFromStorage().length > 0);
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -2300,6 +2310,7 @@ You give direct, tactical advice. No fluff. No buzzwords. No "it depends" withou
     setMessages([]);
     setAttachment(null);
     setError('');
+    isRestoredSession.current = false;
     try { localStorage.removeItem(CHAT_STORAGE_KEY); } catch {}
   };
 
@@ -2309,11 +2320,30 @@ You give direct, tactical advice. No fluff. No buzzwords. No "it depends" withou
     <div className="ff-fadeup">
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
         <div>
-          <h2 className="ff-display ff-text-1" style={{ fontSize: 28, letterSpacing: '-0.02em' }}>
-            Ask anything
-          </h2>
-          <p className="ff-text-2 mt-1" style={{ fontSize: 14, lineHeight: 1.5 }}>
-            Freelance strategy, pricing, copy, clients. Direct answers, no fluff.
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
+            <h2 className="ff-display ff-text-1" style={{ fontSize: 28, letterSpacing: '-0.02em' }}>
+              Ask anything
+            </h2>
+            {isRestoredSession.current && messages.length > 0 && (
+              <span style={{
+                fontSize: 11,
+                fontWeight: 600,
+                letterSpacing: '0.02em',
+                padding: '3px 9px',
+                borderRadius: 'var(--r-pill)',
+                background: 'var(--accent-bg-soft)',
+                color: 'var(--accent)',
+                border: '1px solid var(--accent-border-soft)',
+                whiteSpace: 'nowrap',
+              }}>
+                {Math.floor(messages.length / 2)} exchange{messages.length / 2 !== 1 ? 's' : ''} saved
+              </span>
+            )}
+          </div>
+          <p className="ff-text-2" style={{ fontSize: 14, lineHeight: 1.5 }}>
+            {isRestoredSession.current && messages.length > 0
+              ? 'Picking up where you left off. Your conversation is saved.'
+              : 'Freelance strategy, pricing, copy, clients. Direct answers, no fluff.'}
           </p>
         </div>
         {messages.length > 0 && (
@@ -2343,6 +2373,17 @@ You give direct, tactical advice. No fluff. No buzzwords. No "it depends" withou
                   </button>
                 ))}
               </div>
+            </div>
+          )}
+
+          {/* Restored session divider */}
+          {isRestoredSession.current && messages.length > 0 && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '4px 0 8px' }}>
+              <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
+              <span style={{ fontSize: 11, color: 'var(--text-3)', fontWeight: 500, whiteSpace: 'nowrap', letterSpacing: '0.01em' }}>
+                Previous session
+              </span>
+              <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
             </div>
           )}
 
