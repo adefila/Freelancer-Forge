@@ -233,10 +233,10 @@ const SUGGESTED_PROMPTS = [
 
 const CSS = `
 @import url('https://rsms.me/inter/inter.css');
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&display=swap');
 
 .ff-root {
-  --font-display: 'Fraunces', 'Times New Roman', Georgia, serif;
+  --font-display: 'DM Serif Display', 'Georgia', serif;
   --font-text: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
   --font-mono: 'SF Mono', 'JetBrains Mono', ui-monospace, monospace;
 
@@ -327,10 +327,9 @@ const CSS = `
 
 .ff-display {
   font-family: var(--font-display);
-  letter-spacing: -0.018em;
-  font-weight: 500;
-  font-feature-settings: 'ss01', 'ss02';
-  font-optical-sizing: auto;
+  letter-spacing: -0.02em;
+  font-weight: 400;
+  font-feature-settings: 'kern';
 }
 .ff-mono { font-family: var(--font-mono); font-feature-settings: 'tnum', 'zero'; }
 
@@ -352,9 +351,14 @@ const CSS = `
   transition: border-color var(--t-fast), box-shadow var(--t-fast), background-color var(--t-slow);
   border-radius: var(--r-md);
   letter-spacing: -0.01em;
+  font-size: 16px; /* prevents iOS zoom on focus */
 }
-.ff-input { font-size: 14px; padding: 10px 12px; }
-.ff-textarea { font-size: 15px; line-height: 1.5; padding: 12px 14px; resize: vertical; }
+.ff-input { padding: 11px 13px; }
+.ff-textarea { line-height: 1.5; padding: 13px 14px; resize: vertical; }
+@media (min-width: 768px) {
+  .ff-input { font-size: 14px; padding: 10px 12px; }
+  .ff-textarea { font-size: 15px; padding: 12px 14px; }
+}
 .ff-input:focus, .ff-textarea:focus {
   border-color: var(--accent);
   box-shadow: var(--sh-focus);
@@ -900,7 +904,7 @@ const CSS = `
   letter-spacing: -0.018em;
   color: var(--text-1);
   margin-bottom: 8px;
-  font-optical-sizing: auto;
+  
 }
 .ff-optimize-sub {
   font-size: 14.5px;
@@ -1075,7 +1079,7 @@ const CSS = `
   font-weight: 500;
   letter-spacing: -0.018em;
   color: var(--text-1);
-  font-optical-sizing: auto;
+  
 }
 
 .ff-pulse { animation: ff-pulse 1.6s ease-in-out infinite; }
@@ -1409,43 +1413,44 @@ const CSS = `
 .ff-root-inner {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 24px 20px 48px;
+  padding: 32px 24px 72px;
 }
 
 .ff-topbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 32px;
+  margin-bottom: 40px;
   gap: 12px;
 }
 
 .ff-hero {
-  margin-bottom: 36px;
+  margin-bottom: 48px;
 }
 
 .ff-hero-heading {
-  font-size: clamp(32px, 5.6vw, 64px);
-  line-height: 1.06;
-  font-weight: 500;
-  letter-spacing: -0.022em;
-  max-width: 20ch;
-  margin-bottom: 16px;
+  font-size: clamp(34px, 5.6vw, 68px);
+  line-height: 1.05;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  max-width: 22ch;
+  margin-bottom: 18px;
 }
 
 .ff-hero-sub {
   font-size: clamp(14px, 1.3vw, 17px);
-  line-height: 1.55;
-  letter-spacing: -0.01em;
-  max-width: 52ch;
+  line-height: 1.6;
+  letter-spacing: -0.005em;
+  max-width: 48ch;
+  color: var(--text-2);
 }
 
 .ff-tabs-nav {
-  margin-bottom: 32px;
+  margin-bottom: 40px;
 }
 
 .ff-cv-selector {
-  margin-bottom: 32px;
+  margin-bottom: 36px;
 }
 
 .ff-pipeline-topbar {
@@ -1758,72 +1763,112 @@ const CSS = `
 }
 
 .ff-chat-footer {
-  padding: 16px;
+  padding: 12px 16px 14px;
   border-top: 1px solid var(--border);
   background: var(--bg);
 }
 
-.ff-chat-input-row {
-  display: flex;
-  gap: 10px;
-  align-items: flex-end;
+/* Unified input container — ChatGPT/Claude style */
+.ff-chat-input-box {
+  background: var(--bg-input);
+  border: 1px solid var(--border-strong);
+  border-radius: 16px;
+  transition: border-color var(--t-fast), box-shadow var(--t-fast);
+  position: relative;
+}
+
+.ff-chat-input-box:focus-within {
+  border-color: var(--border-strong);
+  box-shadow: 0 0 0 3px rgba(0,0,0,0.04);
+}
+
+.ff-root.dark .ff-chat-input-box:focus-within {
+  box-shadow: 0 0 0 3px rgba(255,255,255,0.05);
 }
 
 .ff-chat-textarea {
-  flex: 1;
-  background: var(--bg-elev-1);
-  border: 1px solid var(--border-strong);
+  display: block;
+  width: 100%;
+  background: transparent;
+  border: none;
   color: var(--text-1);
   font-family: var(--font-text);
-  font-size: 14px;
+  font-size: 16px;
   line-height: 1.5;
-  padding: 11px 14px;
-  border-radius: var(--r-md);
+  padding: 14px 16px 0;
   resize: none;
   outline: none;
   letter-spacing: -0.005em;
-  transition: border-color var(--t-fast), box-shadow var(--t-fast);
   max-height: 160px;
   overflow-y: auto;
-  min-height: 44px;
+  min-height: 28px;
 }
-
-.ff-chat-textarea:focus {
-  border-color: var(--accent);
-  box-shadow: var(--sh-focus);
+@media (min-width: 768px) {
+  .ff-chat-textarea { font-size: 15px; }
 }
 
 .ff-chat-textarea::placeholder { color: var(--text-3); }
 
-.ff-chat-send {
-  width: 42px;
-  height: 42px;
-  background: var(--accent);
+/* Bottom bar with attach + send */
+.ff-chat-input-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px 10px;
+}
+
+.ff-chat-attach-btn {
+  width: 32px;
+  height: 32px;
+  background: transparent;
   border: none;
-  border-radius: var(--r-md);
-  color: var(--accent-text-on);
+  border-radius: 8px;
+  color: var(--text-3);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  transition: background var(--t-fast), transform var(--t-fast), box-shadow var(--t-fast);
-  box-shadow: var(--sh-1);
+  transition: all var(--t-fast);
+}
+
+.ff-chat-attach-btn:hover {
+  background: var(--bg-elev-2);
+  color: var(--text-1);
+}
+
+.ff-chat-send {
+  width: 32px;
+  height: 32px;
+  background: var(--text-1);
+  border: none;
+  border-radius: 8px;
+  color: var(--bg);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background var(--t-fast), transform var(--t-fast), opacity var(--t-fast);
 }
 
 .ff-chat-send:hover:not(:disabled) {
-  background: var(--accent-hover);
-  transform: translateY(-1px);
-  box-shadow: var(--sh-blue);
+  background: var(--text-2);
+  transform: scale(1.05);
 }
 
 .ff-chat-send:active:not(:disabled) {
-  transform: translateY(0) scale(0.95);
+  transform: scale(0.95);
 }
 
 .ff-chat-send:disabled {
-  opacity: 0.45;
+  opacity: 0.2;
   cursor: not-allowed;
+}
+
+.ff-root.dark .ff-chat-send {
+  background: var(--text-1);
+  color: var(--bg);
 }
 
 .ff-chat-empty {
@@ -1892,11 +1937,92 @@ const CSS = `
   font-style: italic;
 }
 
-`;
+/* ====================================================================== */
+/* CHAT ATTACHMENT STYLES                                                 */
+/* ====================================================================== */
 
-/* ====================================================================== */
-/* APP                                                                    */
-/* ====================================================================== */
+.ff-chat-attach-btn {
+  width: 38px;
+  height: 38px;
+  background: var(--bg-elev-1);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-md);
+  color: var(--text-2);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all var(--t-fast);
+}
+.ff-chat-attach-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-bg-soft);
+}
+.ff-chat-attachment-preview {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  background: var(--bg-elev-1);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  margin-bottom: 8px;
+  font-size: 12px;
+  color: var(--text-2);
+}
+.ff-chat-attachment-preview img {
+  width: 36px;
+  height: 36px;
+  object-fit: cover;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+.ff-chat-attachment-preview-icon {
+  width: 36px;
+  height: 36px;
+  background: var(--accent-bg-soft);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--accent);
+}
+.ff-chat-attachment-name {
+  flex: 1;
+  min-width: 0;
+  font-weight: 500;
+  color: var(--text-1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ff-chat-user-attachment {
+  max-width: 200px;
+  border-radius: var(--r-md);
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+.ff-chat-user-attachment img {
+  width: 100%;
+  display: block;
+  border-radius: var(--r-md);
+}
+.ff-chat-user-attachment-file {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgba(255,255,255,0.15);
+  border-radius: var(--r-md);
+  font-size: 12px;
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+
+`;
 
 export default function FreelancersForge() {
   const [theme, setTheme] = useState('light');
@@ -2008,49 +2134,112 @@ function formatMessageText(text) {
   });
 }
 
+
+const CHAT_STORAGE_KEY = 'ff_chat_v1';
+const CHAT_RETENTION_DAYS = 15;
+
+function loadChatFromStorage() {
+  try {
+    const raw = localStorage.getItem(CHAT_STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    const cutoff = Date.now() - CHAT_RETENTION_DAYS * 24 * 60 * 60 * 1000;
+    return parsed.filter(m => m && m.role && m.content && (m.ts || 0) >= cutoff);
+  } catch { return []; }
+}
+
+function saveChatToStorage(messages) {
+  try {
+    localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(messages));
+  } catch {}
+}
+
 function AskAnythingTab() {
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState(() => loadChatFromStorage());
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [copiedIdx, setCopiedIdx] = useState(null);
+  const [attachment, setAttachment] = useState(null); // { type: 'image'|'file', data, mediaType, name, preview }
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
-    scrollToBottom();
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, loading]);
+
+  useEffect(() => {
+    saveChatToStorage(messages);
+  }, [messages]);
 
   const autoResize = () => {
     const ta = textareaRef.current;
     if (!ta) return;
     ta.style.height = 'auto';
-    ta.style.height = Math.min(ta.scrollHeight, 160) + 'px';
+    ta.style.height = Math.min(ta.scrollHeight, 140) + 'px';
+  };
+
+  const handleAttachFile = (file) => {
+    if (!file) return;
+    const isImage = file.type.startsWith('image/');
+    const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+    const maxSize = isPdf ? 20 * 1024 * 1024 : 5 * 1024 * 1024;
+    if (file.size > maxSize) { setError(`File too large (max ${isPdf ? '20MB' : '5MB'}).`); return; }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const dataUrl = e.target.result;
+      setAttachment({
+        type: isImage ? 'image' : (isPdf ? 'pdf' : 'file'),
+        data: dataUrl.split(',')[1],
+        mediaType: isPdf ? 'application/pdf' : file.type,
+        name: file.name,
+        preview: isImage ? dataUrl : null,
+      });
+    };
+    reader.readAsDataURL(file);
   };
 
   const sendMessage = async (text) => {
     const trimmed = (text || input).trim();
-    if (!trimmed || loading) return;
+    if ((!trimmed && !attachment) || loading) return;
 
-    const userMsg = { role: 'user', content: trimmed };
+    const userMsg = {
+      role: 'user',
+      content: trimmed || (attachment ? `[Attached: ${attachment.name}]` : ''),
+      attachment: attachment ? { type: attachment.type, name: attachment.name, preview: attachment.preview } : null,
+      ts: Date.now(),
+    };
+
     const updatedMessages = [...messages, userMsg];
     setMessages(updatedMessages);
     setInput('');
+    setAttachment(null);
     setError('');
     setLoading(true);
-
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
-    }
+    if (textareaRef.current) textareaRef.current.style.height = 'auto';
 
     try {
+      // Build API message content
+      const buildContent = (msg) => {
+        if (msg.role !== 'user') return msg.content;
+        const parts = [];
+        // For the current message, include attachment data
+        if (msg === userMsg && attachment) {
+          if (attachment.type === 'image') {
+            parts.push({ type: 'image', source: { type: 'base64', media_type: attachment.mediaType, data: attachment.data } });
+          } else if (attachment.type === 'pdf') {
+            parts.push({ type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: attachment.data } });
+          }
+        }
+        if (trimmed) parts.push({ type: 'text', text: trimmed });
+        return parts.length === 1 && parts[0].type === 'text' ? parts[0].text : parts;
+      };
+
       const apiMessages = updatedMessages.map(m => ({
         role: m.role,
-        content: m.content,
+        content: buildContent(m),
       }));
 
       const response = await fetch('/api/claude', {
@@ -2080,10 +2269,8 @@ You give direct, tactical advice. No fluff. No buzzwords. No "it depends" withou
 
       const data = await response.json();
       const replyText = data.content.filter(b => b.type === 'text').map(b => b.text).join('').trim();
-
-      setMessages(prev => [...prev, { role: 'assistant', content: replyText }]);
+      setMessages(prev => [...prev, { role: 'assistant', content: replyText, ts: Date.now() }]);
     } catch (err) {
-      console.error('Ask error:', err);
       setError(err.message || 'Something went wrong. Try again.');
       setMessages(prev => prev.slice(0, -1));
     } finally {
@@ -2092,10 +2279,7 @@ You give direct, tactical advice. No fluff. No buzzwords. No "it depends" withou
   };
 
   const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
-    }
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
   };
 
   const copyMessage = async (text, idx) => {
@@ -2104,11 +2288,8 @@ You give direct, tactical advice. No fluff. No buzzwords. No "it depends" withou
         await navigator.clipboard.writeText(text);
       } else {
         const ta = document.createElement('textarea');
-        ta.value = text;
-        ta.style.position = 'fixed'; ta.style.left = '-9999px';
-        document.body.appendChild(ta); ta.select();
-        document.execCommand('copy');
-        document.body.removeChild(ta);
+        ta.value = text; ta.style.position = 'fixed'; ta.style.left = '-9999px';
+        document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
       }
       setCopiedIdx(idx);
       setTimeout(() => setCopiedIdx(null), 1800);
@@ -2117,17 +2298,18 @@ You give direct, tactical advice. No fluff. No buzzwords. No "it depends" withou
 
   const clearChat = () => {
     setMessages([]);
+    setAttachment(null);
     setError('');
+    try { localStorage.removeItem(CHAT_STORAGE_KEY); } catch {}
   };
 
   const isEmpty = messages.length === 0;
 
   return (
     <div className="ff-fadeup">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
         <div>
-          <h2 className="ff-display ff-text-1" style={{ fontSize: 28, fontWeight: 500, letterSpacing: '-0.018em' }}>
+          <h2 className="ff-display ff-text-1" style={{ fontSize: 28, letterSpacing: '-0.02em' }}>
             Ask anything
           </h2>
           <p className="ff-text-2 mt-1" style={{ fontSize: 14, lineHeight: 1.5 }}>
@@ -2135,52 +2317,28 @@ You give direct, tactical advice. No fluff. No buzzwords. No "it depends" withou
           </p>
         </div>
         {messages.length > 0 && (
-          <button
-            type="button"
-            className="ff-btn ff-btn-secondary"
-            onClick={clearChat}
-            style={{ width: 'auto', padding: '10px 16px' }}
-          >
-            <RotateCcw size={13} />
-            New chat
+          <button type="button" className="ff-btn ff-btn-secondary" onClick={clearChat} style={{ width: 'auto', padding: '9px 15px' }}>
+            <RotateCcw size={13} /> New chat
           </button>
         )}
       </div>
 
-      {/* Chat window */}
       <div className="ff-chat-wrap">
-        {/* Messages area */}
         <div className="ff-chat-messages">
           {isEmpty && !loading && (
             <div className="ff-chat-empty">
-              <div style={{
-                width: 52,
-                height: 52,
-                borderRadius: '50%',
-                background: 'var(--accent-bg-soft)',
-                border: '1px solid var(--accent-border-soft)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginBottom: 16,
-              }}>
-                <Bot size={22} style={{ color: 'var(--accent)' }} />
+              <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'var(--accent-bg-soft)', border: '1px solid var(--accent-border-soft)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 14 }}>
+                <Bot size={20} style={{ color: 'var(--accent)' }} />
               </div>
-              <p className="ff-display ff-text-1 mb-2" style={{ fontSize: 20, lineHeight: 1.3, fontWeight: 500, letterSpacing: '-0.018em' }}>
+              <p className="ff-display ff-text-1 mb-2" style={{ fontSize: 22, letterSpacing: '-0.02em' }}>
                 What do you want to know?
               </p>
-              <p className="ff-text-3 mb-8" style={{ fontSize: 13.5, lineHeight: 1.55, maxWidth: '36ch' }}>
-                Ask about pricing, niches, client scripts, copy help, or anything freelance.
+              <p className="ff-text-3 mb-7" style={{ fontSize: 13.5, lineHeight: 1.55, maxWidth: '34ch' }}>
+                Ask about pricing, niches, client scripts, copy, or upload a file to review.
               </p>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center', maxWidth: 560 }}>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7, justifyContent: 'center', maxWidth: 520 }}>
                 {SUGGESTED_PROMPTS.map((p, i) => (
-                  <button
-                    key={i}
-                    type="button"
-                    className="ff-suggested-prompt"
-                    onClick={() => sendMessage(p.text)}
-                    style={{ animationDelay: `${i * 50}ms` }}
-                  >
+                  <button key={i} type="button" className="ff-suggested-prompt" onClick={() => sendMessage(p.text)} style={{ animationDelay: `${i * 50}ms` }}>
                     {p.label}
                   </button>
                 ))}
@@ -2193,18 +2351,25 @@ You give direct, tactical advice. No fluff. No buzzwords. No "it depends" withou
               <div className={`ff-chat-avatar ${msg.role === 'user' ? 'ff-chat-avatar-user' : 'ff-chat-avatar-ai'}`}>
                 {msg.role === 'user' ? 'You' : <Bot size={15} />}
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: msg.role === 'user' ? 'flex-end' : 'flex-start' }}>
-                <div className={`ff-chat-bubble ${msg.role === 'user' ? 'ff-chat-bubble-user' : 'ff-chat-bubble-ai'}`}>
-                  <div className="ff-chat-bubble-text">
-                    {formatMessageText(msg.content)}
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: msg.role === 'user' ? 'flex-end' : 'flex-start', maxWidth: 'min(560px, 80%)' }}>
+                {/* Attachment preview in message */}
+                {msg.attachment && msg.attachment.preview && (
+                  <div className="ff-chat-user-attachment">
+                    <img src={msg.attachment.preview} alt={msg.attachment.name} />
                   </div>
-                </div>
+                )}
+                {msg.attachment && !msg.attachment.preview && (
+                  <div className="ff-chat-user-attachment-file" style={{ color: 'var(--accent-text-on)', background: 'rgba(255,255,255,0.15)', marginBottom: 6 }}>
+                    <FileText size={13} /> {msg.attachment.name}
+                  </div>
+                )}
+                {msg.content && (
+                  <div className={`ff-chat-bubble ${msg.role === 'user' ? 'ff-chat-bubble-user' : 'ff-chat-bubble-ai'}`}>
+                    <div className="ff-chat-bubble-text">{formatMessageText(msg.content)}</div>
+                  </div>
+                )}
                 {msg.role === 'assistant' && (
-                  <button
-                    type="button"
-                    className="ff-chat-copy-btn"
-                    onClick={() => copyMessage(msg.content, i)}
-                  >
+                  <button type="button" className="ff-chat-copy-btn" onClick={() => copyMessage(msg.content, i)}>
                     {copiedIdx === i ? <Check size={11} /> : <Copy size={11} />}
                     {copiedIdx === i ? 'Copied' : 'Copy'}
                   </button>
@@ -2215,29 +2380,15 @@ You give direct, tactical advice. No fluff. No buzzwords. No "it depends" withou
 
           {loading && (
             <div className="ff-chat-msg ff-fadein">
-              <div className="ff-chat-avatar ff-chat-avatar-ai">
-                <Bot size={15} />
-              </div>
+              <div className="ff-chat-avatar ff-chat-avatar-ai"><Bot size={15} /></div>
               <div className="ff-chat-bubble ff-chat-bubble-ai">
-                <div className="ff-chat-typing">
-                  <span></span>
-                  <span></span>
-                  <span></span>
-                </div>
+                <div className="ff-chat-typing"><span></span><span></span><span></span></div>
               </div>
             </div>
           )}
 
           {error && (
-            <div className="ff-fadeup" style={{
-              background: 'var(--danger-bg)',
-              color: 'var(--danger)',
-              padding: '10px 14px',
-              borderRadius: 'var(--r-md)',
-              fontSize: 13,
-              fontWeight: 500,
-              textAlign: 'center',
-            }}>
+            <div className="ff-fadeup" style={{ background: 'var(--danger-bg)', color: 'var(--danger)', padding: '10px 14px', borderRadius: 'var(--r-md)', fontSize: 13, fontWeight: 500, textAlign: 'center' }}>
               {error}
             </div>
           )}
@@ -2245,25 +2396,42 @@ You give direct, tactical advice. No fluff. No buzzwords. No "it depends" withou
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Input footer */}
         <div className="ff-chat-footer">
           {messages.length > 0 && messages.length < 3 && (
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 10 }}>
               {SUGGESTED_PROMPTS.slice(0, 3).map((p, i) => (
-                <button
-                  key={i}
-                  type="button"
-                  className="ff-suggested-prompt"
-                  onClick={() => sendMessage(p.text)}
-                  style={{ fontSize: 11.5, padding: '6px 11px' }}
-                >
+                <button key={i} type="button" className="ff-suggested-prompt" onClick={() => sendMessage(p.text)} style={{ fontSize: 11.5, padding: '6px 11px' }}>
                   {p.label}
                 </button>
               ))}
             </div>
           )}
 
-          <div className="ff-chat-input-row">
+          <div className="ff-chat-input-box">
+            {/* Attachment preview inside box */}
+            {attachment && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 12px 0', borderBottom: '1px solid var(--border)' }}>
+                {attachment.preview
+                  ? <img src={attachment.preview} alt={attachment.name} style={{ width: 32, height: 32, objectFit: 'cover', borderRadius: 6, flexShrink: 0 }} />
+                  : <div style={{ width: 32, height: 32, background: 'var(--accent-bg-soft)', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><FileText size={14} style={{ color: 'var(--accent)' }} /></div>
+                }
+                <span style={{ flex: 1, fontSize: 12, fontWeight: 500, color: 'var(--text-1)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{attachment.name}</span>
+                <button onClick={() => setAttachment(null)} style={{ background: 'none', border: 'none', color: 'var(--text-3)', cursor: 'pointer', padding: 4, display: 'flex', alignItems: 'center', borderRadius: 4, flexShrink: 0 }}>
+                  <X size={13} />
+                </button>
+              </div>
+            )}
+
+            {/* Hidden file input */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*,application/pdf,.txt,.md,.csv,.json,.doc,.docx"
+              style={{ display: 'none' }}
+              onChange={e => { handleAttachFile(e.target.files?.[0]); e.target.value = ''; }}
+            />
+
+            {/* Text input */}
             <textarea
               ref={textareaRef}
               className="ff-chat-textarea"
@@ -2274,18 +2442,31 @@ You give direct, tactical advice. No fluff. No buzzwords. No "it depends" withou
               rows={1}
               disabled={loading}
             />
-            <button
-              type="button"
-              className="ff-chat-send"
-              onClick={() => sendMessage()}
-              disabled={loading || !input.trim()}
-              aria-label="Send message"
-            >
-              {loading ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
-            </button>
+
+            {/* Bottom actions bar */}
+            <div className="ff-chat-input-actions">
+              <button
+                type="button"
+                className="ff-chat-attach-btn"
+                onClick={() => fileInputRef.current?.click()}
+                aria-label="Attach file"
+                title="Attach image or file"
+              >
+                <Paperclip size={16} />
+              </button>
+              <button
+                type="button"
+                className="ff-chat-send"
+                onClick={() => sendMessage()}
+                disabled={loading || (!input.trim() && !attachment)}
+                aria-label="Send message"
+              >
+                {loading ? <Loader2 size={14} className="animate-spin" /> : <ArrowRight size={15} />}
+              </button>
+            </div>
           </div>
           <p className="ff-text-3 mt-2" style={{ fontSize: 11, textAlign: 'center', letterSpacing: '-0.003em' }}>
-            Enter to send, Shift+Enter for new line
+            Enter to send · Shift+Enter for new line · Chats saved 15 days
           </p>
         </div>
       </div>
@@ -3102,21 +3283,35 @@ Return ONLY JSON. No em dashes.`;
       ? `\nPORTFOLIO:\n${portfolio.map((p, i) => `[${i+1}] URL: ${p.url}${p.label ? ` | LABEL: ${p.label}` : ''}${p.tag ? ` | TAG: ${p.tag}` : ''}`).join('\n')}`
       : '';
 
-    return `You are an expert freelance closer.
+    return `You are an expert freelance closer. Write a SHORT, scannable proposal that a busy client can read in 30 seconds.
 ${imageData ? 'NOTE: Image attached.\n' : ''}
+
+CRITICAL PROPOSAL FORMAT RULES:
+- The proposal MUST be structured into exactly 4 named sections
+- Each section is SHORT. No walls of text. Clients skim, not read.
+- Section 1 "hook": 1-2 punchy sentences max. Name their exact problem. No fluff opener.
+- Section 2 "fit": 2-3 bullet points max. Each bullet = one specific reason you are right for this. Numbers where possible.
+- Section 3 "process": 3 numbered steps max. Very short. Each step = 5-8 words.
+- Section 4 "cta": 1 sentence. Soft, specific next step. No "I look forward to hearing from you."
+- coldDM: 3 lines max. Pattern-breaking opener. Immediate value. One question to reply to.
+
 Generate ONLY:
 {
   "extraction": { "clientType": "4-8 words", "projectType": "4-7 words", "tone": "3-6 words", "coreProblem": "1-2 sentences", "urgency": "Low|Medium|High", "budgetSignal": "Low|Medium|High", "hiddenIntent": "1-2 sentences" },
   "attachments": [{ "description": "1-2 sentences", "links": ["url from portfolio if matches"] }],
-  "proposal": "full proposal, \\n breaks",
-  "coldDM": "3-5 lines, \\n breaks"
+  "proposal": {
+    "hook": "1-2 sentences. Their problem, named directly. No greeting. No 'I came across your post'.",
+    "fit": ["bullet 1: specific reason with proof/number", "bullet 2: specific reason with proof/number", "bullet 3: specific reason with proof/number"],
+    "process": ["Step 1: 5-8 words", "Step 2: 5-8 words", "Step 3: 5-8 words"],
+    "cta": "One sentence. Specific and soft. e.g. 'Happy to send over 2-3 relevant examples if useful.'"
+  },
+  "coldDM": "3 lines, \\n breaks"
 }
-RULES: 3-5 attachments. Include EVERY matching portfolio URL. Never invent URLs.
+
+RULES: 3-5 attachments max. Include EVERY matching portfolio URL. Never invent URLs.
 VOICE: ${toneInstruction}
 ${STRICT_RULES}
 INPUT: ${intel.trim() || (imageData ? '[See attached.]' : '')}
-${offer.trim() ? `\nOFFER: ${offer}` : ''}
-${proof.trim() ? `\nPROOF: ${proof}` : ''}
 ${portfolioBlock}
 Return ONLY JSON. No em dashes.`;
   };
@@ -3191,6 +3386,17 @@ Return ONLY JSON. No em dashes.`;
 
       Object.keys(parsed).forEach(k => { if (typeof parsed[k] === 'string') parsed[k] = stripEmDashes(parsed[k]); });
       if (parsed.extraction) Object.keys(parsed.extraction).forEach(k => { if (typeof parsed.extraction[k] === 'string') parsed.extraction[k] = stripEmDashes(parsed.extraction[k]); });
+      // Handle structured proposal object
+      if (parsed.proposal && typeof parsed.proposal === 'object') {
+        const p = parsed.proposal;
+        if (typeof p.hook === 'string') p.hook = stripEmDashes(p.hook);
+        if (typeof p.cta === 'string') p.cta = stripEmDashes(p.cta);
+        if (Array.isArray(p.fit)) p.fit = p.fit.map(s => stripEmDashes(s));
+        if (Array.isArray(p.process)) p.process = p.process.map(s => stripEmDashes(s));
+      } else if (typeof parsed.proposal === 'string') {
+        parsed.proposal = stripEmDashes(parsed.proposal);
+      }
+      if (typeof parsed.coldDM === 'string') parsed.coldDM = stripEmDashes(parsed.coldDM);
       if (Array.isArray(parsed.attachments)) {
         const portfolioUrls = new Set(portfolio.map(p => p.url));
         parsed.attachments = parsed.attachments.map(a => {
@@ -3631,7 +3837,7 @@ function PipelineTab() {
     <div className="ff-fadeup">
       <div className="ff-pipeline-topbar">
         <div>
-          <h2 className="ff-display ff-text-1" style={{ fontSize: 28, fontWeight: 500, letterSpacing: '-0.018em' }}>
+          <h2 className="ff-display ff-text-1" style={{ fontSize: 28, fontWeight: 400, letterSpacing: '-0.02em' }}>
             Your pipeline
           </h2>
           <p className="ff-text-2 mt-1" style={{ fontSize: 14, lineHeight: 1.5 }}>
@@ -3738,7 +3944,7 @@ function PipelineTab() {
       {entries.length === 0 && !showForm && (
         <div className="ff-empty-state">
           <TrendingUp size={28} style={{ color: 'var(--text-3)', display: 'inline-block', marginBottom: 12, opacity: 0.5 }} />
-          <p className="ff-display ff-text-1 mb-3" style={{ fontSize: 22, lineHeight: 1.3, fontWeight: 500, letterSpacing: '-0.018em' }}>
+          <p className="ff-display ff-text-1 mb-3" style={{ fontSize: 22, lineHeight: 1.3, fontWeight: 400, letterSpacing: '-0.02em' }}>
             Nothing logged yet.
           </p>
           <p className="ff-text-3" style={{ fontSize: 13, lineHeight: 1.55 }}>
@@ -3853,7 +4059,7 @@ function ActivityModal({ open, onClose, period, setPeriod, week, month, year }) 
         <div className="ff-modal-head">
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <TrendingUp size={16} style={{ color: 'var(--accent)' }} />
-            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 500, letterSpacing: '-0.018em', color: 'var(--text-1)', margin: 0 }}>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 400, letterSpacing: '-0.018em', color: 'var(--text-1)', margin: 0 }}>
               Activity
             </h2>
           </div>
@@ -3931,7 +4137,7 @@ function SummaryStat({ label, value, accent, muted }) {
   return (
     <div>
       <p className="ff-section-label" style={{ fontSize: 10, marginBottom: 6 }}>{label}</p>
-      <p style={{ fontFamily: 'var(--font-display)', fontSize: 22, fontWeight: 500, letterSpacing: '-0.02em', color: accent ? 'var(--accent)' : (muted ? 'var(--text-2)' : 'var(--text-1)'), margin: 0, lineHeight: 1.1 }}>
+      <p style={{ fontFamily: 'var(--font-display)', fontSize: 22, fontWeight: 400, letterSpacing: '-0.02em', color: accent ? 'var(--accent)' : (muted ? 'var(--text-2)' : 'var(--text-1)'), margin: 0, lineHeight: 1.1 }}>
         {value}
       </p>
     </div>
@@ -4209,24 +4415,108 @@ function PortfolioCard({ item, onRemove }) {
 }
 
 function ProposalOutput({ result, pillClass, portfolio, copied, copyText, selectAllText }) {
+  // Build plain-text version for copying
+  const proposalText = (() => {
+    const p = result.proposal;
+    if (!p) return '';
+    if (typeof p === 'string') return p;
+    const lines = [];
+    if (p.hook) lines.push(p.hook);
+    if (p.fit?.length) { lines.push(''); p.fit.forEach(b => lines.push(`• ${b}`)); }
+    if (p.process?.length) { lines.push(''); p.process.forEach((s, i) => lines.push(`${i + 1}. ${s}`)); }
+    if (p.cta) { lines.push(''); lines.push(p.cta); }
+    return lines.join('\n');
+  })();
+
+  const proposal = result.proposal;
+  const isStructured = proposal && typeof proposal === 'object';
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
+      {/* Breakdown */}
       <div className="ff-fadeup ff-card">
-        <h3 className="ff-subheading mb-4">Breakdown</h3>
+        <h3 className="ff-subheading mb-4">Read</h3>
         <div className="ff-detail-grid">
           <Cell label="Client Type" value={result.extraction?.clientType} />
-          <Cell label="Project Type" value={result.extraction?.projectType} accent />
-          <Cell label="Tone" value={result.extraction?.tone} wide />
+          <Cell label="Project" value={result.extraction?.projectType} accent />
           <Cell label="Urgency"><span className={pillClass(result.extraction?.urgency)}>{result.extraction?.urgency}</span></Cell>
-          <Cell label="Budget Signal"><span className={pillClass(result.extraction?.budgetSignal)}>{result.extraction?.budgetSignal}</span></Cell>
+          <Cell label="Budget"><span className={pillClass(result.extraction?.budgetSignal)}>{result.extraction?.budgetSignal}</span></Cell>
           <Cell label="Core Problem" value={result.extraction?.coreProblem} wide />
           <Cell label="Hidden Intent" value={result.extraction?.hiddenIntent} wide />
         </div>
       </div>
 
+      {/* Structured Proposal */}
+      {proposal && (
+        <div className="ff-fadeup" style={{ animationDelay: '60ms' }}>
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="ff-subheading">Proposal</h3>
+            <button className="ff-icon-btn" onClick={() => copyText('proposal', proposalText)}>
+              {copied.proposal ? <Check size={12} /> : <Copy size={12} />}
+              {copied.proposal ? 'Copied' : 'Copy'}
+            </button>
+          </div>
+
+          {isStructured ? (
+            <div className="ff-card" style={{ padding: 0, overflow: 'hidden' }}>
+              {/* Hook */}
+              {proposal.hook && (
+                <div style={{ padding: '18px 20px', borderBottom: '1px solid var(--border)' }}>
+                  <span className="ff-section-label" style={{ display: 'block', marginBottom: 8 }}>Hook</span>
+                  <p style={{ fontSize: 15, lineHeight: 1.55, color: 'var(--text-1)', fontWeight: 500, letterSpacing: '-0.005em', margin: 0 }}>{proposal.hook}</p>
+                </div>
+              )}
+
+              {/* Why me */}
+              {proposal.fit?.length > 0 && (
+                <div style={{ padding: '18px 20px', borderBottom: '1px solid var(--border)' }}>
+                  <span className="ff-section-label" style={{ display: 'block', marginBottom: 10 }}>Why me</span>
+                  <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {proposal.fit.map((b, i) => (
+                      <li key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                        <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--accent)', flexShrink: 0, marginTop: 7 }} />
+                        <span style={{ fontSize: 14, lineHeight: 1.5, color: 'var(--text-1)', letterSpacing: '-0.005em' }}>{b}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Process */}
+              {proposal.process?.length > 0 && (
+                <div style={{ padding: '18px 20px', borderBottom: '1px solid var(--border)' }}>
+                  <span className="ff-section-label" style={{ display: 'block', marginBottom: 10 }}>How it works</span>
+                  <ol style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {proposal.process.map((s, i) => (
+                      <li key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+                        <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--accent)', fontFamily: 'var(--font-mono)', flexShrink: 0, width: 18, paddingTop: 2 }}>{String(i + 1).padStart(2, '0')}</span>
+                        <span style={{ fontSize: 14, lineHeight: 1.5, color: 'var(--text-1)', letterSpacing: '-0.005em' }}>{s}</span>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              )}
+
+              {/* CTA */}
+              {proposal.cta && (
+                <div style={{ padding: '16px 20px', background: 'var(--accent-bg-soft)' }}>
+                  <span className="ff-section-label" style={{ display: 'block', marginBottom: 6, color: 'var(--accent)' }}>Next step</span>
+                  <p style={{ fontSize: 14, lineHeight: 1.5, color: 'var(--text-1)', fontWeight: 500, letterSpacing: '-0.005em', margin: 0 }}>{proposal.cta}</p>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="ff-card">
+              <p className="ff-output-text" onClick={selectAllText} style={{ cursor: 'text' }}>{proposalText}</p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Suggested Attachments */}
       {result.attachments?.length > 0 && (
-        <div className="ff-fadeup ff-card" style={{ animationDelay: '60ms' }}>
-          <h3 className="ff-subheading mb-4">Suggested Attachments</h3>
+        <div className="ff-fadeup ff-card" style={{ animationDelay: '120ms' }}>
+          <h3 className="ff-subheading mb-4">Attachments to send</h3>
           <ul className="ff-attach-list">
             {result.attachments.map((item, i) => (
               <li key={i} className="ff-attach-item">
@@ -4258,7 +4548,7 @@ function ProposalOutput({ result, pillClass, portfolio, copied, copyText, select
         </div>
       )}
 
-      <OutputBlock title="Proposal" text={result.proposal} copyKey="proposal" copied={copied} copyText={copyText} selectAllText={selectAllText} delay={120} />
+      {/* Cold DM */}
       <OutputBlock title="Cold DM" text={result.coldDM} copyKey="dm" copied={copied} copyText={copyText} selectAllText={selectAllText} delay={180} />
     </div>
   );
@@ -4451,7 +4741,7 @@ function OptimizeEmpty() {
       <div className="ff-mono ff-pulse mb-4" style={{ fontSize: 11, color: 'var(--text-3)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
         Awaiting Page
       </div>
-      <p className="ff-display ff-text-1 mb-4" style={{ fontSize: 22, lineHeight: 1.3, fontWeight: 500, letterSpacing: '-0.018em' }}>
+      <p className="ff-display ff-text-1 mb-4" style={{ fontSize: 22, lineHeight: 1.3, fontWeight: 400, letterSpacing: '-0.02em' }}>
         Your audit, scores, and<br/>rewrites will appear here.
       </p>
       <p className="ff-text-3" style={{ fontSize: 13, lineHeight: 1.55 }}>
@@ -4499,7 +4789,7 @@ function CloserEmpty({ mode }) {
       <div className="ff-mono ff-pulse mb-4" style={{ fontSize: 11, color: 'var(--text-3)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
         {kicker}
       </div>
-      <p className="ff-display ff-text-1" style={{ fontSize: 22, lineHeight: 1.3, fontWeight: 500, letterSpacing: '-0.018em', whiteSpace: 'pre-line' }}>
+      <p className="ff-display ff-text-1" style={{ fontSize: 22, lineHeight: 1.3, fontWeight: 400, letterSpacing: '-0.02em', whiteSpace: 'pre-line' }}>
         {messages[mode]}
       </p>
     </div>
