@@ -3427,34 +3427,15 @@ WHAT YOU KNOW:
 /* HEADSHOT AI TAB                                                         */
 /* ====================================================================== */
 
-const HEADSHOT_PROMPT = `Take this image and preserve the subject's exact facial features, expression, skin texture, and identity with no alterations. Convert the image into a professional passport-style studio headshot with the following adjustments: Change the background to a clean, seamless white studio backdrop. Ensure soft, even lighting with no harsh shadows (studio-quality lighting). Enhance overall image sharpness, clarity, and skin detail while keeping it natural (no over-smoothing). Adjust the subject's gaze so the eyes are looking directly into the camera. Maintain neutral facial expression (do not modify emotion or structure). Replace clothing with a clean, well-fitted black collared shirt. Ensure proper headshot framing (centered, head and upper shoulders visible). Keep proportions realistic and avoid distortion. Make the final result look like it was professionally taken in a studio. Output should be high-resolution, clean, and suitable for official passport or professional use.`;
+const HEADSHOT_PROMPT = `Professional studio headshot. Preserve the subject's exact face, identity, skin tone, and facial features unchanged. Place the subject against a clean white seamless studio backdrop. Apply soft, even studio lighting with no harsh shadows. The subject is wearing a clean, well-fitted dark navy or black collared shirt. Frame as a standard professional headshot: head and upper shoulders centered, eyes looking directly at the camera, neutral and natural expression. Enhance image clarity and sharpness naturally without over-smoothing. Realistic proportions, no distortion. The result should look like a high-quality photo taken by a professional photographer in a studio.`;
 
 async function transformHeadshot(imageBase64, mediaType) {
   const apiKey = import.meta.env.VITE_FAL_API_KEY;
   if (!apiKey) throw new Error('VITE_FAL_API_KEY is not set in your .env file.');
 
-  // Step 1: Upload image to fal.ai storage to get a proper URL
-  const byteChars = atob(imageBase64);
-  const byteArr = new Uint8Array(byteChars.length);
-  for (let i = 0; i < byteChars.length; i++) byteArr[i] = byteChars.charCodeAt(i);
-  const blob = new Blob([byteArr], { type: mediaType });
-  const ext = mediaType.split('/')[1] || 'jpg';
-  const file = new File([blob], `photo.${ext}`, { type: mediaType });
-  const fd = new FormData();
-  fd.append('file', file);
+  // Pass image as base64 data URL directly — supported by flux-general
+  const imageDataUrl = `data:${mediaType};base64,${imageBase64}`;
 
-  const uploadRes = await fetch('https://fal.run/storage/upload', {
-    method: 'POST',
-    headers: { 'Authorization': `Key ${apiKey}` },
-    body: fd,
-  });
-  if (!uploadRes.ok) {
-    const t = await uploadRes.text().catch(() => '');
-    throw new Error(`Upload failed (${uploadRes.status}): ${t.slice(0, 150)}`);
-  }
-  const { url: imageUrl } = await uploadRes.json();
-
-  // Step 2: Run image-to-image transformation
   const response = await fetch('https://fal.run/fal-ai/flux-general/image-to-image', {
     method: 'POST',
     headers: {
@@ -3462,13 +3443,13 @@ async function transformHeadshot(imageBase64, mediaType) {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      image_url: imageUrl,
+      image_url: imageDataUrl,
       prompt: HEADSHOT_PROMPT,
-      strength: 0.85,
+      strength: 0.80,
       num_inference_steps: 28,
       guidance_scale: 3.5,
       num_images: 1,
-      enable_safety_checker: false,
+      enable_safety_checker: true,
     }),
   });
 
