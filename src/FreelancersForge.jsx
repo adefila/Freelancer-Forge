@@ -2440,15 +2440,17 @@ const CSS = `
 
 /* Headline */
 .ff-preloader-headline {
-  font-size: clamp(22px, 3.6vw, 46px);
-  font-weight: 500; line-height: 1.06;
-  letter-spacing: -0.038em; margin-bottom: 16px;
+  font-size: clamp(22px, 3.2vw, 42px);
+  font-weight: 500; line-height: 1.08;
+  letter-spacing: -0.034em; margin-bottom: 16px;
   font-family: 'Inter', -apple-system, system-ui, sans-serif;
-  white-space: nowrap;
+  white-space: normal;
+  max-width: 18ch;
+  margin-left: auto;
+  margin-right: auto;
 }
-/* Allow wrap on small screens */
 @media (max-width: 640px) {
-  .ff-preloader-headline { white-space: normal; font-size: clamp(22px, 6vw, 34px); }
+  .ff-preloader-headline { font-size: clamp(20px, 6vw, 30px); }
 }
 .ff-preloader.light .ff-preloader-headline { color: #0a0a0a; }
 .ff-preloader.dark  .ff-preloader-headline { color: #f5f5f7; }
@@ -2459,9 +2461,9 @@ const CSS = `
 
 /* Sub */
 .ff-preloader-sub {
-  font-size: clamp(14px, 1.6vw, 16.5px);
-  line-height: 1.6; letter-spacing: -0.005em; max-width: 44ch; margin: 0 auto;
-  font-family: system-ui, sans-serif;
+  font-size: clamp(13px, 1.4vw, 15.5px);
+  line-height: 1.65; letter-spacing: -0.005em; max-width: 38ch; margin: 0 auto;
+  font-family: system-ui, sans-serif; text-align: center;
 }
 .ff-preloader.light .ff-preloader-sub { color: rgba(0,0,0,0.42); }
 .ff-preloader.dark  .ff-preloader-sub { color: rgba(255,255,255,0.38); }
@@ -2656,25 +2658,25 @@ const PRELOADER_SLIDES = [
   {
     label: 'Optimize',
     icon: <Sparkles size={13} />,
-    headline: <>Audit any page. <em>Rewrite it like the top 1%.</em></>,
+    headline: <>Audit any page.<br /><em>Rewrite it like the top 1%.</em></>,
     sub: 'Score your portfolio, Upwork profile, LinkedIn, or CV against expert criteria — then get a complete rewrite in one click.',
   },
   {
     label: 'Close Client',
     icon: <Target size={13} />,
-    headline: <>Close clients with <em>proposals that convert.</em></>,
+    headline: <>Close clients with<br /><em>proposals that convert.</em></>,
     sub: 'Generate tight, scannable proposals, cold DMs, follow-ups, and cover letters tailored to the exact lead in front of you.',
   },
   {
     label: 'Pipeline',
     icon: <TrendingUp size={13} />,
-    headline: <>Track every pitch. <em>See what works.</em></>,
+    headline: <>Track every pitch.<br /><em>See what works.</em></>,
     sub: 'Log proposals, DMs, and emails. Watch reply rate and win rate build over time. Saved in your browser — no account needed.',
   },
   {
     label: 'Ask Anything',
     icon: <Bot size={13} />,
-    headline: <>Ask anything. <em>Get tactical answers fast.</em></>,
+    headline: <>Ask anything.<br /><em>Get tactical answers fast.</em></>,
     sub: 'Pricing strategy, scope creep scripts, rate increases, niche advice — your freelance mentor is one message away.',
   },
 ];
