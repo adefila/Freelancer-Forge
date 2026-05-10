@@ -3427,7 +3427,7 @@ WHAT YOU KNOW:
 /* HEADSHOT AI TAB                                                         */
 /* ====================================================================== */
 
-const HEADSHOT_PROMPT = `Professional studio headshot. Preserve the subject's exact face, identity, skin tone, and facial features unchanged. Place the subject against a clean white seamless studio backdrop. Apply soft, even studio lighting with no harsh shadows. The subject is wearing a clean, well-fitted dark navy or black collared shirt. Frame as a standard professional headshot: head and upper shoulders centered, eyes looking directly at the camera, neutral and natural expression. Enhance image clarity and sharpness naturally without over-smoothing. Realistic proportions, no distortion. The result should look like a high-quality photo taken by a professional photographer in a studio.`;
+const HEADSHOT_PROMPT = `Take this image and preserve the subject's exact facial features, expression, skin texture, and identity with no alterations. Convert the image into a professional passport-style studio headshot. Change the background to a clean, seamless white studio backdrop. Ensure soft, even lighting with no harsh shadows, studio-quality lighting. Enhance overall image sharpness, clarity, and skin detail while keeping it natural, no over-smoothing. Adjust the subject's gaze so the eyes are looking directly into the camera. Maintain neutral facial expression, do not modify emotion or structure. Replace clothing with a clean, well-fitted black collared shirt. Ensure proper headshot framing, centered, head and upper shoulders visible. Keep proportions realistic and avoid distortion. Make the final result look like it was professionally taken in a studio. Output should be high-resolution, clean, and suitable for official passport or professional use. Photorealistic, not illustrated, not cartoon, not painting. Real photograph quality only.`;
 
 async function transformHeadshot(imageBase64, mediaType) {
   const apiKey = import.meta.env.VITE_FAL_API_KEY;
@@ -3445,11 +3445,12 @@ async function transformHeadshot(imageBase64, mediaType) {
     body: JSON.stringify({
       image_url: imageDataUrl,
       prompt: HEADSHOT_PROMPT,
-      strength: 0.80,
-      num_inference_steps: 28,
-      guidance_scale: 3.5,
+      strength: 0.65,
+      num_inference_steps: 20,
+      guidance_scale: 7.5,
       num_images: 1,
-      enable_safety_checker: true,
+      enable_safety_checker: false,
+      output_format: 'jpeg',
     }),
   });
 
@@ -3588,10 +3589,7 @@ function HeadshotTab() {
             }
           </button>
 
-          {/* Photo tips as a small inline note */}
-          <p className="ff-text-3" style={{ fontSize: 12.5, lineHeight: 1.6, marginTop: 14 }}>
-            <strong style={{ color: 'var(--text-2)' }}>Best results:</strong> face clearly visible, looking forward, decent lighting. Your face is never altered — only background, clothing, and lighting change.
-          </p>
+
         </div>
 
         {/* Right: result */}
@@ -3634,13 +3632,7 @@ function HeadshotTab() {
             )}
           </div>
 
-          {resultUrl && (
-            <div className="ff-fadeup ff-card" style={{ marginTop: 16, padding: '14px 16px' }}>
-              <p className="ff-text-2" style={{ fontSize: 13, lineHeight: 1.55 }}>
-                <strong style={{ color: 'var(--text-1)' }}>Not perfect?</strong> Try uploading a photo with better front-facing lighting, or a clearer view of your face. Results improve significantly with well-lit source photos.
-              </p>
-            </div>
-          )}
+
         </div>
       </div>
     </div>
