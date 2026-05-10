@@ -3433,24 +3433,25 @@ async function transformHeadshot(imageBase64, mediaType) {
   const apiKey = import.meta.env.VITE_FAL_API_KEY;
   if (!apiKey) throw new Error('VITE_FAL_API_KEY is not set in your .env file.');
 
-  // Pass image as base64 data URL directly — supported by flux-general
   const imageDataUrl = `data:${mediaType};base64,${imageBase64}`;
 
-  const response = await fetch('https://fal.run/fal-ai/flux-general/image-to-image', {
+  // ip-adapter-face-id: preserves face identity, generates in ~5-8s
+  const response = await fetch('https://fal.run/fal-ai/ip-adapter-face-id', {
     method: 'POST',
     headers: {
       'Authorization': `Key ${apiKey}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      image_url: imageDataUrl,
+      face_image_url: imageDataUrl,
       prompt: HEADSHOT_PROMPT,
-      strength: 0.65,
-      num_inference_steps: 20,
+      negative_prompt: 'cartoon, illustration, painting, drawing, anime, 3d render, cgi, low quality, blurry, deformed, ugly, disfigured, bad anatomy, extra limbs, watermark, text',
+      num_inference_steps: 30,
       guidance_scale: 7.5,
+      ip_adapter_scale: 0.8,
       num_images: 1,
+      image_size: 'portrait_4_3',
       enable_safety_checker: false,
-      output_format: 'jpeg',
     }),
   });
 
