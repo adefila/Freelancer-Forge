@@ -3,9 +3,9 @@ import {
   ArrowRight, Copy, Check, Loader2, Sparkles, Paperclip, X, ImageIcon,
   Sun, Moon, Plus, ExternalLink, Link as LinkIcon, ChevronDown,
   Mail, MessageSquare, FileText, Reply, Type, Image as ImgIcon,
-  Target, Award, Briefcase, User, Layers, Wand2, Monitor,
+  Target, Award, Briefcase, User, Layers, Wand2, Monitor, Camera,
   TrendingUp, Trash2, HelpCircle, PenLine, Bot, Send, RotateCcw,
-  ChevronUp
+  ChevronUp, Download
 } from 'lucide-react';
 
 /* ====================================================================== */
@@ -190,22 +190,72 @@ const TONE_DIRECTIVES = {
 };
 
 const STRICT_RULES = `
-=== STRICT WRITING RULES ===
-1. EM DASHES ARE FORBIDDEN. Use periods, commas, parentheses, or colons.
-2. GRAMMAR MUST BE IMPECCABLE. Vary sentence openers.
-3. NO GENERIC AI / CORPORATE WORDS. Forbidden: leverage, utilize, synergy, streamline, cutting-edge, innovative, world-class, best-in-class, top-notch, game-changer, unlock, empower, optimize, maximize, robust, seamless, transform, revolutionize, supercharge, level up, holistic, ecosystem, paradigm, scalable, dynamic, results-driven, deep dive, foster, cultivate, harness, elevate, dive into, embark on.
-4. NO GENERIC OPENERS. No "I hope this finds you well", "I came across your post", "passionate about".
-5. PREFER SPECIFIC OVER ABSTRACT. Numbers, named outcomes, concrete time frames.
+=== NON-NEGOTIABLE WRITING RULES — NEVER VIOLATE ===
+
+GRAMMAR AND MECHANICS:
+- Zero em dashes (—) or en dashes (–). Use a period, comma, colon, or parentheses instead.
+- No ellipsis (...) used for effect. If you must trail off, restructure the sentence.
+- No sentence fragments used as style. Every sentence has a subject and a verb.
+- Vary sentence openers. Never start two consecutive sentences with "I", "We", "You", or "The".
+- Active voice only. "I cut churn by 22%" not "Churn was cut by 22%".
+- Past tense for completed work. Present tense for current capabilities or ongoing results.
+- Contractions are allowed and preferred in conversational copy (DMs, proposals, follow-ups).
+
+FORBIDDEN WORDS AND PHRASES — never use these under any circumstances:
+leverage, utilize, synergy, streamline, cutting-edge, innovative, world-class, best-in-class,
+top-notch, game-changer, unlock, empower, optimize, maximize, robust, seamless, transform,
+revolutionize, supercharge, level up, holistic, ecosystem, paradigm, scalable, dynamic,
+results-driven, deep dive, foster, cultivate, harness, elevate, dive into, embark on,
+passionate about, I came across your post, I hope this finds you well, I wanted to reach out,
+excited to, thrilled to, I'd love to, touch base, circle back, move the needle, bandwidth,
+pain points, value proposition, solution, offering, deliverables, onboard (as a verb for clients),
+at the end of the day, going forward, in today's landscape, in the ever-changing world of,
+it's no secret that, needless to say, I think we can all agree.
+
+SPECIFICITY RULE — every output must pass this test:
+- Every claim needs at least one of: a number, a percentage, a dollar amount, a named client or brand, a specific time frame, a named tool or platform.
+- BAD: "I help companies grow their revenue."
+- GOOD: "I helped a B2B SaaS company grow MRR from $40k to $110k in 8 months by rebuilding their outbound sequence."
+- BAD: "Strong communication skills and attention to detail."
+- GOOD: "Ran weekly async standups across 3 time zones. Zero missed deadlines in 18 months."
+
+VOICE RULES:
+- Sound like a person who has done this work, not a consultant describing it.
+- Confident without arrogance. Direct without being cold. Human without being sloppy.
+- Short sentences land harder than long ones. Average sentence length: 12-15 words.
+- No hedging phrases: "I believe", "I think", "It could be argued", "In my experience" (unless the context genuinely calls for it).
+- Opinions are stated as fact, not as opinions. "This approach works better" not "I think this approach might work better."
 `;
 
 const CV_STRICT_RULES = `
-=== CV-SPECIFIC RULES (additional, NEVER violate) ===
-A. NEVER use these phrases anywhere: "results-driven", "team player", "passionate about", "proven track record", "strong communication skills", "detail-oriented", "self-motivated", "go-getter", "out-of-the-box thinker", "wear many hats", "spearheaded", "drove results", "highly motivated", "strategic thinker", "collaborate with cross-functional teams", "responsible for", "duties included", "tasked with", "helped to", "worked on", "assisted in", "References available on request".
-B. EVERY bullet point MUST contain at least ONE of: a number, a percentage, a dollar amount, a time frame (e.g. 9 months, Q3 2024), a specific tool/system name (e.g. Salesforce, Postgres), or a named outcome (e.g. Series A close, app launch). If a bullet has none of these, REWRITE it or DELETE it.
-C. ZERO first-person pronouns (no "I", "my", "me"). Subject is implied.
-D. Use ONLY active, tactical past-tense verbs (or present for current role). Examples of strong starts: Shipped, Reduced, Closed, Built, Migrated, Negotiated, Cut, Scaled, Onboarded, Launched, Authored, Architected, Recovered, Delivered, Eliminated.
-E. NEVER add "Objective", "References available on request", or photos.
-F. ATS-friendly format only: standard headers (Experience, Education, Skills), no tables, no columns, no graphics, no progress bars or rating scales.
+=== CV-SPECIFIC RULES — ADDITIONAL, NEVER VIOLATE ===
+
+FORBIDDEN PHRASES (never appear anywhere on the CV):
+"results-driven", "team player", "passionate about", "proven track record", "strong communication skills",
+"detail-oriented", "self-motivated", "go-getter", "out-of-the-box thinker", "wear many hats",
+"spearheaded", "drove results", "highly motivated", "strategic thinker", "cross-functional teams",
+"responsible for", "duties included", "tasked with", "helped to", "worked on", "assisted in",
+"References available on request", "Objective", "Summary of qualifications".
+
+BULLET POINT LAW:
+Every single bullet must contain at least ONE of these: a number, a percentage, a dollar amount,
+a time frame (e.g. 9 months, Q3 2024, 18 months), a specific tool or system name (e.g. Salesforce, Figma, Postgres),
+or a named outcome (e.g. Series A close, product launch, ISO certification).
+If a bullet has none of these: rewrite it or delete it. No exceptions.
+
+GRAMMAR ON CVs:
+- Zero first-person pronouns (no "I", "my", "me", "we"). Subject is always implied.
+- All verbs are strong and tactical. Start every bullet with a verb.
+- Past roles: past tense. Current role: present tense.
+- Strong verb examples: Shipped, Reduced, Closed, Built, Migrated, Negotiated, Cut, Scaled,
+  Onboarded, Launched, Authored, Architected, Recovered, Delivered, Eliminated, Generated,
+  Secured, Restructured, Automated, Deployed, Directed, Overhauled, Accelerated.
+- Weak verb examples (never use): Responsible for, Helped, Worked on, Assisted, Managed (without specifics), Supported.
+
+FORMAT RULES:
+- One page maximum. Exception: 10+ years of directly relevant experience, two pages allowed.
+- ATS-friendly: standard section headers, single column, no tables, no text boxes, no graphics.
+- No photos, no star ratings, no progress bars, no icons.
 `;
 
 const stripEmDashes = (s) => {
@@ -233,10 +283,9 @@ const SUGGESTED_PROMPTS = [
 
 const CSS = `
 @import url('https://rsms.me/inter/inter.css');
-@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&display=swap');
 
 .ff-root {
-  --font-display: 'DM Serif Display', 'Georgia', serif;
+  --font-display: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   --font-text: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
   --font-mono: 'SF Mono', 'JetBrains Mono', ui-monospace, monospace;
 
@@ -246,9 +295,9 @@ const CSS = `
   --r-xl: 16px;
   --r-pill: 999px;
 
-  --sh-1: 0 1px 2px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.02);
-  --sh-2: 0 2px 8px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.06);
-  --sh-3: 0 12px 32px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.04);
+  --sh-1: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+  --sh-2: 0 3px 10px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.05);
+  --sh-3: 0 14px 36px rgba(0,0,0,0.10), 0 3px 8px rgba(0,0,0,0.06);
   --sh-blue: 0 4px 14px rgba(37, 99, 235, 0.32), 0 2px 6px rgba(37, 99, 235, 0.18);
   --sh-focus: 0 0 0 3px rgba(37, 99, 235, 0.18);
 
@@ -257,15 +306,15 @@ const CSS = `
   --t-slow: 380ms cubic-bezier(0.4, 0, 0.2, 1);
 
   /* LIGHT MODE */
-  --bg: #ffffff;
-  --bg-elev-1: #fafafa;
-  --bg-elev-2: #f4f4f5;
+  --bg: #f9f8f7;
+  --bg-elev-1: #f3f2f0;
+  --bg-elev-2: #ebe9e7;
   --bg-input: #ffffff;
   --text-1: #0a0a0a;
   --text-2: #4a4a4f;
   --text-3: #6b6b70;
-  --border: rgba(0, 0, 0, 0.08);
-  --border-strong: rgba(0, 0, 0, 0.12);
+  --border: rgba(0, 0, 0, 0.09);
+  --border-strong: rgba(0, 0, 0, 0.14);
   --accent: #2563eb;
   --accent-hover: #1d4ed8;
   --accent-active: #1e40af;
@@ -289,47 +338,47 @@ const CSS = `
   color: var(--text-1);
   min-height: 100vh;
   position: relative;
-  overflow-x: hidden;
+  overflow-x: clip;
   transition: background-color var(--t-slow), color var(--t-slow);
   letter-spacing: -0.01em;
 }
 
 .ff-root.dark {
-  --bg: #0a0a0c;
-  --bg-elev-1: #131316;
-  --bg-elev-2: #1a1a1e;
-  --bg-input: #0f0f12;
-  --text-1: #f5f5f7;
-  --text-2: #b8b8bd;
-  --text-3: #8a8a90;
-  --border: rgba(255, 255, 255, 0.08);
-  --border-strong: rgba(255, 255, 255, 0.14);
-  --accent: #3b82f6;
+  --bg: #111113;
+  --bg-elev-1: #1c1c20;
+  --bg-elev-2: #26262b;
+  --bg-input: #18181c;
+  --text-1: #f0f0f2;
+  --text-2: #c0c0c8;
+  --text-3: #8e8e96;
+  --border: rgba(255, 255, 255, 0.10);
+  --border-strong: rgba(255, 255, 255, 0.18);
+  --accent: #4f8ef7;
   --accent-hover: #60a5fa;
   --accent-active: #2563eb;
   --accent-vivid: #2563eb;
   --accent-vivid-hover: #3b82f6;
-  --accent-bg-soft: rgba(59, 130, 246, 0.12);
-  --accent-border-soft: rgba(59, 130, 246, 0.32);
+  --accent-bg-soft: rgba(79, 142, 247, 0.14);
+  --accent-border-soft: rgba(79, 142, 247, 0.36);
   --accent-text-on: #ffffff;
-  --warning: #f59e0b;
-  --warning-bg: rgba(245, 158, 11, 0.12);
+  --warning: #fbbf24;
+  --warning-bg: rgba(251, 191, 36, 0.14);
   --success: #4ade80;
-  --success-bg: rgba(74, 222, 128, 0.12);
+  --success-bg: rgba(74, 222, 128, 0.14);
   --danger: #f87171;
-  --danger-bg: rgba(248, 113, 113, 0.12);
-  --sh-1: 0 1px 2px rgba(0,0,0,0.5), 0 1px 3px rgba(0,0,0,0.3);
-  --sh-2: 0 2px 8px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.5);
-  --sh-3: 0 12px 32px rgba(0,0,0,0.5), 0 2px 6px rgba(0,0,0,0.3);
+  --danger-bg: rgba(248, 113, 113, 0.14);
+  --sh-1: 0 1px 3px rgba(0,0,0,0.6), 0 1px 2px rgba(0,0,0,0.4);
+  --sh-2: 0 3px 12px rgba(0,0,0,0.55), 0 1px 4px rgba(0,0,0,0.45);
+  --sh-3: 0 16px 40px rgba(0,0,0,0.65), 0 4px 10px rgba(0,0,0,0.4);
   --sh-blue: 0 4px 16px rgba(59, 130, 246, 0.4), 0 2px 6px rgba(59, 130, 246, 0.2);
   --sh-focus: 0 0 0 3px rgba(59, 130, 246, 0.25);
 }
 
 .ff-display {
   font-family: var(--font-display);
-  letter-spacing: -0.02em;
-  font-weight: 400;
-  font-feature-settings: 'kern';
+  letter-spacing: -0.038em;
+  font-weight: 500;
+  font-feature-settings: 'cv11', 'ss01', 'kern';
 }
 .ff-mono { font-family: var(--font-mono); font-feature-settings: 'tnum', 'zero'; }
 
@@ -642,7 +691,7 @@ const CSS = `
   gap: 0;
   border-bottom: 1px solid var(--border);
   overflow-x: auto;
-  overflow-y: visible;
+  overflow-y: clip;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -723,6 +772,7 @@ const CSS = `
   flex-direction: column;
   border-radius: var(--r-lg);
   box-shadow: var(--sh-3);
+  backdrop-filter: none;
   overflow: hidden;
   padding: 6px;
 }
@@ -766,8 +816,9 @@ const CSS = `
   background-color: var(--bg-elev-1);
   border: 1px solid var(--border);
   border-radius: var(--r-lg);
-  padding: 24px;
-  transition: background-color var(--t-slow), border-color var(--t-slow);
+  padding: 28px;
+  box-shadow: var(--sh-1);
+  transition: background-color var(--t-slow), border-color var(--t-slow), box-shadow var(--t-slow);
 }
 .ff-card-elevated {
   background-color: var(--bg);
@@ -992,12 +1043,11 @@ const CSS = `
 .ff-optimize-headline {
   font-family: var(--font-display);
   font-size: 24px;
-  line-height: 1.2;
+  line-height: 1.15;
   font-weight: 500;
-  letter-spacing: -0.018em;
+  letter-spacing: -0.038em;
   color: var(--text-1);
   margin-bottom: 8px;
-  
 }
 .ff-optimize-sub {
   font-size: 14.5px;
@@ -1144,9 +1194,9 @@ const CSS = `
   font-family: var(--font-text);
   font-size: 12px;
   font-weight: 600;
-  color: var(--text-3);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  color: var(--text-2);
+  letter-spacing: -0.005em;
+  text-transform: none;
 }
 
 .ff-field-label {
@@ -1170,9 +1220,8 @@ const CSS = `
   font-family: var(--font-display);
   font-size: 20px;
   font-weight: 500;
-  letter-spacing: -0.018em;
+  letter-spacing: -0.038em;
   color: var(--text-1);
-  
 }
 
 .ff-pulse { animation: ff-pulse 1.6s ease-in-out infinite; }
@@ -1308,10 +1357,10 @@ const CSS = `
   filter: blur(8px);
 }
 .ff-root.dark .ff-gradient-bg {
-  opacity: 0.5;
+  opacity: 0.6;
   background:
-    radial-gradient(ellipse 60% 50% at 75% 0%, rgba(59, 130, 246, 0.15) 0%, transparent 60%),
-    radial-gradient(ellipse 50% 40% at 25% 10%, rgba(59, 130, 246, 0.12) 0%, transparent 55%);
+    radial-gradient(ellipse 60% 50% at 75% 0%, rgba(79, 142, 247, 0.18) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 25% 10%, rgba(79, 142, 247, 0.14) 0%, transparent 55%);
 }
 
 @keyframes ff-ringfill {
@@ -1506,28 +1555,28 @@ const CSS = `
 .ff-root-inner {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 32px 24px 72px;
+  padding: 48px 32px 96px;
 }
 
 .ff-topbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 40px;
+  margin-bottom: 52px;
   gap: 12px;
 }
 
 .ff-hero {
-  margin-bottom: 48px;
+  margin-bottom: 60px;
 }
 
 .ff-hero-heading {
   font-size: clamp(34px, 5.6vw, 68px);
-  line-height: 1.05;
-  font-weight: 400;
-  letter-spacing: -0.01em;
+  line-height: 1.02;
+  font-weight: 500;
+  letter-spacing: -0.038em;
   max-width: 22ch;
-  margin-bottom: 18px;
+  margin-bottom: 20px;
 }
 
 .ff-hero-sub {
@@ -1539,7 +1588,7 @@ const CSS = `
 }
 
 .ff-tabs-nav {
-  margin-bottom: 40px;
+  margin-bottom: 48px;
 }
 
 .ff-cv-selector {
@@ -1578,14 +1627,14 @@ const CSS = `
 .ff-2col {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 20px;
-  margin-bottom: 32px;
+  gap: 24px;
+  margin-bottom: 40px;
 }
 
 .ff-2col-stack {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 40px 56px;
+  gap: 48px 64px;
 }
 
 .ff-detail-grid {
@@ -1629,7 +1678,7 @@ const CSS = `
 @media (max-width: 768px) {
   .space-y-5 > * + * { margin-top: 16px !important; }
   .space-y-6 > * + * { margin-top: 20px !important; }
-  .ff-textarea { font-size: 14px; }
+  /* ff-textarea stays 16px on mobile to prevent iOS zoom */
   .ff-output-text { font-size: 14px; }
   .ff-subheading { font-size: 18px; }
   .ff-dropdown-menu { min-width: min(280px, 90vw); left: 0; right: auto; }
@@ -1659,7 +1708,7 @@ const CSS = `
 /* Mobile overrides */
 @media (max-width: 768px) {
   .ff-root-inner {
-    padding: 20px 16px 40px;
+    padding: 28px 20px 56px;
   }
 
   .ff-topbar {
@@ -1744,6 +1793,19 @@ const CSS = `
   height: 600px;
   background: var(--bg);
   box-shadow: 0 4px 24px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.04);
+}
+
+/* Dark mode depth enhancement */
+.ff-root.dark .ff-card {
+  background-color: var(--bg-elev-1);
+  border-color: rgba(255,255,255,0.11);
+}
+.ff-root.dark .ff-card-elevated {
+  background-color: var(--bg-elev-2);
+}
+.ff-root.dark .ff-empty-state {
+  background-color: var(--bg-elev-1);
+  border-color: rgba(255,255,255,0.11);
 }
 .ff-root.dark .ff-ask-layout {
   box-shadow: 0 4px 24px rgba(0,0,0,0.3), 0 1px 4px rgba(0,0,0,0.2);
@@ -2377,15 +2439,20 @@ const CSS = `
 
 /* Headline */
 .ff-preloader-headline {
-  font-size: clamp(32px, 5.5vw, 54px);
-  font-weight: 400; line-height: 1.06;
-  letter-spacing: -0.024em; margin-bottom: 16px;
-  font-family: 'DM Serif Display', Georgia, serif;
+  font-size: clamp(22px, 3.6vw, 46px);
+  font-weight: 500; line-height: 1.06;
+  letter-spacing: -0.038em; margin-bottom: 16px;
+  font-family: 'Inter', -apple-system, system-ui, sans-serif;
+  white-space: nowrap;
+}
+/* Allow wrap on small screens */
+@media (max-width: 640px) {
+  .ff-preloader-headline { white-space: normal; font-size: clamp(22px, 6vw, 34px); }
 }
 .ff-preloader.light .ff-preloader-headline { color: #0a0a0a; }
 .ff-preloader.dark  .ff-preloader-headline { color: #f5f5f7; }
 .ff-preloader-headline em {
-  font-style: italic; color: #3b82f6;
+  font-style: normal; font-weight: 500; color: #3b82f6;
 }
 .ff-preloader.light .ff-preloader-headline em { color: #2563eb; }
 
@@ -2451,31 +2518,162 @@ const CSS = `
   box-shadow: 0 0 8px rgba(59,130,246,0.65);
 }
 
+/* ====================================================================== */
+/* HEADSHOT AI TAB                                                         */
+/* ====================================================================== */
+
+.ff-headshot-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px 64px;
+}
+
+.ff-headshot-upload-zone {
+  border: 2px dashed var(--border-strong);
+  border-radius: var(--r-xl);
+  padding: 48px 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: all var(--t-med);
+  background: var(--bg-elev-1);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 280px;
+}
+.ff-headshot-upload-zone:hover {
+  border-color: var(--accent);
+  background: var(--accent-bg-soft);
+}
+.ff-headshot-upload-zone.has-image {
+  padding: 0;
+  border-style: solid;
+  border-color: var(--border);
+  overflow: hidden;
+}
+
+.ff-headshot-preview {
+  width: 100%;
+  height: 100%;
+  min-height: 280px;
+  object-fit: cover;
+  border-radius: calc(var(--r-xl) - 2px);
+  display: block;
+}
+
+.ff-headshot-upload-icon {
+  width: 56px; height: 56px;
+  border-radius: 16px;
+  background: var(--accent-bg-soft);
+  border: 1px solid var(--accent-border-soft);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 16px;
+  color: var(--accent);
+}
+
+.ff-headshot-replace-btn {
+  position: absolute;
+  bottom: 12px; right: 12px;
+  background: var(--bg);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-pill);
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-1);
+  cursor: pointer;
+  display: flex; align-items: center; gap: 6px;
+  transition: all var(--t-fast);
+  font-family: var(--font-text);
+  box-shadow: var(--sh-2);
+}
+.ff-headshot-replace-btn:hover { background: var(--bg-elev-1); }
+
+.ff-headshot-result {
+  position: relative;
+  border-radius: var(--r-xl);
+  overflow: hidden;
+  background: var(--bg-elev-2);
+  min-height: 280px;
+  display: flex; align-items: center; justify-content: center;
+  border: 1px solid var(--border);
+}
+.ff-headshot-result-img {
+  width: 100%;
+  display: block;
+  border-radius: var(--r-xl);
+}
+.ff-headshot-download-btn {
+  position: absolute;
+  bottom: 12px; right: 12px;
+  background: var(--accent);
+  border: none;
+  border-radius: var(--r-pill);
+  padding: 8px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  display: flex; align-items: center; gap: 6px;
+  transition: all var(--t-fast);
+  font-family: var(--font-text);
+  box-shadow: var(--sh-blue);
+  text-decoration: none;
+}
+.ff-headshot-download-btn:hover { background: var(--accent-hover); transform: translateY(-1px); }
+
+.ff-headshot-empty {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 10px; color: var(--text-3);
+  text-align: center; padding: 24px;
+}
+
+.ff-headshot-processing {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 14px; padding: 32px;
+}
+.ff-headshot-spinner {
+  width: 40px; height: 40px;
+  border: 3px solid var(--border-strong);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: ff-spin 700ms linear infinite;
+}
+@keyframes ff-spin { to { transform: rotate(360deg); } }
+
+@media (max-width: 768px) {
+  .ff-headshot-layout { grid-template-columns: 1fr; gap: 24px; }
+}
+
 `;
 
 const PRELOADER_SLIDES = [
   {
     label: 'Optimize',
     icon: <Sparkles size={13} />,
-    headline: <>Audit any page.<br /><em>Rewrite it like the top 1%.</em></>,
+    headline: <>Audit any page. <em>Rewrite it like the top 1%.</em></>,
     sub: 'Score your portfolio, Upwork profile, LinkedIn, or CV against expert criteria — then get a complete rewrite in one click.',
   },
   {
     label: 'Close Client',
     icon: <Target size={13} />,
-    headline: <>Close clients with<br /><em>proposals that convert.</em></>,
+    headline: <>Close clients with <em>proposals that convert.</em></>,
     sub: 'Generate tight, scannable proposals, cold DMs, follow-ups, and cover letters tailored to the exact lead in front of you.',
   },
   {
     label: 'Pipeline',
     icon: <TrendingUp size={13} />,
-    headline: <>Track every pitch.<br /><em>See what works.</em></>,
+    headline: <>Track every pitch. <em>See what works.</em></>,
     sub: 'Log proposals, DMs, and emails. Watch reply rate and win rate build over time. Saved in your browser — no account needed.',
   },
   {
     label: 'Ask Anything',
     icon: <Bot size={13} />,
-    headline: <>Ask anything.<br /><em>Get tactical answers fast.</em></>,
+    headline: <>Ask anything. <em>Get tactical answers fast.</em></>,
     sub: 'Pricing strategy, scope creep scripts, rate increases, niche advice — your freelance mentor is one message away.',
   },
 ];
@@ -2675,11 +2873,11 @@ export default function FreelancersForge() {
         {/* TITLE */}
         <div className="ff-hero">
           <h1 className="ff-display ff-text-1 ff-hero-heading">
-            Audit any page. Rewrite it like{' '}
-            <span style={{ color: 'var(--accent)', fontStyle: 'italic', fontWeight: 500 }}>the top one percent.</span>
+            Your freelance edge.<br />
+            <span style={{ color: 'var(--accent)', fontWeight: 500 }}>Built to win clients.</span>
           </h1>
           <p className="ff-text-2 ff-hero-sub">
-            Score against expert criteria, then one-click rewrite using the patterns of top performers.
+            Audit your pages, close more clients, track your pipeline, and get expert freelance advice — all in one place.
           </p>
         </div>
 
@@ -2718,12 +2916,21 @@ export default function FreelancersForge() {
             <Bot size={15} />
             Ask Anything
           </button>
+          <button
+            type="button"
+            className={`ff-tab ${tab === 'headshot' ? 'ff-tab-active' : ''}`}
+            onClick={() => setTab('headshot')}
+          >
+            <Camera size={15} />
+            Headshot AI
+          </button>
         </div>
 
         {tab === 'optimize' && <OptimizeTab />}
         {tab === 'close' && <CloseTab />}
         {tab === 'pipeline' && <PipelineTab />}
         {tab === 'ask' && <AskAnythingTab />}
+        {tab === 'headshot' && <HeadshotTab />}
 
       </div>
     </div>
@@ -2821,6 +3028,7 @@ function AskAnythingTab() {
   const [copiedIdx, setCopiedIdx] = useState(null);
   const [attachment, setAttachment] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const messagesContainerRef = useRef(null);
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -2828,7 +3036,10 @@ function AskAnythingTab() {
   const messages = convos.find(c => c.id === activeId)?.messages || [];
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    // Scroll only within the chat container — never scrollIntoView which scrolls the page
+    if (!messagesContainerRef.current || messages.length === 0) return;
+    const el = messagesContainerRef.current;
+    el.scrollTop = el.scrollHeight;
   }, [messages, loading]);
 
   useEffect(() => {
@@ -2920,7 +3131,29 @@ function AskAnythingTab() {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           model: 'claude-sonnet-4-5', max_tokens: 1000,
-          system: `You are Forge AI, the expert assistant built into Freelancer's Forge. You specialize in helping freelancers, independent contractors, and solopreneurs with positioning, pricing, niche strategy, writing copy, client management, rates, contracts, negotiation, platform-specific advice, business development, and career moves. You give direct, tactical advice. No fluff. No buzzwords. Short sentences. Specific numbers when possible. Opinions that you'd defend.`,
+          system: `You are Forge AI — a no-nonsense advisor for freelancers, contractors, and consultants. You have deep, practical knowledge of how freelance businesses actually work: positioning, pricing, client acquisition, negotiation, scope management, platform dynamics (Upwork, Fiverr, LinkedIn, Toptal), and business development.
+
+Your job is to give the kind of advice a trusted senior freelancer would give over coffee — honest, specific, and immediately actionable. Not the kind a consultant gives in a deck.
+
+HOW YOU COMMUNICATE:
+- Direct. Say what you mean in the first sentence. Don't build up to it.
+- Specific. If you're recommending a rate, give a number. If you're recommending an approach, give the exact words or framework.
+- Short sentences. If a sentence has more than 20 words, split it.
+- Opinions stated as fact. "That rate is too low for that market" not "You might want to consider whether your rate reflects the market."
+- No hedging. No "it depends" without immediately saying what it depends on and giving a concrete answer anyway.
+- No corporate language. Never use: leverage, synergy, optimize, value proposition, pain points, deliverables, bandwidth, circle back, touch base, reach out (as a euphemism for "contact"), or "at the end of the day."
+- No em dashes (—). Use a comma, period, or colon instead.
+- If the person is about to make a mistake, say so plainly. Don't soften it to avoid discomfort.
+- If you don't know something or need more context to give a useful answer, say that directly and ask for what you need.
+
+WHAT YOU KNOW:
+- How to price freelance work by market, niche, and experience level
+- How platforms like Upwork, Fiverr, Contra, Toptal, and LinkedIn actually work algorithmically and behaviourally
+- How to write copy that gets responses (proposals, DMs, bios, profiles, emails)
+- How to handle difficult client conversations (scope creep, late payment, price objections, revision loops)
+- How to position a freelancer to command premium rates in their niche
+- How to build a pipeline and get off the feast-or-famine cycle
+- How to negotiate, set boundaries, and write contracts that protect you`,
           messages: apiMessages,
         }),
       });
@@ -2966,7 +3199,7 @@ function AskAnythingTab() {
       {/* Compact header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14, gap: 10, flexWrap: 'wrap' }}>
         <div>
-          <h2 className="ff-display ff-text-1" style={{ fontSize: 24, letterSpacing: '-0.02em', marginBottom: 2 }}>Ask anything</h2>
+          <h2 className="ff-display ff-text-1" style={{ fontSize: 24, letterSpacing: '-0.038em', marginBottom: 2 }}>Ask anything</h2>
           <p className="ff-text-3" style={{ fontSize: 13, lineHeight: 1.4 }}>Strategy, pricing, copy, clients — direct answers.</p>
         </div>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
@@ -3071,7 +3304,7 @@ function AskAnythingTab() {
 
         {/* Chat pane */}
         <div className="ff-chat-pane">
-          <div className="ff-chat-messages">
+          <div className="ff-chat-messages" ref={messagesContainerRef}>
             {isEmpty && !loading && (
               <div className="ff-chat-empty">
                 <div style={{
@@ -3082,7 +3315,7 @@ function AskAnythingTab() {
                 }}>
                   <Bot size={19} style={{ color: 'var(--accent)' }} />
                 </div>
-                <p className="ff-display ff-text-1" style={{ fontSize: 18, letterSpacing: '-0.02em', marginBottom: 6, lineHeight: 1.2 }}>
+                <p className="ff-display ff-text-1" style={{ fontSize: 18, letterSpacing: '-0.038em', marginBottom: 6, lineHeight: 1.2 }}>
                   What do you want to know?
                 </p>
                 <p className="ff-text-3" style={{ fontSize: 13, lineHeight: 1.55, maxWidth: '30ch', marginBottom: 20 }}>
@@ -3181,6 +3414,224 @@ function AskAnythingTab() {
               Enter to send · Chats saved 15 days
             </p>
           </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ====================================================================== */
+/* HEADSHOT AI TAB                                                         */
+/* ====================================================================== */
+
+const HEADSHOT_PROMPT = `Take this image and preserve the subject's exact facial features, expression, skin texture, and identity with no alterations. Convert the image into a professional passport-style studio headshot with the following adjustments: Change the background to a clean, seamless white studio backdrop. Ensure soft, even lighting with no harsh shadows (studio-quality lighting). Enhance overall image sharpness, clarity, and skin detail while keeping it natural (no over-smoothing). Adjust the subject's gaze so the eyes are looking directly into the camera. Maintain neutral facial expression (do not modify emotion or structure). Replace clothing with a clean, well-fitted black collared shirt. Ensure proper headshot framing (centered, head and upper shoulders visible). Keep proportions realistic and avoid distortion. Make the final result look like it was professionally taken in a studio. Output should be high-resolution, clean, and suitable for official passport or professional use.`;
+
+async function transformHeadshot(imageBase64, mediaType) {
+  const apiKey = import.meta.env.VITE_FAL_API_KEY;
+  if (!apiKey) throw new Error('VITE_FAL_API_KEY is not set in your .env file.');
+
+  const imageDataUrl = `data:${mediaType};base64,${imageBase64}`;
+
+  const response = await fetch('https://fal.run/fal-ai/flux/dev/image-to-image', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Key ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      image_url: imageDataUrl,
+      prompt: HEADSHOT_PROMPT,
+      strength: 0.75,
+      num_inference_steps: 28,
+      guidance_scale: 3.5,
+      num_images: 1,
+      enable_safety_checker: true,
+    }),
+  });
+
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.message || err.error || `Request failed (${response.status}). Check your API key.`);
+  }
+
+  const data = await response.json();
+  const url = data?.images?.[0]?.url || data?.image?.url;
+  if (!url) throw new Error('No image returned. Please try again.');
+  return url;
+}
+
+function HeadshotTab() {
+  const [image, setImage] = useState(null);
+  const [resultUrl, setResultUrl] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const fileInputRef = useRef(null);
+
+  const handleFile = (file) => {
+    if (!file) return;
+    if (!file.type.startsWith('image/')) { setError('Please upload an image file (JPG, PNG, WebP).'); return; }
+    if (file.size > 10 * 1024 * 1024) { setError('Image must be under 10MB.'); return; }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const dataUrl = e.target.result;
+      setImage({ base64: dataUrl.split(',')[1], mediaType: file.type, name: file.name, preview: dataUrl });
+      setResultUrl(null);
+      setError('');
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    handleFile(e.dataTransfer.files?.[0]);
+  };
+
+  const handleGenerate = async () => {
+    if (!image) { setError('Upload a photo first.'); return; }
+    setError(''); setLoading(true); setResultUrl(null);
+    try {
+      const url = await transformHeadshot(image.base64, image.mediaType);
+      setResultUrl(url);
+    } catch (err) {
+      setError(err.message || 'Something went wrong. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="ff-fadeup">
+      {/* Header */}
+      <div style={{ marginBottom: 32 }}>
+        <h2 className="ff-display ff-text-1" style={{ fontSize: 28, letterSpacing: '-0.038em', marginBottom: 6 }}>
+          Headshot AI
+        </h2>
+        <p className="ff-text-2" style={{ fontSize: 14, lineHeight: 1.55, maxWidth: '52ch' }}>
+          Upload any photo. Get back a studio-quality professional headshot suitable for LinkedIn, passports, and job applications.
+        </p>
+      </div>
+
+      <div className="ff-headshot-layout">
+        {/* Left: upload + controls */}
+        <div>
+          <p className="ff-field-label" style={{ marginBottom: 10, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+            Your photo
+            <Tooltip text="Face clearly visible, looking forward. Decent lighting works best. Your face is never altered — only the background, clothing, and lighting change." />
+          </p>
+
+          {/* Upload zone */}
+          <div
+            className={`ff-headshot-upload-zone${image ? ' has-image' : ''}`}
+            onClick={() => !image && fileInputRef.current?.click()}
+            onDrop={handleDrop}
+            onDragOver={(e) => e.preventDefault()}
+          >
+            {image ? (
+              <>
+                <img src={image.preview} alt="Your photo" className="ff-headshot-preview" />
+                <button
+                  type="button"
+                  className="ff-headshot-replace-btn"
+                  onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}
+                >
+                  <Camera size={12} /> Replace photo
+                </button>
+              </>
+            ) : (
+              <>
+                <div className="ff-headshot-upload-icon">
+                  <Camera size={24} />
+                </div>
+                <p className="ff-text-1" style={{ fontWeight: 600, fontSize: 15, marginBottom: 6, letterSpacing: '-0.01em' }}>
+                  Drop your photo here
+                </p>
+                <p className="ff-text-3" style={{ fontSize: 13, lineHeight: 1.5 }}>
+                  or click to browse · JPG, PNG, WebP · up to 10MB
+                </p>
+              </>
+            )}
+          </div>
+
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            style={{ display: 'none' }}
+            onChange={(e) => { handleFile(e.target.files?.[0]); e.target.value = ''; }}
+          />
+
+          {error && (
+            <div className="ff-fadeup" style={{ background: 'var(--danger-bg)', color: 'var(--danger)', padding: '10px 14px', borderRadius: 'var(--r-md)', fontSize: 13, fontWeight: 500, marginTop: 14 }}>
+              {error}
+            </div>
+          )}
+
+          <button
+            type="button"
+            className="ff-btn"
+            onClick={handleGenerate}
+            disabled={loading || !image}
+            style={{ marginTop: 16 }}
+          >
+            {loading
+              ? <><Loader2 size={15} className="animate-spin" /> Generating headshot...</>
+              : <><Sparkles size={15} /> Generate Professional Headshot <ArrowRight size={15} /></>
+            }
+          </button>
+
+          {/* Photo tips as a small inline note */}
+          <p className="ff-text-3" style={{ fontSize: 12.5, lineHeight: 1.6, marginTop: 14 }}>
+            <strong style={{ color: 'var(--text-2)' }}>Best results:</strong> face clearly visible, looking forward, decent lighting. Your face is never altered — only background, clothing, and lighting change.
+          </p>
+        </div>
+
+        {/* Right: result */}
+        <div>
+          <p className="ff-field-label" style={{ marginBottom: 10 }}>Result</p>
+          <div className="ff-headshot-result">
+            {loading ? (
+              <div className="ff-headshot-processing">
+                <div className="ff-headshot-spinner" />
+                <p className="ff-text-2" style={{ fontSize: 14, fontWeight: 500 }}>Generating your headshot...</p>
+                <p className="ff-text-3" style={{ fontSize: 12.5, textAlign: 'center', maxWidth: '28ch', lineHeight: 1.5 }}>
+                  fal.ai is processing your image. This takes about 15-30 seconds.
+                </p>
+              </div>
+            ) : resultUrl ? (
+              <>
+                <img src={resultUrl} alt="Professional headshot" className="ff-headshot-result-img" />
+                <a
+                  href={resultUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  download="headshot.jpg"
+                  className="ff-headshot-download-btn"
+                >
+                  <Download size={13} /> Download
+                </a>
+              </>
+            ) : (
+              <div className="ff-headshot-empty">
+                <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'var(--bg-elev-2)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 12 }}>
+                  <Camera size={22} style={{ color: 'var(--text-3)' }} />
+                </div>
+                <p className="ff-text-1" style={{ fontSize: 14, fontWeight: 600, marginBottom: 4, letterSpacing: '-0.01em' }}>
+                  Your headshot appears here
+                </p>
+                <p className="ff-text-3" style={{ fontSize: 13, lineHeight: 1.5, maxWidth: '28ch' }}>
+                  Upload a photo and click Generate to get started.
+                </p>
+              </div>
+            )}
+          </div>
+
+          {resultUrl && (
+            <div className="ff-fadeup ff-card" style={{ marginTop: 16, padding: '14px 16px' }}>
+              <p className="ff-text-2" style={{ fontSize: 13, lineHeight: 1.55 }}>
+                <strong style={{ color: 'var(--text-1)' }}>Not perfect?</strong> Try uploading a photo with better front-facing lighting, or a clearer view of your face. Results improve significantly with well-lit source photos.
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -3340,33 +3791,58 @@ function OptimizeTab() {
     const pt = PAGE_TYPES[pageType];
     const criteriaList = pt.criteria.map((c, i) => `${i + 1}. ${c}`).join('\n');
 
-    const prompt = `You are an elite conversion strategist auditing a freelancer page. You audit ONLY based on the actual content provided. Do not invent details, do not guess about content not shown. If something is missing, flag it as missing.
+    const prompt = `You are a senior conversion strategist who has audited thousands of freelancer pages. You have strong opinions. You say what others won't. You audit ONLY what is actually in front of you — never invent content, never assume what might be there. If something is absent, name it as absent.
 ${pageType === 'cv' && imageData
   ? (imageData.isPdf
-    ? 'NOTE: The applicant\'s CV is attached as a PDF. Read every section carefully. Pull exact phrases, role names, time frames, and metrics from the document.\n'
-    : 'NOTE: The applicant\'s CV is attached as an image. Read every visible detail.\n')
-  : (imageData && method === 'image' ? 'NOTE: A screenshot of the page is attached. Read every visible detail.\n' : '')}
+    ? 'ATTACHED: The CV as a PDF. Read every section. Pull exact phrases, company names, dates, metrics, and tool names from the document before writing a single word of feedback.\n'
+    : 'ATTACHED: The CV as an image. Read every visible detail before writing feedback.\n')
+  : (imageData && method === 'image' ? 'ATTACHED: A screenshot of the page. Read every visible element — headlines, body copy, CTAs, navigation, testimonials, everything — before writing feedback.\n' : '')}
 PAGE TYPE: ${pt.label}
-PAGE TYPE DESCRIPTION: ${pt.desc}
+WHAT THIS TYPE IS JUDGED ON: ${pt.desc}
 
-AUDIT CRITERIA (score each 1-10):
+SCORING CRITERIA (score each 1-10, where 10 = top 1% of this page type):
 ${criteriaList}
 
-${audience.trim() ? `TARGET AUDIENCE: ${audience.trim()}\n` : ''}${goal.trim() ? `GOAL: ${goal.trim()}\n` : ''}
 ${buildPageInputBlock()}
 
-Generate ONLY a JSON object:
+VERDICT RULES:
+- Lead with the single most damaging problem. Not the most obvious — the most costly.
+- Quote or paraphrase at least one specific phrase from the actual page in your verdict. No generic feedback.
+- Score 1-4 = broken and costing conversions right now. Score 5-7 = functional but forgettable. Score 8-10 = genuinely strong.
+- The overall score reflects how a real buyer would react, not how professional the designer made it look.
+
+RECOMMENDATION RULES:
+- Each recommendation names the specific line, section, or element that is the problem — not just a general area.
+- Each fix is a concrete action, not a suggestion to "consider" something.
+- Prioritise by revenue impact, not effort.
+
+REWRITE RULES:
+- "before" = verbatim or close-to-verbatim from the actual page. If nothing is visible, write [not visible].
+- "after" = a finished, ready-to-use replacement. Not a template. Not a suggestion. The actual copy.
+- Every "after" must be tighter, more specific, and have a clearer point than the "before".
+
+Generate ONLY valid JSON:
 {
-  "overall": { "score": 0-100, "verdict": "3-5 sentences. Lead with a definitive judgment (e.g. 'This page buries the lede.' or 'This profile reads like 90% of competitors.'). Quote or reference an exact phrase from the page when relevant. Then explain what works, what's broken, and the single biggest issue. Brutally honest, no hedging.", "headline": "5-8 word verdict, definitive not vague" },
-  "scores": [{ "criterion": "label", "score": 1-10, "note": "one short sentence referencing actual page content" }],
-  "recommendations": [{ "priority": "High|Medium|Low", "issue": "1-2 sentences citing what's actually on the page", "fix": "tactical, 1-2 sentences" }],
-  "rewrites": [{ "section": "name", "before": "current copy from the page (verbatim or near-verbatim if visible)", "after": "rewritten" }]
+  "overall": {
+    "score": 0-100,
+    "headline": "5-8 words. A verdict, not a description. Definitive. e.g. 'Buries the only thing that matters' or 'Reads like every other freelancer'.",
+    "verdict": "3-5 sentences. Lead with the single biggest problem and why it costs them clients. Reference actual copy from the page. Name what works, name what doesn't. End with the one thing that would move the needle most if fixed today. No hedging. No em dashes. No corporate language."
+  },
+  "scores": [
+    { "criterion": "exact criterion label from above", "score": 1-10, "note": "One sentence. Name something specific from the actual page — a phrase, a section, a missing element." }
+  ],
+  "recommendations": [
+    { "priority": "High|Medium|Low", "issue": "Name the exact problem and where it is on the page. 1-2 sentences.", "fix": "The specific action to take. Not 'consider adding' — the actual thing to do or write. 1-2 sentences." }
+  ],
+  "rewrites": [
+    { "section": "Name of the section or element", "before": "Exact or near-exact copy from the page", "after": "Finished replacement copy, ready to use. Specific, human, no corporate language, no em dashes." }
+  ]
 }
 
-RULES: Score every criterion. 4-7 recommendations, 3-5 rewrites. Be specific.
+Output 4-6 recommendations and 3-5 rewrites. Score every criterion.
 ${STRICT_RULES}
 ${pageType === 'cv' ? CV_STRICT_RULES : ''}
-Return ONLY JSON. No em dashes.`;
+Return ONLY JSON. No em dashes anywhere in the output.`;
 
     try {
       const parsed = await callClaude(prompt, method === 'image' || (pageType === 'cv' && !!imageData));
@@ -3399,7 +3875,7 @@ Return ONLY JSON. No em dashes.`;
       cv: "Pull 8-12 ATS keywords from the target role / target audience. Weave them naturally into the professional summary, skills section, and top 2 experience entries. Use the exact phrasing recruiters and ATS systems search for. No keyword stuffing. If no target role is given, infer the most likely role from the CV itself and optimize for that.",
     };
 
-    const prompt = `You are an elite copywriter who studies what TOP-PERFORMING freelancers do, AND you weave in search keywords.
+    const prompt = `You are a direct-response copywriter who specialises in freelancer positioning. Your rewrites win clients because they say something specific and true, not because they use marketing language. You have studied what the top-earning freelancers on every platform actually write, and you know the exact patterns that make buyers stop and book.
 
 PAGE TYPE: ${pt.label}
 
@@ -3408,40 +3884,48 @@ ${TOP_PERFORMER_PATTERNS[pageType]}
 KEYWORD STRATEGY:
 ${platformKeywordGuidance[pageType]}
 
-PAGE WAS AUDITED. Do NOT repeat these mistakes:
-- Verdict: ${result.overall?.headline || 'Underperforming'}
-- Issues: ${(result.recommendations || []).map(r => r.issue).join(' | ')}
-- Score: ${result.overall?.score || 0}/100
+AUDIT CONTEXT — do not repeat these problems:
+- Core verdict: ${result.overall?.headline || 'Underperforming'}
+- Problems to fix: ${(result.recommendations || []).map(r => r.issue).join(' | ')}
+- Current score: ${result.overall?.score || 0}/100
 
-${audience.trim() ? `TARGET: ${audience.trim()}\n` : ''}${goal.trim() ? `GOAL: ${goal.trim()}\n` : ''}
+${audience.trim() ? `TARGET BUYER: ${audience.trim()}\n` : ''}${goal.trim() ? `PAGE GOAL: ${goal.trim()}\n` : ''}
 
-ORIGINAL:
+ORIGINAL PAGE:
 ${buildPageInputBlock()}
 
-YOUR TASK:
-1. Identify the niche, pull 6-10 highest-search keywords buyers use to find this kind of freelancer.
-2. Rewrite the entire page as ONE continuous, ready-to-paste block. Use ALL CAPS section headers (followed by blank line). Sections to cover:
-${sectionsList}
-3. Weave keywords naturally where they have maximum search impact. No stuffing.
-4. Voice: human, specific, direct. No corporate buzzwords. No em dashes. If the original page has any voice (sarcastic, warm, blunt, technical), preserve and amplify it. Do NOT flatten it into generic "professional" tone. The rewrite should sound like the same person, just sharper.
-5. Specificity rule: every claim needs a number, named outcome, time frame, or specific niche term. No abstractions. Bad: "I help startups grow." Good: "I help Series A SaaS founders cut churn 18-40% in 90 days."
+REWRITE MISSION:
+1. Identify the specific niche this person serves. Pull 6-10 keywords buyers actually search when looking for this type of freelancer. These go where they have maximum algorithmic impact.
 
-Generate ONLY:
+2. Rewrite the entire page as ONE block of finished, ready-to-paste copy. Use ALL CAPS section headers. Cover every section:
+${sectionsList}
+
+3. Voice rules for the rewrite:
+   - Keep the original person's voice if they have one. Sarcastic? Keep it. Blunt? Keep it. Technical? Keep it. Do NOT flatten it into generic professional tone.
+   - If they have no voice yet, write in a confident, direct, first-person voice — like a founder who knows exactly who they help and why they're the right call.
+   - Short sentences. Concrete claims. No softening language.
+
+4. Every section must pass this test: would a qualified buyer read this and immediately know if this freelancer is right for them? If not, rewrite it until they would.
+
+5. Proof injection: find every place where a vague claim can be replaced with a specific number, named outcome, time frame, or named client type. Make that swap.
+
+6. The CTA must create a low-friction next step — not "contact me" but something specific like "Send me the brief and I'll tell you if it's a fit within 24 hours."
+
+Generate ONLY valid JSON:
 {
   "summary": {
-    "headline": "5-8 word strategic shift",
-    "shift": "2 sentences. First explains positioning move. Second explains keyword strategy.",
-    "patterns_applied": ["short label", "short label", "short label"],
-    "niche": "the niche identified",
-    "keywords": ["keyword 1", "keyword 2", "..."]
+    "headline": "5-8 words describing the strategic repositioning made",
+    "shift": "2 sentences. First: what positioning move was made and why. Second: what keyword strategy was applied.",
+    "patterns_applied": ["pattern 1", "pattern 2", "pattern 3"],
+    "niche": "The specific niche identified",
+    "keywords": ["keyword 1", "keyword 2", "keyword 3", "keyword 4", "keyword 5"]
   },
-  "fullRewrite": "COMPLETE rewritten page as one continuous text. ALL CAPS section headers followed by \\n\\n then content. Use \\n for line breaks within sections. All sections: ${pt.rewriteSections.join(', ')}. No commentary."
+  "fullRewrite": "The complete rewritten page. ALL CAPS section headers followed by two newlines, then the section content. Use single newlines within sections. Every section listed above must appear. No commentary, no placeholders, no [YOUR NAME HERE] — write it as if you are the freelancer. No em dashes anywhere."
 }
 
-REQUIRED: fullRewrite is finished page copy, not a template. Every section appears in fullRewrite. Keywords woven naturally.
 ${STRICT_RULES}
 ${pageType === 'cv' ? CV_STRICT_RULES : ''}
-Return ONLY JSON. No em dashes.`;
+Return ONLY JSON. No em dashes anywhere in the output.`;
 
     try {
       const parsed = await callClaude(prompt, method === 'image' || (pageType === 'cv' && !!imageData));
@@ -3454,9 +3938,6 @@ Return ONLY JSON. No em dashes.`;
         parsed.fullRewrite = stripEmDashes(parsed.fullRewrite);
       }
       setOptimized(parsed);
-      setTimeout(() => {
-        document.querySelector('[data-optimized-anchor]')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 100);
     } catch (err) {
       console.error('Optimize error:', err);
       setError(err.message || 'Optimization failed.');
@@ -3889,34 +4370,39 @@ function CloseTab() {
       const clientBlock = clientMessage.trim() ? `THE CLIENT'S MESSAGE:\n"""\n${clientMessage.trim()}\n"""` : (imageData ? "[The client's message is in the attached image.]" : '[No client message provided.]');
       const myBlock = myMessage.trim() ? `MY LAST REPLY (what I sent before):\n"""\n${myMessage.trim()}\n"""` : '[I have not replied yet, this is the first follow-up.]';
 
-      return `You are an expert freelance closer drafting a follow-up message.
-${imageData ? 'NOTE: Image attached, may contain the conversation.\n' : ''}
+      return `You are a freelancer who is excellent at follow-ups. You know that most follow-ups fail because they create pressure instead of value. Yours do the opposite. You read the room, find the right angle, and write something that makes replying feel easy.
+${imageData ? 'ATTACHED: Image that may contain the conversation.\n' : ''}
 
 ${clientBlock}
 
 ${myBlock}
 
-GOAL OF THIS FOLLOW-UP: ${goal.trim() || 'Re-engage and move the conversation forward.'}
+GOAL: ${goal.trim() || 'Re-engage the conversation and move toward a decision.'}
 
-Generate ONLY this JSON:
-{
-  "clientRead": "1-2 sentences. What kind of client is this? (e.g. 'Cautious buyer testing fit, mentions budget twice.' or 'Decisive operator, wants to move fast.')",
-  "situation": "1-2 sentences reading the room. What's the actual state of this conversation? Where did it stall, or what is the client really asking?",
-  "followup": "The follow-up message, ready to send. Use \\n for line breaks. 3-6 short paragraphs max. No greeting fluff like 'Hope you're well.'"
-}
+HOW TO READ THIS CONVERSATION:
+- What is the client's communication style? Fast and direct, or slow and cautious?
+- Where did things stall? Price, timing, uncertainty about scope, or something unstated?
+- What does a good outcome look like for them — and what are they afraid of?
 
-RULES:
-- Match the client's energy and formality from their message.
-- Acknowledge without summarizing what they said back to them.
-- Move toward the goal without being pushy.
-- Offer a soft off-ramp if the client has gone silent (e.g. "If timing isn't right, no worries, just let me know.").
-- Reference something specific from their message to prove you read it.
-- If I haven't replied yet, treat this as a fresh follow-up that opens new energy. If I have replied, build on what I last said.
+FOLLOW-UP RULES:
+- Open with something specific to their message or situation. Not "Just following up" or "Checking in."
+- Add a small piece of value: a relevant example, an observation about their situation, a specific question that shows you've been thinking about their problem.
+- Make the next step feel obvious and low-effort. Not "Let me know what you think" — something concrete.
+- If they've gone quiet, give them an easy out: "No worries if the timing isn't right — happy to reconnect whenever it makes sense." This often gets more replies than pressure.
+- 3-5 short paragraphs maximum. No walls of text.
+- No "Hope you're doing well." No "I wanted to circle back." No "Just wanted to touch base."
 
 VOICE: ${toneInstruction}
 ${STRICT_RULES}
 
-Return ONLY JSON. No em dashes.`;
+Generate ONLY valid JSON:
+{
+  "clientRead": "1-2 sentences. What kind of buyer is this, and what are they really signalling? Be specific.",
+  "situation": "1-2 sentences. What is the actual state of this conversation right now, and what is the single most likely reason it hasn't moved forward?",
+  "followup": "The follow-up message, ready to send. \\n between paragraphs. 3-5 short paragraphs. No greeting fluff. No em dashes."
+}
+
+Return ONLY JSON.`;
     }
 
     if (mode === 'coverletter') {
@@ -3928,105 +4414,150 @@ Return ONLY JSON. No em dashes.`;
         ? `JOB DESCRIPTION / POSTING:\n"""\n${jobDescription.trim()}\n"""`
         : `JOB CONTEXT (no full posting given):\n"""\n${intel.trim() || '[Nothing provided.]'}\n"""`;
 
-      return `You are an elite cover letter writer who has gotten people interviews at top companies. You are NOT a cliche generator. Your letters sound like a real, specific person.
+      return `You are a cover letter writer who gets people interviews. You know that cover letters fail when they summarise the CV, restate the job description, or lead with how excited the applicant is. Yours do none of that. They open with something specific, prove fit with one well-chosen example, and close with confidence.
 
 ${cvBlock}
 
 ${jobBlock}
 
-${offer.trim() ? `APPLICANT POSITIONING (their angle):\n"""\n${offer.trim()}\n"""\n` : ''}${proof.trim() ? `APPLICANT PROOF POINT:\n"""\n${proof.trim()}\n"""\n` : ''}
+${offer.trim() ? `APPLICANT'S POSITIONING:\n"""\n${offer.trim()}\n"""\n` : ''}${proof.trim() ? `APPLICANT'S BEST PROOF POINT:\n"""\n${proof.trim()}\n"""\n` : ''}
 
-Generate ONLY this JSON:
-{
-  "extraction": {
-    "targetRole": "4-8 words. The actual role being applied for.",
-    "company": "The company name if visible, else 'the company'.",
-    "topNeed": "1-2 sentences. The single biggest thing this employer is solving for, pulled from the posting.",
-    "fitAngle": "1-2 sentences. The applicant's strongest angle for this role, pulled from CV or proof."
-  },
-  "subject": "Email subject line if applicable. <60 chars. Specific. No 'Application for the X role'.",
-  "coverLetter": "The full letter, ready to send. 3-4 short paragraphs max. Use \\n for line breaks between paragraphs."
-}
+WHAT TO READ FIRST:
+Before writing a word, identify: (1) the single most important thing the employer needs solved, (2) the one piece of the applicant's background that maps most directly to that need, (3) anything specific about the company or role that can be referenced to show genuine interest.
 
-RULES:
-- Open with a specific observation about the company, role, or industry. NEVER 'I am writing to apply for' or 'I came across' or 'I'm excited to'.
-- Paragraph 1: Hook. State why this role specifically (1-2 sentences max). Reference something concrete from the posting.
-- Paragraph 2: Best-fit proof. Pull ONE specific outcome from the CV that matches the role's biggest need. Use a number, time frame, named tool, or dollar figure.
-- Paragraph 3: A second angle or point of difference. Why this person, not just any qualified candidate.
-- Paragraph 4 (close): One clean sentence asking for the next step. Confident, not begging.
-- NEVER use these phrases: 'I am writing to apply', 'I am excited to', 'I'm a great fit', 'I bring a unique blend', 'passionate about', 'proven track record', 'team player', 'I hope this finds you well', 'thank you for your consideration', 'attached is my resume', 'please find my CV', 'I look forward to hearing from you', 'I would love the opportunity'.
-- NEVER restate the job posting back at them.
-- NEVER use first person more than necessary. Active voice. Present tense for current work, past tense for past wins.
-- ZERO buzzwords. Every claim has proof.
-- Length: 200-280 words total. Tight.
+COVER LETTER RULES:
+- Paragraph 1 (hook): Open with an observation about the company, role, or industry — not "I am writing to apply." Show you read more than the job title. 2-3 sentences max.
+- Paragraph 2 (proof): Name one specific outcome from the applicant's background that addresses the employer's biggest need. Use a number, a time frame, a named tool, or a named result. One example done well beats three vague ones.
+- Paragraph 3 (fit): The second angle — why this person specifically, not just any qualified candidate. A perspective, a method, or a point of difference that is genuine and specific.
+- Paragraph 4 (close): One clean sentence that proposes a next step. Confident. Not "I would love the opportunity." Something like "Happy to walk you through the project on a call this week."
+- Total length: 200-260 words. Not a word more.
+
+FORBIDDEN PHRASES:
+"I am writing to apply", "I am excited to", "I'm a great fit", "I bring a unique blend", "passionate about",
+"proven track record", "team player", "thank you for your consideration", "attached is my resume",
+"I look forward to hearing from you", "I would love the opportunity", "I believe I would be a strong candidate",
+"strong communication skills", "detail-oriented", "I noticed you are looking for."
 
 VOICE: ${toneInstruction}
 ${STRICT_RULES}
 
-Return ONLY JSON. No em dashes.`;
+Generate ONLY valid JSON:
+{
+  "extraction": {
+    "targetRole": "4-8 words. The exact role.",
+    "company": "Company name from the posting, or 'the company' if not visible.",
+    "topNeed": "1-2 sentences. The single most important thing this employer is trying to solve, in their own language from the posting.",
+    "fitAngle": "1-2 sentences. The applicant's strongest, most specific angle for this role."
+  },
+  "subject": "Email subject line under 60 characters. Specific. No 'Application for the [X] role'.",
+  "coverLetter": "The finished letter. \\n between paragraphs. 200-260 words. Ready to send. No em dashes."
+}
+
+Return ONLY JSON.`;
     }
 
     if (mode === 'dm') {
-      return `You are an expert freelance closer.
-${imageData ? 'NOTE: Image attached.\n' : ''}
-Generate ONLY: { "clientType": "4-8 words", "hook": "4-10 words", "coldDM": "3-5 lines max, \\n breaks" }
-RULES: pattern-breaking opener, reference specific, value fast, soft CTA.
+      return `You are a freelancer who writes cold DMs that get replies. You know the difference between DMs that get ignored and DMs that start conversations. The difference: specificity, not enthusiasm.
+
+${imageData ? 'ATTACHED: Image with context about the lead.\n' : ''}
+
+COLD DM RULES:
+- Line 1: A specific observation about them — something in their profile, post, company, or content that shows you actually looked. NOT "I came across your profile" or "I noticed you're looking for..."
+- Line 2: One relevant fact about your work that connects directly to their situation. A number, a named outcome, or a named client type. No generic claims.
+- Line 3: One question. Open-ended but specific enough that answering it takes 10 seconds. Makes them want to reply, not feel sold to.
+- Total length: 3-5 lines. No more. A long DM is a deleted DM.
+- No subject line needed. No sign-off. No "Hope this helps!" No "Let me know if you have any questions."
+
+ABOUT THE LEAD:
+${intel.trim() || (imageData ? '[See attached.]' : '[No context provided — write for a generic lead in the most likely niche]')}
+
 VOICE: ${toneInstruction}
 ${STRICT_RULES}
-INPUT: ${intel.trim() || (imageData ? '[See attached.]' : '')}
-${offer.trim() ? `\nOFFER: ${offer}` : ''}
-${proof.trim() ? `\nPROOF: ${proof}` : ''}
-Return ONLY JSON. No em dashes.`;
+
+Generate ONLY valid JSON:
+{ "clientType": "4-8 words describing who this person is", "hook": "4-10 words — the specific thing noticed about them", "coldDM": "The DM, ready to send. \\n between lines. 3-5 lines max. No em dashes." }
+
+Return ONLY JSON.`;
     }
 
     if (mode === 'email') {
-      return `You are an expert freelance closer.
-${imageData ? 'NOTE: Image attached.\n' : ''}
-Generate ONLY: { "clientType": "4-8 words", "subject": "<50 chars no emoji", "body": "4-7 short paragraphs, \\n breaks, sign 'Best, [Your name]'" }
-RULES: subject <50 chars, hook in first line, specific reference in first 2 sentences, one low-friction CTA.
+      return `You are a freelancer who writes cold emails that get opened and replied to. You know that most cold emails fail because they lead with the sender, not the recipient. Yours lead with the recipient.
+
+${imageData ? 'ATTACHED: Image with context about the lead.\n' : ''}
+
+EMAIL RULES:
+- Subject line: Under 50 characters. Specific enough to feel personal, intriguing enough to open. No clickbait. No ALL CAPS. No "Quick question" or "Following up."
+- Opening line: Not "My name is..." or "I'm reaching out because..." — start with something about them or their situation.
+- Body: 4-6 short paragraphs. Each paragraph is 1-3 sentences. Lots of white space.
+  - Para 1: What you noticed about them (their company, product, content, or situation).
+  - Para 2: One specific outcome you've produced for someone in a similar position. Number, named result, or named client type.
+  - Para 3: The connection — why that outcome is relevant to their current situation.
+  - Para 4: One soft, specific ask. A 15-minute call, a response to one question, a look at a relevant sample. Not "let me know if you're interested."
+- Sign-off: Simple. "Best, [Your name]" or just the name. No "Warm regards" or "I look forward to hearing from you."
+
+ABOUT THE LEAD:
+${intel.trim() || (imageData ? '[See attached.]' : '[No context — write for the most likely professional profile]')}
+
 VOICE: ${toneInstruction}
 ${STRICT_RULES}
-INPUT: ${intel.trim() || (imageData ? '[See attached.]' : '')}
-${offer.trim() ? `\nOFFER: ${offer}` : ''}
-${proof.trim() ? `\nPROOF: ${proof}` : ''}
-Return ONLY JSON. No em dashes.`;
+
+Generate ONLY valid JSON:
+{ "clientType": "4-8 words describing this buyer", "subject": "Under 50 characters. Specific. No emoji.", "body": "Full email body with \\n between paragraphs. Ready to send. No em dashes. Sign off with 'Best, [Your name]'." }
+
+Return ONLY JSON.`;
     }
 
     const portfolioBlock = portfolio.length > 0
       ? `\nPORTFOLIO:\n${portfolio.map((p, i) => `[${i+1}] URL: ${p.url}${p.label ? ` | LABEL: ${p.label}` : ''}${p.tag ? ` | TAG: ${p.tag}` : ''}`).join('\n')}`
       : '';
 
-    return `You are an expert freelance closer. Write a SHORT, scannable proposal that a busy client can read in 30 seconds.
-${imageData ? 'NOTE: Image attached.\n' : ''}
+    return `You are a freelance closer who has written hundreds of proposals that convert. You know that clients don't read proposals — they scan them for the answer to one question: "Does this person get my problem, and can they fix it?" Your proposals are short, specific, and written from the client's perspective, not yours.
 
-CRITICAL PROPOSAL FORMAT RULES:
-- The proposal MUST be structured into exactly 4 named sections
-- Each section is SHORT. No walls of text. Clients skim, not read.
-- Section 1 "hook": 1-2 punchy sentences max. Name their exact problem. No fluff opener.
-- Section 2 "fit": 2-3 bullet points max. Each bullet = one specific reason you are right for this. Numbers where possible.
-- Section 3 "process": 3 numbered steps max. Very short. Each step = 5-8 words.
-- Section 4 "cta": 1 sentence. Soft, specific next step. No "I look forward to hearing from you."
-- coldDM: 3 lines max. Pattern-breaking opener. Immediate value. One question to reply to.
+${imageData ? 'ATTACHED: Image containing job post or brief details.\n' : ''}
 
-Generate ONLY:
+PROPOSAL STRUCTURE RULES:
+- hook (1-2 sentences): Name their actual problem. Not "I saw your post about..." — the problem itself. Make them feel understood in the first 10 words.
+- fit (2-3 bullets): Specific reasons you are the right call. Each bullet has a number, a named outcome, or a named reference. No generic claims.
+- process (3 steps max): What happens after they say yes. 6-8 words per step. Removes friction and shows you've done this before.
+- cta (1 sentence): A low-stakes, specific next step. NOT "I look forward to hearing from you." Something like "Happy to share 2 examples from a similar project this week if useful."
+- coldDM (3 lines): A pattern-breaking opener (not "Hi [Name], I came across..."), one line of immediate relevant value, one question that makes them want to reply.
+
+EXTRACTION — read the brief carefully and identify:
+- What they actually want (the stated goal)
+- What they're afraid of (the real fear behind the brief)
+- What "done" looks like to them (the success metric)
+- Whether the budget signal suggests they're buying on price or on expertise
+
+${STRICT_RULES}
+
+INPUT (job post, brief, or context):
+${intel.trim() || (imageData ? '[See attached.]' : '[No input provided]')}
+${portfolioBlock}
+
+VOICE: ${toneInstruction}
+
+Generate ONLY valid JSON:
 {
-  "extraction": { "clientType": "4-8 words", "projectType": "4-7 words", "tone": "3-6 words", "coreProblem": "1-2 sentences", "urgency": "Low|Medium|High", "budgetSignal": "Low|Medium|High", "hiddenIntent": "1-2 sentences" },
-  "attachments": [{ "description": "1-2 sentences", "links": ["url from portfolio if matches"] }],
-  "proposal": {
-    "hook": "1-2 sentences. Their problem, named directly. No greeting. No 'I came across your post'.",
-    "fit": ["bullet 1: specific reason with proof/number", "bullet 2: specific reason with proof/number", "bullet 3: specific reason with proof/number"],
-    "process": ["Step 1: 5-8 words", "Step 2: 5-8 words", "Step 3: 5-8 words"],
-    "cta": "One sentence. Specific and soft. e.g. 'Happy to send over 2-3 relevant examples if useful.'"
+  "extraction": {
+    "clientType": "4-8 words describing who this buyer is",
+    "projectType": "4-7 words describing what they actually need",
+    "tone": "3-6 words describing their communication style from the brief",
+    "coreProblem": "1-2 sentences. The actual problem behind the brief — what will go wrong if this doesn't get done.",
+    "urgency": "Low|Medium|High",
+    "budgetSignal": "Low|Medium|High",
+    "hiddenIntent": "1-2 sentences. What they're really evaluating — trust, speed, expertise, cheapest option?"
   },
-  "coldDM": "3 lines, \\n breaks"
+  "attachments": [{ "description": "Why this piece of work is relevant to this specific brief. 1-2 sentences.", "links": ["matching portfolio URL if available"] }],
+  "proposal": {
+    "hook": "1-2 sentences. Their problem, named directly. Reads like you've seen this exact situation before. No greeting. No 'I came across your post'. No em dashes.",
+    "fit": ["Specific reason 1 with proof, number, or named outcome", "Specific reason 2 with proof, number, or named outcome", "Specific reason 3 with proof, number, or named outcome"],
+    "process": ["Step 1: 6-8 words", "Step 2: 6-8 words", "Step 3: 6-8 words"],
+    "cta": "One sentence. Specific, low-friction, confident. Not a request for permission."
+  },
+  "coldDM": "3 lines with \\n breaks. Line 1: pattern-breaking opener that references something specific. Line 2: one relevant proof point or observation. Line 3: one open question."
 }
 
-RULES: 3-5 attachments max. Include EVERY matching portfolio URL. Never invent URLs.
-VOICE: ${toneInstruction}
-${STRICT_RULES}
-INPUT: ${intel.trim() || (imageData ? '[See attached.]' : '')}
-${portfolioBlock}
-Return ONLY JSON. No em dashes.`;
+No em dashes anywhere in the output. Return ONLY JSON.`;
   };
 
   const handleGenerate = async () => {
@@ -4550,7 +5081,7 @@ function PipelineTab() {
     <div className="ff-fadeup">
       <div className="ff-pipeline-topbar">
         <div>
-          <h2 className="ff-display ff-text-1" style={{ fontSize: 28, fontWeight: 400, letterSpacing: '-0.02em' }}>
+          <h2 className="ff-display ff-text-1" style={{ fontSize: 28, fontWeight: 500, letterSpacing: '-0.038em' }}>
             Your pipeline
           </h2>
           <p className="ff-text-2 mt-1" style={{ fontSize: 14, lineHeight: 1.5 }}>
@@ -4657,7 +5188,7 @@ function PipelineTab() {
       {entries.length === 0 && !showForm && (
         <div className="ff-empty-state">
           <TrendingUp size={28} style={{ color: 'var(--text-3)', display: 'inline-block', marginBottom: 12, opacity: 0.5 }} />
-          <p className="ff-display ff-text-1 mb-3" style={{ fontSize: 22, lineHeight: 1.3, fontWeight: 400, letterSpacing: '-0.02em' }}>
+          <p className="ff-display ff-text-1 mb-3" style={{ fontSize: 22, lineHeight: 1.3, fontWeight: 500, letterSpacing: '-0.038em' }}>
             Nothing logged yet.
           </p>
           <p className="ff-text-3" style={{ fontSize: 13, lineHeight: 1.55 }}>
@@ -4714,7 +5245,7 @@ function StatCard({ label, value, sub, accent }) {
         fontSize: 28,
         lineHeight: 1.1,
         fontWeight: 500,
-        letterSpacing: '-0.022em',
+        letterSpacing: '-0.038em',
         color: accent ? 'var(--accent)' : 'var(--text-1)',
         fontFeatureSettings: "'tnum'",
       }}>
@@ -4772,7 +5303,7 @@ function ActivityModal({ open, onClose, period, setPeriod, week, month, year }) 
         <div className="ff-modal-head">
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <TrendingUp size={16} style={{ color: 'var(--accent)' }} />
-            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 400, letterSpacing: '-0.018em', color: 'var(--text-1)', margin: 0 }}>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 500, letterSpacing: '-0.038em', color: 'var(--text-1)', margin: 0 }}>
               Activity
             </h2>
           </div>
@@ -4850,7 +5381,7 @@ function SummaryStat({ label, value, accent, muted }) {
   return (
     <div>
       <p className="ff-section-label" style={{ fontSize: 12, marginBottom: 6 }}>{label}</p>
-      <p style={{ fontFamily: 'var(--font-display)', fontSize: 22, fontWeight: 400, letterSpacing: '-0.02em', color: accent ? 'var(--accent)' : (muted ? 'var(--text-2)' : 'var(--text-1)'), margin: 0, lineHeight: 1.1 }}>
+      <p style={{ fontFamily: 'var(--font-display)', fontSize: 22, fontWeight: 500, letterSpacing: '-0.038em', color: accent ? 'var(--accent)' : (muted ? 'var(--text-2)' : 'var(--text-1)'), margin: 0, lineHeight: 1.1 }}>
         {value}
       </p>
     </div>
@@ -5454,7 +5985,7 @@ function OptimizeEmpty() {
       <div className="ff-mono ff-pulse mb-4" style={{ fontSize: 12, color: 'var(--text-3)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
         Awaiting Page
       </div>
-      <p className="ff-display ff-text-1 mb-4" style={{ fontSize: 22, lineHeight: 1.3, fontWeight: 400, letterSpacing: '-0.02em' }}>
+      <p className="ff-display ff-text-1 mb-4" style={{ fontSize: 22, lineHeight: 1.3, fontWeight: 500, letterSpacing: '-0.038em' }}>
         Your audit, scores, and<br/>rewrites will appear here.
       </p>
       <p className="ff-text-3" style={{ fontSize: 13, lineHeight: 1.55 }}>
@@ -5502,7 +6033,7 @@ function CloserEmpty({ mode }) {
       <div className="ff-mono ff-pulse mb-4" style={{ fontSize: 12, color: 'var(--text-3)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
         {kicker}
       </div>
-      <p className="ff-display ff-text-1" style={{ fontSize: 22, lineHeight: 1.3, fontWeight: 400, letterSpacing: '-0.02em', whiteSpace: 'pre-line' }}>
+      <p className="ff-display ff-text-1" style={{ fontSize: 22, lineHeight: 1.3, fontWeight: 500, letterSpacing: '-0.038em', whiteSpace: 'pre-line' }}>
         {messages[mode]}
       </p>
     </div>
