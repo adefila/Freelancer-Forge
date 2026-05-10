@@ -1575,7 +1575,7 @@ const CSS = `
   line-height: 1.02;
   font-weight: 500;
   letter-spacing: -0.038em;
-  max-width: 22ch;
+  max-width: 100%;
   margin-bottom: 20px;
 }
 
@@ -1583,7 +1583,8 @@ const CSS = `
   font-size: clamp(14px, 1.3vw, 17px);
   line-height: 1.6;
   letter-spacing: -0.005em;
-  max-width: 48ch;
+  max-width: 640px;
+  width: 100%;
   color: var(--text-2);
 }
 
@@ -3432,7 +3433,7 @@ async function transformHeadshot(imageBase64, mediaType) {
 
   const imageDataUrl = `data:${mediaType};base64,${imageBase64}`;
 
-  const response = await fetch('https://fal.run/fal-ai/flux/dev/image-to-image', {
+  const response = await fetch('https://fal.run/fal-ai/flux/schnell/image-to-image', {
     method: 'POST',
     headers: {
       'Authorization': `Key ${apiKey}`,
@@ -3441,11 +3442,11 @@ async function transformHeadshot(imageBase64, mediaType) {
     body: JSON.stringify({
       image_url: imageDataUrl,
       prompt: HEADSHOT_PROMPT,
-      strength: 0.75,
-      num_inference_steps: 28,
-      guidance_scale: 3.5,
+      strength: 0.85,
+      num_inference_steps: 4,
       num_images: 1,
-      enable_safety_checker: true,
+      enable_safety_checker: false,
+      sync_mode: true,
     }),
   });
 
