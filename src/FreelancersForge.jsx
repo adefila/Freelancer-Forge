@@ -3,9 +3,9 @@ import {
   ArrowRight, Copy, Check, Loader2, Sparkles, Paperclip, X, ImageIcon,
   Sun, Moon, Plus, ExternalLink, Link as LinkIcon, ChevronDown,
   Mail, MessageSquare, FileText, Reply, Type, Image as ImgIcon,
-  Target, Award, Briefcase, User, Layers, Wand2, Monitor, Camera,
+  Target, Award, Briefcase, User, Layers, Wand2, Monitor,
   TrendingUp, Trash2, HelpCircle, PenLine, Bot, Send, RotateCcw,
-  ChevronUp, Download
+  ChevronUp
 } from 'lucide-react';
 
 /* ====================================================================== */
@@ -2521,135 +2521,7 @@ const CSS = `
   box-shadow: 0 0 8px rgba(59,130,246,0.65);
 }
 
-/* ====================================================================== */
-/* HEADSHOT AI TAB                                                         */
-/* ====================================================================== */
 
-.ff-headshot-layout {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 48px 64px;
-}
-
-.ff-headshot-upload-zone {
-  border: 2px dashed var(--border-strong);
-  border-radius: var(--r-xl);
-  padding: 48px 24px;
-  text-align: center;
-  cursor: pointer;
-  transition: all var(--t-med);
-  background: var(--bg-elev-1);
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 280px;
-}
-.ff-headshot-upload-zone:hover {
-  border-color: var(--accent);
-  background: var(--accent-bg-soft);
-}
-.ff-headshot-upload-zone.has-image {
-  padding: 0;
-  border-style: solid;
-  border-color: var(--border);
-  overflow: hidden;
-}
-
-.ff-headshot-preview {
-  width: 100%;
-  height: 100%;
-  min-height: 280px;
-  object-fit: cover;
-  border-radius: calc(var(--r-xl) - 2px);
-  display: block;
-}
-
-.ff-headshot-upload-icon {
-  width: 56px; height: 56px;
-  border-radius: 16px;
-  background: var(--accent-bg-soft);
-  border: 1px solid var(--accent-border-soft);
-  display: flex; align-items: center; justify-content: center;
-  margin: 0 auto 16px;
-  color: var(--accent);
-}
-
-.ff-headshot-replace-btn {
-  position: absolute;
-  bottom: 12px; right: 12px;
-  background: var(--bg);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--r-pill);
-  padding: 6px 12px;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text-1);
-  cursor: pointer;
-  display: flex; align-items: center; gap: 6px;
-  transition: all var(--t-fast);
-  font-family: var(--font-text);
-  box-shadow: var(--sh-2);
-}
-.ff-headshot-replace-btn:hover { background: var(--bg-elev-1); }
-
-.ff-headshot-result {
-  position: relative;
-  border-radius: var(--r-xl);
-  overflow: hidden;
-  background: var(--bg-elev-2);
-  min-height: 280px;
-  display: flex; align-items: center; justify-content: center;
-  border: 1px solid var(--border);
-}
-.ff-headshot-result-img {
-  width: 100%;
-  display: block;
-  border-radius: var(--r-xl);
-}
-.ff-headshot-download-btn {
-  position: absolute;
-  bottom: 12px; right: 12px;
-  background: var(--accent);
-  border: none;
-  border-radius: var(--r-pill);
-  padding: 8px 16px;
-  font-size: 12px;
-  font-weight: 600;
-  color: white;
-  cursor: pointer;
-  display: flex; align-items: center; gap: 6px;
-  transition: all var(--t-fast);
-  font-family: var(--font-text);
-  box-shadow: var(--sh-blue);
-  text-decoration: none;
-}
-.ff-headshot-download-btn:hover { background: var(--accent-hover); transform: translateY(-1px); }
-
-.ff-headshot-empty {
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  gap: 10px; color: var(--text-3);
-  text-align: center; padding: 24px;
-}
-
-.ff-headshot-processing {
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  gap: 14px; padding: 32px;
-}
-.ff-headshot-spinner {
-  width: 40px; height: 40px;
-  border: 3px solid var(--border-strong);
-  border-top-color: var(--accent);
-  border-radius: 50%;
-  animation: ff-spin 700ms linear infinite;
-}
-@keyframes ff-spin { to { transform: rotate(360deg); } }
-
-@media (max-width: 768px) {
-  .ff-headshot-layout { grid-template-columns: 1fr; gap: 24px; }
 }
 
 `;
@@ -2919,21 +2791,13 @@ export default function FreelancersForge() {
             <Bot size={15} />
             Ask Anything
           </button>
-          <button
-            type="button"
-            className={`ff-tab ${tab === 'headshot' ? 'ff-tab-active' : ''}`}
-            onClick={() => setTab('headshot')}
-          >
-            <Camera size={15} />
-            Headshot AI
-          </button>
+
         </div>
 
         {tab === 'optimize' && <OptimizeTab />}
         {tab === 'close' && <CloseTab />}
         {tab === 'pipeline' && <PipelineTab />}
         {tab === 'ask' && <AskAnythingTab />}
-        {tab === 'headshot' && <HeadshotTab />}
 
       </div>
     </div>
@@ -3133,7 +2997,7 @@ function AskAnythingTab() {
       const response = await fetch('/api/claude', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: 'claude-sonnet-4-5', max_tokens: 1000,
+          model: 'claude-sonnet-4-5', max_tokens: 800,
           system: `You are Forge AI — a no-nonsense advisor for freelancers, contractors, and consultants. You have deep, practical knowledge of how freelance businesses actually work: positioning, pricing, client acquisition, negotiation, scope management, platform dynamics (Upwork, Fiverr, LinkedIn, Toptal), and business development.
 
 Your job is to give the kind of advice a trusted senior freelancer would give over coffee — honest, specific, and immediately actionable. Not the kind a consultant gives in a deck.
@@ -3427,222 +3291,7 @@ WHAT YOU KNOW:
 /* HEADSHOT AI TAB                                                         */
 /* ====================================================================== */
 
-const HEADSHOT_PROMPT = `Take this image and preserve the subject's exact facial features, expression, skin texture, and identity with no alterations. Convert the image into a professional passport-style studio headshot. Change the background to a clean, seamless white studio backdrop. Ensure soft, even lighting with no harsh shadows, studio-quality lighting. Enhance overall image sharpness, clarity, and skin detail while keeping it natural, no over-smoothing. Adjust the subject's gaze so the eyes are looking directly into the camera. Maintain neutral facial expression, do not modify emotion or structure. Replace clothing with a clean, well-fitted black collared shirt. Ensure proper headshot framing, centered, head and upper shoulders visible. Keep proportions realistic and avoid distortion. Make the final result look like it was professionally taken in a studio. Output should be high-resolution, clean, and suitable for official passport or professional use. Photorealistic, not illustrated, not cartoon, not painting. Real photograph quality only.`;
 
-async function transformHeadshot(imageBase64, mediaType) {
-  const apiKey = import.meta.env.VITE_FAL_API_KEY;
-  if (!apiKey) throw new Error('VITE_FAL_API_KEY is not set in your .env file.');
-
-  const imageDataUrl = `data:${mediaType};base64,${imageBase64}`;
-
-  // ip-adapter-face-id: preserves face identity, generates in ~5-8s
-  const response = await fetch('https://fal.run/fal-ai/ip-adapter-face-id', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Key ${apiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      face_image_url: imageDataUrl,
-      prompt: HEADSHOT_PROMPT,
-      negative_prompt: 'cartoon, illustration, painting, drawing, anime, 3d render, cgi, low quality, blurry, deformed, ugly, disfigured, bad anatomy, extra limbs, watermark, text',
-      num_inference_steps: 30,
-      guidance_scale: 7.5,
-      ip_adapter_scale: 0.8,
-      num_images: 1,
-      image_size: 'portrait_4_3',
-      enable_safety_checker: false,
-    }),
-  });
-
-  if (!response.ok) {
-    const errText = await response.text().catch(() => '');
-    let errMsg = `fal.ai error (${response.status})`;
-    try {
-      const e = JSON.parse(errText);
-      errMsg = e.message || e.error || e.detail || JSON.stringify(e);
-    } catch { errMsg = errText.slice(0, 200) || errMsg; }
-    throw new Error(errMsg);
-  }
-
-  const data = await response.json();
-  const url = data?.images?.[0]?.url || data?.image?.url;
-  if (!url) throw new Error('No image returned from fal.ai. Please try again.');
-  return url;
-}
-
-function HeadshotTab() {
-  const [image, setImage] = useState(null);
-  const [resultUrl, setResultUrl] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const fileInputRef = useRef(null);
-
-  const handleFile = (file) => {
-    if (!file) return;
-    if (!file.type.startsWith('image/')) { setError('Please upload an image file (JPG, PNG, WebP).'); return; }
-    if (file.size > 10 * 1024 * 1024) { setError('Image must be under 10MB.'); return; }
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const dataUrl = e.target.result;
-      setImage({ base64: dataUrl.split(',')[1], mediaType: file.type, name: file.name, preview: dataUrl });
-      setResultUrl(null);
-      setError('');
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const handleDrop = (e) => {
-    e.preventDefault();
-    handleFile(e.dataTransfer.files?.[0]);
-  };
-
-  const handleGenerate = async () => {
-    if (!image) { setError('Upload a photo first.'); return; }
-    setError(''); setLoading(true); setResultUrl(null);
-    try {
-      const url = await transformHeadshot(image.base64, image.mediaType);
-      setResultUrl(url);
-    } catch (err) {
-      setError(err.message || 'Something went wrong. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <div className="ff-fadeup">
-      {/* Header */}
-      <div style={{ marginBottom: 32 }}>
-        <h2 className="ff-display ff-text-1" style={{ fontSize: 28, letterSpacing: '-0.038em', marginBottom: 6 }}>
-          Headshot AI
-        </h2>
-        <p className="ff-text-2" style={{ fontSize: 14, lineHeight: 1.55, maxWidth: '52ch' }}>
-          Upload any photo. Get back a studio-quality professional headshot suitable for LinkedIn, passports, and job applications.
-        </p>
-      </div>
-
-      <div className="ff-headshot-layout">
-        {/* Left: upload + controls */}
-        <div>
-          <p className="ff-field-label" style={{ marginBottom: 10, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-            Your photo
-            <Tooltip text="Face clearly visible, looking forward. Decent lighting works best. Your face is never altered — only the background, clothing, and lighting change." />
-          </p>
-
-          {/* Upload zone */}
-          <div
-            className={`ff-headshot-upload-zone${image ? ' has-image' : ''}`}
-            onClick={() => !image && fileInputRef.current?.click()}
-            onDrop={handleDrop}
-            onDragOver={(e) => e.preventDefault()}
-          >
-            {image ? (
-              <>
-                <img src={image.preview} alt="Your photo" className="ff-headshot-preview" />
-                <button
-                  type="button"
-                  className="ff-headshot-replace-btn"
-                  onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}
-                >
-                  <Camera size={12} /> Replace photo
-                </button>
-              </>
-            ) : (
-              <>
-                <div className="ff-headshot-upload-icon">
-                  <Camera size={24} />
-                </div>
-                <p className="ff-text-1" style={{ fontWeight: 600, fontSize: 15, marginBottom: 6, letterSpacing: '-0.01em' }}>
-                  Drop your photo here
-                </p>
-                <p className="ff-text-3" style={{ fontSize: 13, lineHeight: 1.5 }}>
-                  or click to browse · JPG, PNG, WebP · up to 10MB
-                </p>
-              </>
-            )}
-          </div>
-
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            style={{ display: 'none' }}
-            onChange={(e) => { handleFile(e.target.files?.[0]); e.target.value = ''; }}
-          />
-
-          {error && (
-            <div className="ff-fadeup" style={{ background: 'var(--danger-bg)', color: 'var(--danger)', padding: '10px 14px', borderRadius: 'var(--r-md)', fontSize: 13, fontWeight: 500, marginTop: 14 }}>
-              {error}
-            </div>
-          )}
-
-          <button
-            type="button"
-            className="ff-btn"
-            onClick={handleGenerate}
-            disabled={loading || !image}
-            style={{ marginTop: 16 }}
-          >
-            {loading
-              ? <><Loader2 size={15} className="animate-spin" /> Generating headshot...</>
-              : <><Sparkles size={15} /> Generate Professional Headshot <ArrowRight size={15} /></>
-            }
-          </button>
-
-
-        </div>
-
-        {/* Right: result */}
-        <div>
-          <p className="ff-field-label" style={{ marginBottom: 10 }}>Result</p>
-          <div className="ff-headshot-result">
-            {loading ? (
-              <div className="ff-headshot-processing">
-                <div className="ff-headshot-spinner" />
-                <p className="ff-text-2" style={{ fontSize: 14, fontWeight: 500 }}>Generating your headshot...</p>
-                <p className="ff-text-3" style={{ fontSize: 12.5, textAlign: 'center', maxWidth: '28ch', lineHeight: 1.5 }}>
-                  fal.ai is processing your image. This takes about 15-30 seconds.
-                </p>
-              </div>
-            ) : resultUrl ? (
-              <>
-                <img src={resultUrl} alt="Professional headshot" className="ff-headshot-result-img" />
-                <a
-                  href={resultUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  download="headshot.jpg"
-                  className="ff-headshot-download-btn"
-                >
-                  <Download size={13} /> Download
-                </a>
-              </>
-            ) : (
-              <div className="ff-headshot-empty">
-                <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'var(--bg-elev-2)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 12 }}>
-                  <Camera size={22} style={{ color: 'var(--text-3)' }} />
-                </div>
-                <p className="ff-text-1" style={{ fontSize: 14, fontWeight: 600, marginBottom: 4, letterSpacing: '-0.01em' }}>
-                  Your headshot appears here
-                </p>
-                <p className="ff-text-3" style={{ fontSize: 13, lineHeight: 1.5, maxWidth: '28ch' }}>
-                  Upload a photo and click Generate to get started.
-                </p>
-              </div>
-            )}
-          </div>
-
-
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ====================================================================== */
-/* OPTIMIZE TAB                                                           */
-/* ====================================================================== */
 
 function OptimizeTab() {
   const [pageType, setPageType] = useState('portfolio');
@@ -3735,7 +3384,7 @@ function OptimizeTab() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         model: "claude-sonnet-4-5",
-        max_tokens: 8000,
+        max_tokens: 1500,
         system: "You are a JSON-only API. You MUST respond with valid, complete JSON only. No prose, no markdown, no commentary, no code fences. Start your response with { and end with }. Every string must be properly escaped. Do not truncate. Make sure all brackets and braces close properly.",
         messages: [{ role: "user", content }]
       })
@@ -3841,7 +3490,7 @@ Generate ONLY valid JSON:
   ]
 }
 
-Output 4-6 recommendations and 3-5 rewrites. Score every criterion.
+Output 3-4 recommendations and 2-3 rewrites. Score every criterion. Be concise.
 ${STRICT_RULES}
 ${pageType === 'cv' ? CV_STRICT_RULES : ''}
 Return ONLY JSON. No em dashes anywhere in the output.`;
@@ -3922,7 +3571,7 @@ Generate ONLY valid JSON:
     "niche": "The specific niche identified",
     "keywords": ["keyword 1", "keyword 2", "keyword 3", "keyword 4", "keyword 5"]
   },
-  "fullRewrite": "The complete rewritten page. ALL CAPS section headers followed by two newlines, then the section content. Use single newlines within sections. Every section listed above must appear. No commentary, no placeholders, no [YOUR NAME HERE] — write it as if you are the freelancer. No em dashes anywhere."
+  "fullRewrite": "The complete rewritten page, under 500 words total. ALL CAPS section headers followed by two newlines, then the section content. Use single newlines within sections. Every section listed above must appear. No commentary, no placeholders, no [YOUR NAME HERE] — write it as if you are the freelancer. No em dashes anywhere."
 }
 
 ${STRICT_RULES}
@@ -4594,7 +4243,7 @@ No em dashes anywhere in the output. Return ONLY JSON.`;
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           model: "claude-sonnet-4-5",
-          max_tokens: 4000,
+          max_tokens: 2000,
           system: "You are a JSON-only API. You MUST respond with valid, complete JSON only. No prose, no markdown, no commentary, no code fences. Start your response with { and end with }. Every string must be properly escaped.",
           messages: [{ role: "user", content }]
         })
