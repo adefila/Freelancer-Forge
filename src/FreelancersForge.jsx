@@ -3453,8 +3453,15 @@ async function transformHeadshot(imageBase64, mediaType) {
   });
 
   if (!response.ok) {
-    const err = await response.json().catch(() => ({}));
-    throw new Error(err.message || err.error || `Request failed (${response.status}). Check your API key.`);
+    const errText = await response.text().catch(() => '');
+    let errMsg = `fal.ai error (${response.status})`;
+    try {
+      const e = JSON.parse(errText);
+      errMsg = e.message || e.error || e.detail || JSON.stringify(e);
+    } catch {
+      errMsg = errText.slice(0, 200) || errMsg;
+    }
+    throw new Error(errMsg);
   }
 
   const data = await response.json();
