@@ -3433,22 +3433,42 @@ async function transformHeadshot(imageBase64, mediaType) {
   const apiKey = import.meta.env.VITE_FAL_API_KEY;
   if (!apiKey) throw new Error('VITE_FAL_API_KEY is not set in your .env file.');
 
-  const imageDataUrl = `data:${mediaType};base64,${imageBase64}`;
+  // Step 1: Upload image to fal.ai storage to get a proper URL
+  const byteChars = atob(imageBase64);
+  const byteArr = new Uint8Array(byteChars.length);
+  for (let i = 0; i < byteChars.length; i++) byteArr[i] = byteChars.charCodeAt(i);
+  const blob = new Blob([byteArr], { type: mediaType });
+  const ext = mediaType.split('/')[1] || 'jpg';
+  const file = new File([blob], `photo.${ext}`, { type: mediaType });
+  const fd = new FormData();
+  fd.append('file', file);
 
-  const response = await fetch('https://fal.run/fal-ai/flux/schnell/image-to-image', {
+  const uploadRes = await fetch('https://fal.run/storage/upload', {
+    method: 'POST',
+    headers: { 'Authorization': `Key ${apiKey}` },
+    body: fd,
+  });
+  if (!uploadRes.ok) {
+    const t = await uploadRes.text().catch(() => '');
+    throw new Error(`Upload failed (${uploadRes.status}): ${t.slice(0, 150)}`);
+  }
+  const { url: imageUrl } = await uploadRes.json();
+
+  // Step 2: Run image-to-image transformation
+  const response = await fetch('https://fal.run/fal-ai/flux-general/image-to-image', {
     method: 'POST',
     headers: {
       'Authorization': `Key ${apiKey}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      image_url: imageDataUrl,
+      image_url: imageUrl,
       prompt: HEADSHOT_PROMPT,
       strength: 0.85,
-      num_inference_steps: 4,
+      num_inference_steps: 28,
+      guidance_scale: 3.5,
       num_images: 1,
       enable_safety_checker: false,
-      sync_mode: true,
     }),
   });
 
@@ -3458,15 +3478,13 @@ async function transformHeadshot(imageBase64, mediaType) {
     try {
       const e = JSON.parse(errText);
       errMsg = e.message || e.error || e.detail || JSON.stringify(e);
-    } catch {
-      errMsg = errText.slice(0, 200) || errMsg;
-    }
+    } catch { errMsg = errText.slice(0, 200) || errMsg; }
     throw new Error(errMsg);
   }
 
   const data = await response.json();
   const url = data?.images?.[0]?.url || data?.image?.url;
-  if (!url) throw new Error('No image returned. Please try again.');
+  if (!url) throw new Error('No image returned from fal.ai. Please try again.');
   return url;
 }
 
