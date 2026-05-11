@@ -590,7 +590,6 @@ const CSS = `
   color: var(--text-3);
   line-height: 1.3;
   font-weight: 400;
-  white-space: nowrap;
 }
 
 .ff-theme-menu-divider {
@@ -5558,6 +5557,8 @@ function DMOutput({ result, copied, copyText, selectAllText }) {
     </div>
   );
 }
+
+function EmailOutput({ result, copied, copyText, selectAllText }) {
   const fullEmail = `Subject: ${result.subject || ''}\n\n${result.body || ''}`;
   return (
     <div className="space-y-5">
