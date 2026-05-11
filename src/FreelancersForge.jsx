@@ -518,7 +518,7 @@ const CSS = `
   background: var(--bg);
   border: 1px solid var(--border-strong);
   border-radius: 14px;
-  box-shadow: 0 12px 36px rgba(0,0,0,0.10), 0 3px 10px rgba(0,0,0,0.06);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.04);
   padding: 6px;
   min-width: 210px;
   z-index: 200;
@@ -526,7 +526,7 @@ const CSS = `
   transform-origin: top right;
 }
 .ff-root.dark .ff-theme-menu {
-  box-shadow: 0 12px 36px rgba(0,0,0,0.45), 0 3px 10px rgba(0,0,0,0.3);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.28), 0 1px 4px rgba(0,0,0,0.18);
 }
 
 /* Each row: [check] [icon] [label + desc] */
@@ -586,10 +586,11 @@ const CSS = `
   line-height: 1.3;
 }
 .ff-theme-option-desc {
-  font-size: 13px;
+  font-size: 11.5px;
   color: var(--text-3);
   line-height: 1.3;
   font-weight: 400;
+  white-space: nowrap;
 }
 
 .ff-theme-menu-divider {
@@ -4050,7 +4051,13 @@ Generate ONLY valid JSON:
 {
   "clientRead": "1-2 sentences. What kind of buyer is this, and what are they really signalling? Be specific.",
   "situation": "1-2 sentences. What is the actual state of this conversation right now, and what is the single most likely reason it hasn't moved forward?",
-  "followup": "The follow-up message, ready to send. \\n between paragraphs. 3-5 short paragraphs. No greeting fluff. No em dashes."
+  "followup": "The follow-up message, ready to send. \\n between paragraphs. 3-5 short paragraphs. No greeting fluff. No em dashes.",
+  "clientPsychology": {
+    "buyerType": "6-10 words. The specific buyer archetype based on their message and communication style.",
+    "budgetRange": "Estimated budget range based on signals in the conversation. If unclear, give a range and name the signal.",
+    "confidenceScore": 1-100,
+    "confidenceRationale": "1 sentence. What is most working in the freelancer's favour here, and what is the main risk."
+  }
 }
 
 Return ONLY JSON.`;
@@ -4101,7 +4108,13 @@ Generate ONLY valid JSON:
     "fitAngle": "1-2 sentences. The applicant's strongest, most specific angle for this role."
   },
   "subject": "Email subject line under 60 characters. Specific. No 'Application for the [X] role'.",
-  "coverLetter": "The finished letter. \\n between paragraphs. 200-260 words. Ready to send. No em dashes."
+  "coverLetter": "The finished letter. \\n between paragraphs. 200-260 words. Ready to send. No em dashes.",
+  "clientPsychology": {
+    "buyerType": "6-10 words. The type of hiring manager or employer based on the posting tone and requirements.",
+    "budgetRange": "Estimated salary or contract budget range based on role, company size, and market signals in the posting.",
+    "confidenceScore": 1-100,
+    "confidenceRationale": "1 sentence. The strongest fit signal and the biggest gap between the applicant and what the role demands."
+  }
 }
 
 Return ONLY JSON.`;
@@ -4126,7 +4139,17 @@ VOICE: ${toneInstruction}
 ${STRICT_RULES}
 
 Generate ONLY valid JSON:
-{ "clientType": "4-8 words describing who this person is", "hook": "4-10 words — the specific thing noticed about them", "coldDM": "The DM, ready to send. \\n between lines. 3-5 lines max. No em dashes." }
+{
+  "clientType": "4-8 words describing who this person is",
+  "hook": "4-10 words — the specific thing noticed about them",
+  "coldDM": "The DM, ready to send. \\n between lines. 3-5 lines max. No em dashes.",
+  "clientPsychology": {
+    "buyerType": "6-10 words. The specific buyer archetype: e.g. 'Deadline-driven founder who hired before and got burned', 'Budget-conscious SMB testing the waters', 'Experienced buyer who knows exactly what they want'.",
+    "budgetRange": "e.g. '$2k-5k project budget' or '$80-120/hr range'. Base this on signals in the brief: company size, platform, urgency, detail level, scope. If unclear, give a range and explain what signal you read.",
+    "confidenceScore": 1-100,
+    "confidenceRationale": "1 sentence. Why this score. What is working in the freelancer's favour, and what is the main uncertainty."
+  }
+}
 
 Return ONLY JSON.`;
     }
@@ -4153,7 +4176,17 @@ VOICE: ${toneInstruction}
 ${STRICT_RULES}
 
 Generate ONLY valid JSON:
-{ "clientType": "4-8 words describing this buyer", "subject": "Under 50 characters. Specific. No emoji.", "body": "Full email body with \\n between paragraphs. Ready to send. No em dashes. Sign off with 'Best, [Your name]'." }
+{
+  "clientType": "4-8 words describing this buyer",
+  "subject": "Under 50 characters. Specific. No emoji.",
+  "body": "Full email body with \\n between paragraphs. Ready to send. No em dashes. Sign off with 'Best, [Your name]'.",
+  "clientPsychology": {
+    "buyerType": "6-10 words. The specific buyer archetype: e.g. 'Deadline-driven founder who hired before and got burned', 'Budget-conscious SMB testing the waters', 'Experienced buyer who knows exactly what they want'.",
+    "budgetRange": "e.g. '$2k-5k project budget' or '$80-120/hr range'. Base this on signals in the brief: company size, platform, urgency, detail level, scope. If unclear, give a range and explain what signal you read.",
+    "confidenceScore": 1-100,
+    "confidenceRationale": "1 sentence. Why this score. What is working in the freelancer's favour, and what is the main uncertainty."
+  }
+}
 
 Return ONLY JSON.`;
     }
@@ -5309,6 +5342,58 @@ function PortfolioCard({ item, onRemove }) {
   );
 }
 
+/* ── Psychology card ──────────────────────────────────────────────────── */
+function PsychCard({ psych, delay = 0 }) {
+  if (!psych) return null;
+  const score = psych.confidenceScore;
+  const scoreColor = score >= 75 ? 'var(--success)' : score >= 50 ? 'var(--warning)' : 'var(--danger)';
+  const scoreBg   = score >= 75 ? 'var(--success-bg)' : score >= 50 ? 'var(--warning-bg)' : 'var(--danger-bg)';
+  const scoreLabel = score >= 75 ? 'Strong' : score >= 50 ? 'Moderate' : 'Low';
+
+  return (
+    <div className="ff-fadeup ff-card" style={{ animationDelay: `${delay}ms`, borderColor: 'var(--accent-border-soft)', background: 'var(--bg)' }}>
+      {/* Header */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{ width: 28, height: 28, borderRadius: 8, background: 'var(--accent-bg-soft)', border: '1px solid var(--accent-border-soft)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <User size={13} style={{ color: 'var(--accent)' }} />
+          </div>
+          <h3 className="ff-subheading" style={{ fontSize: 15, margin: 0 }}>Client psychology</h3>
+        </div>
+        {/* Confidence score badge */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ fontSize: 12, color: 'var(--text-3)', fontFamily: 'var(--font-text)' }}>Proposal confidence</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: scoreBg, border: `1px solid ${scoreColor}30`, borderRadius: 20, padding: '4px 10px' }}>
+            <div style={{ width: 6, height: 6, borderRadius: '50%', background: scoreColor }} />
+            <span style={{ fontSize: 13, fontWeight: 700, color: scoreColor, fontFamily: 'var(--font-text)', letterSpacing: '-0.01em' }}>{score}</span>
+            <span style={{ fontSize: 12, color: scoreColor, fontFamily: 'var(--font-text)', opacity: 0.8 }}>{scoreLabel}</span>
+          </div>
+        </div>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: psych.confidenceRationale ? 14 : 0 }}>
+        {/* Buyer type */}
+        <div style={{ background: 'var(--bg-elev-1)', border: '1px solid var(--border)', borderRadius: 'var(--r-lg)', padding: '13px 15px' }}>
+          <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-3)', letterSpacing: '0.04em', textTransform: 'uppercase', fontFamily: 'var(--font-text)', marginBottom: 5 }}>Detected buyer type</p>
+          <p style={{ fontSize: 13.5, fontWeight: 500, color: 'var(--text-1)', lineHeight: 1.4, letterSpacing: '-0.005em', fontFamily: 'var(--font-text)' }}>{psych.buyerType || '—'}</p>
+        </div>
+        {/* Budget range */}
+        <div style={{ background: 'var(--bg-elev-1)', border: '1px solid var(--border)', borderRadius: 'var(--r-lg)', padding: '13px 15px' }}>
+          <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-3)', letterSpacing: '0.04em', textTransform: 'uppercase', fontFamily: 'var(--font-text)', marginBottom: 5 }}>Likely budget range</p>
+          <p style={{ fontSize: 13.5, fontWeight: 500, color: 'var(--accent)', lineHeight: 1.4, letterSpacing: '-0.005em', fontFamily: 'var(--font-text)' }}>{psych.budgetRange || '—'}</p>
+        </div>
+      </div>
+
+      {/* Confidence rationale */}
+      {psych.confidenceRationale && (
+        <div style={{ background: 'var(--bg-elev-1)', border: '1px solid var(--border)', borderRadius: 'var(--r-md)', padding: '11px 14px', fontSize: 13, color: 'var(--text-2)', lineHeight: 1.55, fontFamily: 'var(--font-text)' }}>
+          <strong style={{ color: 'var(--text-1)', fontWeight: 600 }}>Why: </strong>{psych.confidenceRationale}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function ProposalOutput({ result, pillClass, portfolio, copied, copyText, selectAllText }) {
   // Build plain-text version for copying
   const proposalText = (() => {
@@ -5340,6 +5425,8 @@ function ProposalOutput({ result, pillClass, portfolio, copied, copyText, select
           <Cell label="Hidden Intent" value={result.extraction?.hiddenIntent} wide />
         </div>
       </div>
+
+      <PsychCard psych={result.clientPsychology} delay={30} />
 
       {/* Structured Proposal */}
       {proposal && (
@@ -5467,11 +5554,10 @@ function DMOutput({ result, copied, copyText, selectAllText }) {
         </div>
       </div>
       <OutputBlock title="Cold DM" text={result.coldDM} copyKey="dm" copied={copied} copyText={copyText} selectAllText={selectAllText} delay={60} />
+      <PsychCard psych={result.clientPsychology} delay={90} />
     </div>
   );
 }
-
-function EmailOutput({ result, copied, copyText, selectAllText }) {
   const fullEmail = `Subject: ${result.subject || ''}\n\n${result.body || ''}`;
   return (
     <div className="space-y-5">
@@ -5513,6 +5599,7 @@ function EmailOutput({ result, copied, copyText, selectAllText }) {
           <p className="ff-output-text" onClick={selectAllText} style={{ cursor: 'text' }}>{result.body}</p>
         </div>
       </div>
+      <PsychCard psych={result.clientPsychology} delay={150} />
     </div>
   );
 }
@@ -5537,6 +5624,7 @@ function FollowupOutput({ result, copied, copyText, selectAllText }) {
         </div>
       )}
       <OutputBlock title="Follow-up" text={result.followup} copyKey="followup" copied={copied} copyText={copyText} selectAllText={selectAllText} delay={60} />
+      <PsychCard psych={result.clientPsychology} delay={90} />
     </div>
   );
 }
@@ -5596,6 +5684,7 @@ function CoverLetterOutput({ result, copied, copyText, selectAllText }) {
           </p>
         </div>
       </div>
+      <PsychCard psych={result.clientPsychology} delay={150} />
     </div>
   );
 }
