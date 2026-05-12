@@ -3549,8 +3549,6 @@ AUDIT FINDINGS TO FIX:
 - Problems: ${(result.recommendations || []).map(r => r.issue).join(' | ')}
 - Score: ${result.overall?.score || 0}/100
 
-${audience.trim() ? 'TARGET BUYER: ' + audience.trim() + '\n' : ''}${goal.trim() ? 'PAGE GOAL: ' + goal.trim() + '\n' : ''}
-
 ORIGINAL PAGE:
 ${buildPageInputBlock()}
 
