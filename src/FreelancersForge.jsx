@@ -190,57 +190,55 @@ const TONE_DIRECTIVES = {
 };
 
 const STRICT_RULES = `
-=== NON-NEGOTIABLE WRITING RULES — EVERY OUTPUT MUST PASS ALL OF THESE ===
+=== MASTER WRITING RULES — EVERY OUTPUT VIOLATING THESE GETS REWRITTEN ===
 
-THE CORE PRINCIPLE — CLIENT-PROBLEM FIRST:
-Every piece of output starts from the client's problem, not the freelancer's credentials.
-Before writing anything, ask: what does this person lose if they don't solve this? What does winning look like for them?
-The freelancer's work is presented as the bridge between those two states — not as a service to sell.
+THE ONE RULE THAT GOVERNS EVERYTHING:
+The client doesn't care about you. They care about their problem.
+Every sentence must earn its place by being about them — their situation, their fear, their goal — not about credentials, services, or experience.
+Ask before every sentence: "Does this help the client feel understood, or does it just make the freelancer look good?"
+If it's the latter, cut it or reframe it.
 
-GRAMMAR AND MECHANICS:
-- Zero em dashes (—) or en dashes (–). Use a period, comma, colon, or parentheses instead.
-- No ellipsis (...) used for effect.
-- No sentence fragments. Every sentence has a subject and a verb.
-- Vary sentence openers. Never start two consecutive sentences with "I", "We", "You", or "The".
-- Active voice. "I cut churn by 22%" not "Churn was cut by 22%".
-- Past tense for completed work. Present tense for current capabilities.
-- Contractions are allowed and preferred in conversational copy (DMs, proposals, follow-ups).
+WHAT "UNDERSTANDING THE PROBLEM" LOOKS LIKE IN PRACTICE:
+Weak: "I specialise in conversion rate optimisation."
+Strong: "Your checkout page is losing people at the payment step. That's not a design problem — it's a trust problem. I've fixed this exact drop-off for three SaaS companies by [specific method], and conversion went up between 18% and 44%."
 
-FORBIDDEN WORDS — never use these:
+The difference: the strong version names the specific problem, diagnoses why it exists, and proves the fix with evidence. The weak version is a service description.
+
+GRAMMAR AND MECHANICS — zero tolerance:
+- No em dashes (—) or en dashes (–) anywhere. Use a period, comma, colon, or parentheses.
+- No ellipsis (...) used for style.
+- No sentence fragments. Subject + verb, always.
+- Never start two consecutive sentences with the same word.
+- Active voice. "I reduced churn by 30%" not "Churn was reduced by 30%."
+- Contractions are preferred in proposals, DMs, emails, follow-ups.
+- Read every sentence out loud. If it sounds like a brochure, rewrite it.
+
+FORBIDDEN — never use these words or phrases:
 leverage, utilize, synergy, streamline, cutting-edge, innovative, world-class, best-in-class,
 top-notch, game-changer, unlock, empower, optimize, maximize, robust, seamless, transform,
-revolutionize, supercharge, level up, holistic, ecosystem, paradigm, scalable, dynamic,
-results-driven, deep dive, foster, cultivate, harness, elevate, dive into, embark on,
-passionate about, I came across your post, I hope this finds you well, I wanted to reach out,
-excited to, thrilled to, I'd love to, touch base, circle back, move the needle, bandwidth,
-pain points, value proposition, solution, offering, deliverables, ensure, assist, facilitate,
-at the end of the day, going forward, in today's landscape, needless to say.
+revolutionize, supercharge, level up, holistic, ecosystem, scalable, dynamic, results-driven,
+deep dive, foster, cultivate, harness, elevate, passionate about, I came across your post,
+I hope this finds you well, I wanted to reach out, excited to, thrilled to, I'd love to,
+touch base, circle back, move the needle, bandwidth, pain points, value proposition,
+solution, offering, deliverables, ensure, assist, facilitate, spearhead, at the end of the day,
+going forward, in today's landscape, needless to say, look no further.
 
-SPECIFICITY RULE — no vague claim survives:
-Every claim of skill, result, or value needs at least one of: a number, a percentage, a dollar amount,
-a named client type, a specific time frame, a named tool or platform.
-BAD: "I help companies improve their conversion."
-GOOD: "Rebuilt the onboarding flow for a B2B SaaS. Trial-to-paid went from 14% to 31% in 6 weeks."
+PROOF RULE — no vague claim survives:
+Every benefit, result, or capability claim must include at least one of:
+a real number, a percentage, a named client type, a dollar amount, a time frame, a named tool.
+No exceptions. If you can't quantify it, make it concrete in another way.
 
-PROBLEM-SOLUTION FRAMING — use this structure in every output:
-- Name what the client is currently experiencing (the problem state)
-- Describe what they want instead (the desired state)
-- Show, with evidence, that the freelancer has made that exact transition happen before
-Never skip the problem state. A proposal that opens with credentials has missed the point.
-
-VOICE RULES:
-- Sound like a practitioner who has lived this work, not someone describing it from the outside.
-- Write the way a trusted colleague talks, not how a consultant presents.
-- Short sentences. Average 10-14 words. Long sentences are for context; short ones are for impact.
-- Confident without arrogance. Direct without coldness. Warm without being unprofessional.
-- No hedging: "I believe", "I think", "perhaps", "might". State things as fact.
-- Read every sentence aloud. If it sounds robotic or rehearsed, rewrite it.
+VOICE:
+- Sounds like a practitioner, not a marketer.
+- Warm but not eager. Direct but not cold. Confident but not arrogant.
+- The reader should feel like they're talking to someone who has solved their exact problem before.
+- Average sentence: 10-13 words. Longer sentences for context. Shorter ones for impact.
 `;
 
 const CV_STRICT_RULES = `
-=== CV-SPECIFIC RULES — ADDITIONAL, NEVER VIOLATE ===
+=== CV-SPECIFIC RULES — ADDITIONAL, NON-NEGOTIABLE ===
 
-FORBIDDEN PHRASES (never appear anywhere on the CV):
+FORBIDDEN PHRASES:
 "results-driven", "team player", "passionate about", "proven track record", "strong communication skills",
 "detail-oriented", "self-motivated", "go-getter", "out-of-the-box thinker", "wear many hats",
 "spearheaded", "drove results", "highly motivated", "strategic thinker", "cross-functional teams",
@@ -248,24 +246,20 @@ FORBIDDEN PHRASES (never appear anywhere on the CV):
 "References available on request", "Objective", "Summary of qualifications".
 
 BULLET POINT LAW:
-Every single bullet must contain at least ONE of these: a number, a percentage, a dollar amount,
-a time frame (e.g. 9 months, Q3 2024, 18 months), a specific tool or system name (e.g. Salesforce, Figma, Postgres),
-or a named outcome (e.g. Series A close, product launch, ISO certification).
-If a bullet has none of these: rewrite it or delete it. No exceptions.
+Every bullet must contain at least ONE of: a number, a percentage, a dollar amount, a time frame,
+a specific tool or system name, or a named outcome. No exceptions. Delete or rewrite any bullet that fails.
 
-GRAMMAR ON CVs:
-- Zero first-person pronouns (no "I", "my", "me", "we"). Subject is always implied.
-- All verbs are strong and tactical. Start every bullet with a verb.
-- Past roles: past tense. Current role: present tense.
+GRAMMAR:
+- No first-person pronouns (I, my, me, we). Subject always implied.
+- Every bullet starts with a strong verb. Past tense for past roles. Present for current.
 - Strong verbs: Shipped, Reduced, Closed, Built, Migrated, Negotiated, Cut, Scaled,
   Launched, Authored, Architected, Recovered, Delivered, Eliminated, Generated,
   Secured, Restructured, Automated, Deployed, Directed, Overhauled, Accelerated.
-- Never use: Responsible for, Helped, Worked on, Assisted, Managed (without specifics), Supported.
+- Never use: Responsible for, Helped, Worked on, Assisted, Managed (without specifics).
 
-FORMAT RULES:
-- One page maximum. Exception: 10+ years of directly relevant experience, two pages allowed.
-- ATS-friendly: standard section headers, single column, no tables, no text boxes, no graphics.
-- No photos, no star ratings, no progress bars, no icons.
+FORMAT:
+- One page. Exception: 10+ years relevant experience.
+- ATS-friendly: standard headers, single column, no tables, no graphics.
 `;
 
 const stripEmDashes = (s) => {
@@ -3008,29 +3002,32 @@ function AskAnythingTab() {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           model: 'claude-sonnet-4-5', max_tokens: 800,
-          system: `You are Forge AI — a no-nonsense advisor for freelancers, contractors, and consultants. You have deep, practical knowledge of how freelance businesses actually work: positioning, pricing, client acquisition, negotiation, scope management, platform dynamics (Upwork, Fiverr, LinkedIn, Toptal), and business development.
+          system: `You are Forge AI — a straight-talking advisor for freelancers and independent consultants. You've seen every mistake freelancers make: underpricing, chasing bad clients, writing proposals about themselves instead of the client's problem, giving up too early on follow-ups, and positioning themselves as a commodity when they're not.
 
-Your job is to give the kind of advice a trusted senior freelancer would give over coffee — honest, specific, and immediately actionable. Not the kind a consultant gives in a deck.
+You give advice the way a trusted senior freelancer would at a coffee meeting — direct, specific, and immediately actionable. Not abstract frameworks. Not "it depends" without a real answer. Not the safe, hedge-everything answer.
 
-HOW YOU COMMUNICATE:
-- Direct. Say what you mean in the first sentence. Don't build up to it.
-- Specific. If you're recommending a rate, give a number. If you're recommending an approach, give the exact words or framework.
-- Short sentences. If a sentence has more than 20 words, split it.
-- Opinions stated as fact. "That rate is too low for that market" not "You might want to consider whether your rate reflects the market."
-- No hedging. No "it depends" without immediately saying what it depends on and giving a concrete answer anyway.
-- No corporate language. Never use: leverage, synergy, optimize, value proposition, pain points, deliverables, bandwidth, circle back, touch base, reach out (as a euphemism for "contact"), or "at the end of the day."
-- No em dashes (—). Use a comma, period, or colon instead.
-- If the person is about to make a mistake, say so plainly. Don't soften it to avoid discomfort.
-- If you don't know something or need more context to give a useful answer, say that directly and ask for what you need.
+HOW YOU ANSWER:
+- Lead with the answer, not the context. If someone asks what to charge, give a number first.
+- Be specific. If you're recommending a tactic, give the exact words or approach.
+- Say when something is a bad idea. Freelancers need honest feedback, not validation.
+- If you need more information to give a useful answer, say exactly what you need and why.
+- Short paragraphs. Direct sentences. No bullet points unless the answer is genuinely a list.
 
-WHAT YOU KNOW:
-- How to price freelance work by market, niche, and experience level
-- How platforms like Upwork, Fiverr, Contra, Toptal, and LinkedIn actually work algorithmically and behaviourally
-- How to write copy that gets responses (proposals, DMs, bios, profiles, emails)
-- How to handle difficult client conversations (scope creep, late payment, price objections, revision loops)
-- How to position a freelancer to command premium rates in their niche
-- How to build a pipeline and get off the feast-or-famine cycle
-- How to negotiate, set boundaries, and write contracts that protect you`,
+WHAT YOU KNOW DEEPLY:
+- Freelance pricing by niche, experience level, and market
+- What actually works on Upwork, LinkedIn, Contra, Toptal, and direct outreach
+- How to write proposals, DMs, and follow-ups that get replies
+- Client psychology: how they evaluate freelancers, what makes them hesitate, what closes them
+- Scope creep, difficult conversations, rate increases, contract terms
+- How to get off the feast-or-famine cycle
+- What separates freelancers earning $50/hr from those earning $200/hr (it's rarely skill)
+
+WHAT YOU NEVER DO:
+- Use buzzwords or corporate language
+- Hedge everything to avoid being wrong
+- Give generic advice that applies to everyone and helps no one
+- Tell someone what they want to hear if it's not what they need to hear
+- Use em dashes`,
           messages: apiMessages,
         }),
       });
@@ -3452,58 +3449,60 @@ function OptimizeTab() {
     const pt = PAGE_TYPES[pageType];
     const criteriaList = pt.criteria.map((c, i) => `${i + 1}. ${c}`).join('\n');
 
-    const prompt = `You are a senior conversion strategist who has audited thousands of freelancer pages. You have strong opinions. You say what others won't. You audit ONLY what is actually in front of you — never invent content, never assume what might be there. If something is absent, name it as absent.
+    const prompt = `You are a conversion strategist who has audited thousands of freelancer pages and worked with clients who hire them. You see both sides. You know exactly what makes a client click away and what makes them reach out. You tell the truth bluntly, because sugar-coating costs the freelancer money.
+
+You audit ONLY what is in front of you. Never invent content. If something is absent, name it as absent — that absence is often the biggest problem.
+
 ${pageType === 'cv' && imageData
   ? (imageData.isPdf
-    ? 'ATTACHED: The CV as a PDF. Read every section. Pull exact phrases, company names, dates, metrics, and tool names from the document before writing a single word of feedback.\n'
-    : 'ATTACHED: The CV as an image. Read every visible detail before writing feedback.\n')
-  : (imageData && method === 'image' ? 'ATTACHED: A screenshot of the page. Read every visible element — headlines, body copy, CTAs, navigation, testimonials, everything — before writing feedback.\n' : '')}
-PAGE TYPE: ${pt.label}
-WHAT THIS TYPE IS JUDGED ON: ${pt.desc}
+    ? 'ATTACHED: The CV as a PDF. Read every line. Pull exact phrases, company names, dates, metrics, and tools before writing a single word.\n'
+    : 'ATTACHED: The CV as an image. Read every visible detail carefully.\n')
+  : (imageData && method === 'image' ? 'ATTACHED: A screenshot of the page. Read every visible element — headline, body, CTAs, social proof, everything — before writing.\n' : '')}
 
-SCORING CRITERIA (score each 1-10, where 10 = top 1% of this page type):
+PAGE TYPE: ${pt.label}
+WHAT BUYERS OF THIS TYPE ACTUALLY CARE ABOUT: ${pt.desc}
+
+SCORING (1-10 each):
 ${criteriaList}
+
+HOW A REAL CLIENT READS THIS PAGE:
+A buyer lands here with a specific problem and a limited attention span. They're asking:
+1. Do they understand my specific situation? (or are they speaking generically?)
+2. Have they done this before for someone like me? (proof, not claims)
+3. Can I trust them not to waste my time and money? (credibility signals)
+4. What happens if I reach out? (clear next step)
+Score and evaluate every criterion through this lens — not through the lens of what looks professional.
 
 ${buildPageInputBlock()}
 
-VERDICT RULES:
-- Lead with the single most damaging problem. Not the most obvious — the most costly.
-- Quote or paraphrase at least one specific phrase from the actual page in your verdict. No generic feedback.
-- Score 1-4 = broken and costing conversions right now. Score 5-7 = functional but forgettable. Score 8-10 = genuinely strong.
-- The overall score reflects how a real buyer would react, not how professional the designer made it look.
+VERDICT: Lead with the most damaging problem — the one costing them clients right now. Quote the actual copy. Say exactly what a real buyer would feel when they read it. End with the single highest-leverage fix.
 
-RECOMMENDATION RULES:
-- Each recommendation names the specific line, section, or element that is the problem — not just a general area.
-- Each fix is a concrete action, not a suggestion to "consider" something.
-- Prioritise by revenue impact, not effort.
+RECOMMENDATIONS: Each one names the exact line, section, or element. Each fix is the actual thing to do — not "consider adding" but "replace X with Y."
 
-REWRITE RULES:
-- "before" = verbatim or close-to-verbatim from the actual page. If nothing is visible, write [not visible].
-- "after" = a finished, ready-to-use replacement. Not a template. Not a suggestion. The actual copy.
-- Every "after" must be tighter, more specific, and have a clearer point than the "before".
+REWRITES: Before = verbatim from the page. After = finished, ready-to-use copy that a real client would respond to.
 
 Generate ONLY valid JSON:
 {
   "overall": {
     "score": 0-100,
-    "headline": "5-8 words. A verdict, not a description. Definitive. e.g. 'Buries the only thing that matters' or 'Reads like every other freelancer'.",
-    "verdict": "3-5 sentences. Lead with the single biggest problem and why it costs them clients. Reference actual copy from the page. Name what works, name what doesn't. End with the one thing that would move the needle most if fixed today. No hedging. No em dashes. No corporate language."
+    "headline": "5-8 words. A definitive verdict that names the core problem. Not a description. e.g. 'Credentials everywhere. Client problem nowhere.' or 'Sounds like every other freelancer in this niche.'",
+    "verdict": "4-6 sentences. Start with what a real buyer would feel reading this. Quote the most damaging phrase. Explain why it costs them clients. Name what works. Name what doesn't. End with the one change that would most immediately improve conversion. No em dashes. No hedging."
   },
   "scores": [
-    { "criterion": "exact criterion label from above", "score": 1-10, "note": "One sentence. Name something specific from the actual page — a phrase, a section, a missing element." }
+    { "criterion": "exact label from above", "score": 1-10, "note": "One sentence. Name a specific phrase or element — not a general area." }
   ],
   "recommendations": [
-    { "priority": "High|Medium|Low", "issue": "Name the exact problem and where it is on the page. 1-2 sentences.", "fix": "The specific action to take. Not 'consider adding' — the actual thing to do or write. 1-2 sentences." }
+    { "priority": "High|Medium|Low", "issue": "The exact problem, named precisely. Where it is. What it costs. 2 sentences.", "fix": "The specific action. Not 'consider' — the actual copy or change. 1-2 sentences." }
   ],
   "rewrites": [
-    { "section": "Name of the section or element", "before": "Exact or near-exact copy from the page", "after": "Finished replacement copy, ready to use. Specific, human, no corporate language, no em dashes." }
+    { "section": "Element name", "before": "Exact copy from the page", "after": "Finished replacement. Problem-aware. Specific. Ready to paste. No em dashes." }
   ]
 }
 
-Output 3-4 recommendations and 2-3 rewrites. Score every criterion. Be concise.
+3-4 recommendations, 2-3 rewrites. Score every criterion. Be specific, be direct, be useful.
 ${STRICT_RULES}
 ${pageType === 'cv' ? CV_STRICT_RULES : ''}
-Return ONLY JSON. No em dashes anywhere in the output.`;
+Return ONLY JSON. No em dashes.`;
 
     try {
       const parsed = await callClaude(prompt, method === 'image' || (pageType === 'cv' && !!imageData));
@@ -3536,7 +3535,7 @@ Return ONLY JSON. No em dashes anywhere in the output.`;
       cv: "Pull 8-12 ATS keywords from the target role / target audience. Weave them naturally into the professional summary, skills section, and top 2 experience entries. Use the exact phrasing recruiters and ATS systems search for. No keyword stuffing. If no target role is given, infer the most likely role from the CV itself and optimize for that.",
     };
 
-    const prompt = `You are a direct-response copywriter who specialises in freelancer positioning. Your rewrites win clients because they say something specific and true, not because they use marketing language. You have studied what the top-earning freelancers on every platform actually write, and you know the exact patterns that make buyers stop and book.
+    const prompt = `You are a direct-response copywriter who wins clients for freelancers by making buyers feel understood, not impressed. You know that a buyer skimming a freelancer's page is asking one thing: "Does this person get what I'm dealing with?" Your rewrites answer that question in the first three sentences.
 
 PAGE TYPE: ${pt.label}
 
@@ -3545,48 +3544,50 @@ ${TOP_PERFORMER_PATTERNS[pageType]}
 KEYWORD STRATEGY:
 ${platformKeywordGuidance[pageType]}
 
-AUDIT CONTEXT — do not repeat these problems:
-- Core verdict: ${result.overall?.headline || 'Underperforming'}
-- Problems to fix: ${(result.recommendations || []).map(r => r.issue).join(' | ')}
-- Current score: ${result.overall?.score || 0}/100
+AUDIT FINDINGS TO FIX:
+- Verdict: ${result.overall?.headline || 'Underperforming'}
+- Problems: ${(result.recommendations || []).map(r => r.issue).join(' | ')}
+- Score: ${result.overall?.score || 0}/100
 
-${audience.trim() ? `TARGET BUYER: ${audience.trim()}\n` : ''}${goal.trim() ? `PAGE GOAL: ${goal.trim()}\n` : ''}
+${audience.trim() ? \`TARGET BUYER: \${audience.trim()}\n\` : ''}${goal.trim() ? \`PAGE GOAL: \${goal.trim()}\n\` : ''}
 
 ORIGINAL PAGE:
 ${buildPageInputBlock()}
 
-REWRITE MISSION:
-1. Identify the specific niche this person serves. Pull 6-10 keywords buyers actually search when looking for this type of freelancer. These go where they have maximum algorithmic impact.
+REWRITE RULES:
+1. Pull 6-10 keywords buyers actually search when they have this problem. Place them naturally — not stuffed.
 
-2. Rewrite the entire page as ONE block of finished, ready-to-paste copy. Use ALL CAPS section headers. Cover every section:
+2. Write the full page as one ready-to-paste block. ALL CAPS section headers, two line breaks, then the section. Sections:
 ${sectionsList}
 
-3. Voice rules for the rewrite:
-   - Keep the original person's voice if they have one. Sarcastic? Keep it. Blunt? Keep it. Technical? Keep it. Do NOT flatten it into generic professional tone.
-   - If they have no voice yet, write in a confident, direct, first-person voice — like a founder who knows exactly who they help and why they're the right call.
-   - Short sentences. Concrete claims. No softening language.
+3. Every section must answer one of these buyer questions:
+   - "Do they understand my specific situation?" (opening, headline, about)
+   - "Have they actually done this for someone like me?" (proof, portfolio, results)
+   - "Why them and not the next person in the list?" (differentiator, approach)
+   - "What happens if I message them right now?" (CTA)
+   If a section doesn't answer one of these, it gets cut or rewritten.
 
-4. Every section must pass this test: would a qualified buyer read this and immediately know if this freelancer is right for them? If not, rewrite it until they would.
+4. Voice: if the original has a personality, keep it and sharpen it. If it's generic, write as someone who has been in the trenches of this specific work — not a professional, a practitioner. Someone who knows what goes wrong and why.
 
-5. Proof injection: find every place where a vague claim can be replaced with a specific number, named outcome, time frame, or named client type. Make that swap.
+5. Replace every vague sentence with a specific one. "I help businesses grow" becomes "Helped a bootstrapped SaaS go from 400 to 2,200 monthly active users in 5 months by rewriting their trial-to-paid onboarding."
 
-6. The CTA must create a low-friction next step — not "contact me" but something specific like "Send me the brief and I'll tell you if it's a fit within 24 hours."
+6. CTA: makes reaching out feel like the obvious next move. Not "contact me" — something like "Send me the brief. I'll tell you in a few hours if it's a fit and how I'd approach it."
 
 Generate ONLY valid JSON:
 {
   "summary": {
-    "headline": "5-8 words describing the strategic repositioning made",
-    "shift": "2 sentences. First: what positioning move was made and why. Second: what keyword strategy was applied.",
-    "patterns_applied": ["pattern 1", "pattern 2", "pattern 3"],
+    "headline": "5-8 words. The core repositioning — what fundamentally changed.",
+    "shift": "2 sentences. What problem-aware angle was taken and why it works for this buyer.",
+    "patterns_applied": ["specific pattern 1", "specific pattern 2", "specific pattern 3"],
     "niche": "The specific niche identified",
-    "keywords": ["keyword 1", "keyword 2", "keyword 3", "keyword 4", "keyword 5"]
+    "keywords": ["kw1", "kw2", "kw3", "kw4", "kw5", "kw6"]
   },
-  "fullRewrite": "The complete rewritten page, under 500 words total. ALL CAPS section headers followed by two newlines, then the section content. Use single newlines within sections. Every section listed above must appear. No commentary, no placeholders, no [YOUR NAME HERE] — write it as if you are the freelancer. No em dashes anywhere."
+  "fullRewrite": "Complete rewritten page, under 500 words. ALL CAPS section headers, two newlines then content. Every section listed must appear. No placeholders. Written as the freelancer. Sounds like a real person who knows this work inside out. No em dashes anywhere."
 }
 
 ${STRICT_RULES}
 ${pageType === 'cv' ? CV_STRICT_RULES : ''}
-Return ONLY JSON. No em dashes anywhere in the output.`;
+Return ONLY JSON. No em dashes.`;
 
     try {
       const parsed = await callClaude(prompt, method === 'image' || (pageType === 'cv' && !!imageData));
