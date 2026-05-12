@@ -3549,7 +3549,7 @@ AUDIT FINDINGS TO FIX:
 - Problems: ${(result.recommendations || []).map(r => r.issue).join(' | ')}
 - Score: ${result.overall?.score || 0}/100
 
-${audience.trim() ? `TARGET BUYER: ${audience.trim()}\n` : ''}${goal.trim() ? `PAGE GOAL: ${goal.trim()}\n` : ''}
+${audience.trim() ? 'TARGET BUYER: ' + audience.trim() + '\n' : ''}${goal.trim() ? 'PAGE GOAL: ' + goal.trim() + '\n' : ''}
 
 ORIGINAL PAGE:
 ${buildPageInputBlock()}
@@ -4094,7 +4094,7 @@ ${cvBlock}
 
 ${jobBlock}
 
-${offer.trim() ? `APPLICANT'S POSITIONING:\n"""\n${offer.trim()}\n"""\n` : ''}${proof.trim() ? `APPLICANT'S BEST PROOF POINT:\n"""\n${proof.trim()}\n"""\n` : ''}
+${offer.trim() ? 'APPLICANT\'S POSITIONING:\n"""\n' + offer.trim() + '\n"""\n' : ''}${proof.trim() ? 'APPLICANT\'S BEST PROOF POINT:\n"""\n' + proof.trim() + '\n"""\n' : ''}
 
 BEFORE YOU WRITE ANYTHING — identify:
 1. The one problem this employer is trying to solve (not the job description's language — the real operational problem)
