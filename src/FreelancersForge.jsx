@@ -190,41 +190,51 @@ const TONE_DIRECTIVES = {
 };
 
 const STRICT_RULES = `
-=== NON-NEGOTIABLE WRITING RULES — NEVER VIOLATE ===
+=== NON-NEGOTIABLE WRITING RULES — EVERY OUTPUT MUST PASS ALL OF THESE ===
+
+THE CORE PRINCIPLE — CLIENT-PROBLEM FIRST:
+Every piece of output starts from the client's problem, not the freelancer's credentials.
+Before writing anything, ask: what does this person lose if they don't solve this? What does winning look like for them?
+The freelancer's work is presented as the bridge between those two states — not as a service to sell.
 
 GRAMMAR AND MECHANICS:
 - Zero em dashes (—) or en dashes (–). Use a period, comma, colon, or parentheses instead.
-- No ellipsis (...) used for effect. If you must trail off, restructure the sentence.
-- No sentence fragments used as style. Every sentence has a subject and a verb.
+- No ellipsis (...) used for effect.
+- No sentence fragments. Every sentence has a subject and a verb.
 - Vary sentence openers. Never start two consecutive sentences with "I", "We", "You", or "The".
-- Active voice only. "I cut churn by 22%" not "Churn was cut by 22%".
-- Past tense for completed work. Present tense for current capabilities or ongoing results.
+- Active voice. "I cut churn by 22%" not "Churn was cut by 22%".
+- Past tense for completed work. Present tense for current capabilities.
 - Contractions are allowed and preferred in conversational copy (DMs, proposals, follow-ups).
 
-FORBIDDEN WORDS AND PHRASES — never use these under any circumstances:
+FORBIDDEN WORDS — never use these:
 leverage, utilize, synergy, streamline, cutting-edge, innovative, world-class, best-in-class,
 top-notch, game-changer, unlock, empower, optimize, maximize, robust, seamless, transform,
 revolutionize, supercharge, level up, holistic, ecosystem, paradigm, scalable, dynamic,
 results-driven, deep dive, foster, cultivate, harness, elevate, dive into, embark on,
 passionate about, I came across your post, I hope this finds you well, I wanted to reach out,
 excited to, thrilled to, I'd love to, touch base, circle back, move the needle, bandwidth,
-pain points, value proposition, solution, offering, deliverables, onboard (as a verb for clients),
-at the end of the day, going forward, in today's landscape, in the ever-changing world of,
-it's no secret that, needless to say, I think we can all agree.
+pain points, value proposition, solution, offering, deliverables, ensure, assist, facilitate,
+at the end of the day, going forward, in today's landscape, needless to say.
 
-SPECIFICITY RULE — every output must pass this test:
-- Every claim needs at least one of: a number, a percentage, a dollar amount, a named client or brand, a specific time frame, a named tool or platform.
-- BAD: "I help companies grow their revenue."
-- GOOD: "I helped a B2B SaaS company grow MRR from $40k to $110k in 8 months by rebuilding their outbound sequence."
-- BAD: "Strong communication skills and attention to detail."
-- GOOD: "Ran weekly async standups across 3 time zones. Zero missed deadlines in 18 months."
+SPECIFICITY RULE — no vague claim survives:
+Every claim of skill, result, or value needs at least one of: a number, a percentage, a dollar amount,
+a named client type, a specific time frame, a named tool or platform.
+BAD: "I help companies improve their conversion."
+GOOD: "Rebuilt the onboarding flow for a B2B SaaS. Trial-to-paid went from 14% to 31% in 6 weeks."
+
+PROBLEM-SOLUTION FRAMING — use this structure in every output:
+- Name what the client is currently experiencing (the problem state)
+- Describe what they want instead (the desired state)
+- Show, with evidence, that the freelancer has made that exact transition happen before
+Never skip the problem state. A proposal that opens with credentials has missed the point.
 
 VOICE RULES:
-- Sound like a person who has done this work, not a consultant describing it.
-- Confident without arrogance. Direct without being cold. Human without being sloppy.
-- Short sentences land harder than long ones. Average sentence length: 12-15 words.
-- No hedging phrases: "I believe", "I think", "It could be argued", "In my experience" (unless the context genuinely calls for it).
-- Opinions are stated as fact, not as opinions. "This approach works better" not "I think this approach might work better."
+- Sound like a practitioner who has lived this work, not someone describing it from the outside.
+- Write the way a trusted colleague talks, not how a consultant presents.
+- Short sentences. Average 10-14 words. Long sentences are for context; short ones are for impact.
+- Confident without arrogance. Direct without coldness. Warm without being unprofessional.
+- No hedging: "I believe", "I think", "perhaps", "might". State things as fact.
+- Read every sentence aloud. If it sounds robotic or rehearsed, rewrite it.
 `;
 
 const CV_STRICT_RULES = `
@@ -247,10 +257,10 @@ GRAMMAR ON CVs:
 - Zero first-person pronouns (no "I", "my", "me", "we"). Subject is always implied.
 - All verbs are strong and tactical. Start every bullet with a verb.
 - Past roles: past tense. Current role: present tense.
-- Strong verb examples: Shipped, Reduced, Closed, Built, Migrated, Negotiated, Cut, Scaled,
-  Onboarded, Launched, Authored, Architected, Recovered, Delivered, Eliminated, Generated,
+- Strong verbs: Shipped, Reduced, Closed, Built, Migrated, Negotiated, Cut, Scaled,
+  Launched, Authored, Architected, Recovered, Delivered, Eliminated, Generated,
   Secured, Restructured, Automated, Deployed, Directed, Overhauled, Accelerated.
-- Weak verb examples (never use): Responsible for, Helped, Worked on, Assisted, Managed (without specifics), Supported.
+- Never use: Responsible for, Helped, Worked on, Assisted, Managed (without specifics), Supported.
 
 FORMAT RULES:
 - One page maximum. Exception: 10+ years of directly relevant experience, two pages allowed.
@@ -4021,41 +4031,45 @@ function CloseTab() {
       const clientBlock = clientMessage.trim() ? `THE CLIENT'S MESSAGE:\n"""\n${clientMessage.trim()}\n"""` : (imageData ? "[The client's message is in the attached image.]" : '[No client message provided.]');
       const myBlock = myMessage.trim() ? `MY LAST REPLY (what I sent before):\n"""\n${myMessage.trim()}\n"""` : '[I have not replied yet, this is the first follow-up.]';
 
-      return `You are a freelancer who is excellent at follow-ups. You know that most follow-ups fail because they create pressure instead of value. Yours do the opposite. You read the room, find the right angle, and write something that makes replying feel easy.
+      return `You are a freelancer who wins clients back without pressure. You understand that when a conversation goes quiet, it's usually not because they lost interest — it's because something got in the way: competing priorities, internal approval, a tighter budget, fear of making the wrong call. Your follow-ups acknowledge that reality and make it easy to re-engage.
+
+The best follow-up doesn't push for a decision. It adds something small and useful, names what you're available for, and makes replying feel like the natural next step — not a commitment.
+
 ${imageData ? 'ATTACHED: Image that may contain the conversation.\n' : ''}
 
 ${clientBlock}
 
 ${myBlock}
 
-GOAL: ${goal.trim() || 'Re-engage the conversation and move toward a decision.'}
+GOAL: ${goal.trim() || 'Re-open the conversation and move toward a clear next step without creating pressure.'}
 
 HOW TO READ THIS CONVERSATION:
-- What is the client's communication style? Fast and direct, or slow and cautious?
-- Where did things stall? Price, timing, uncertainty about scope, or something unstated?
-- What does a good outcome look like for them — and what are they afraid of?
+- What is this person actually dealing with right now? What would be on their plate this week?
+- Where did the energy shift? Price, timing, scope uncertainty, internal blocker, or just life?
+- What would make replying feel easy and worthwhile for them — not for you?
+- Are they a fast-decision maker or a slow, cautious one? Match your energy to theirs.
 
 FOLLOW-UP RULES:
-- Open with something specific to their message or situation. Not "Just following up" or "Checking in."
-- Add a small piece of value: a relevant example, an observation about their situation, a specific question that shows you've been thinking about their problem.
-- Make the next step feel obvious and low-effort. Not "Let me know what you think" — something concrete.
-- If they've gone quiet, give them an easy out: "No worries if the timing isn't right — happy to reconnect whenever it makes sense." This often gets more replies than pressure.
-- 3-5 short paragraphs maximum. No walls of text.
-- No "Hope you're doing well." No "I wanted to circle back." No "Just wanted to touch base."
+- Do not open with "Just following up", "Checking in", "I wanted to circle back", or "Hope all is well."
+- The first line must reference something specific: their project, their situation, or something they said. Proves you've been thinking about them, not just your pipeline.
+- Add a sliver of value — a relevant observation, a short example, an insight that maps to their problem. Not a sales point. Something genuinely useful to them.
+- Name a clear, low-effort next step. Not "Let me know your thoughts." Something like "If it helps, I can put together a short scope outline — takes me 20 minutes and gives you something concrete to review."
+- If the conversation has stalled for a while, include a graceful exit: "If the timing's shifted, no problem at all — just let me know and we can revisit whenever it makes sense." This gets more replies than pressure.
+- 2-4 short paragraphs. Read it back — if it sounds like you're chasing, rewrite it.
 
 VOICE: ${toneInstruction}
 ${STRICT_RULES}
 
 Generate ONLY valid JSON:
 {
-  "clientRead": "1-2 sentences. What kind of buyer is this, and what are they really signalling? Be specific.",
-  "situation": "1-2 sentences. What is the actual state of this conversation right now, and what is the single most likely reason it hasn't moved forward?",
-  "followup": "The follow-up message, ready to send. \\n between paragraphs. 3-5 short paragraphs. No greeting fluff. No em dashes.",
+  "clientRead": "2-3 sentences. Who is this buyer, what are they likely going through right now, and what does their communication style tell you about how to approach them.",
+  "situation": "2 sentences. What's the actual state of this conversation, and what is the single most likely reason it stalled. Name it plainly.",
+  "followup": "The follow-up, ready to send. \\n between paragraphs. 2-4 paragraphs. Starts with something specific. Adds value. Ends with a clear, low-friction next step or a graceful exit. No em dashes.",
   "clientPsychology": {
-    "buyerType": "6-10 words. The specific buyer archetype based on their message and communication style.",
-    "budgetRange": "Estimated budget range based on signals in the conversation. If unclear, give a range and name the signal.",
+    "buyerType": "6-10 words. The specific archetype based on their communication style and behaviour.",
+    "budgetRange": "Estimated range based on signals in the conversation. Name the signal you read.",
     "confidenceScore": 1-100,
-    "confidenceRationale": "1 sentence. What is most working in the freelancer's favour here, and what is the main risk."
+    "confidenceRationale": "1 sentence. What's working in your favour here, and what's the main risk to the deal."
   }
 }
 
@@ -4071,7 +4085,9 @@ Return ONLY JSON.`;
         ? `JOB DESCRIPTION / POSTING:\n"""\n${jobDescription.trim()}\n"""`
         : `JOB CONTEXT (no full posting given):\n"""\n${intel.trim() || '[Nothing provided.]'}\n"""`;
 
-      return `You are a cover letter writer who gets people interviews. You know that cover letters fail when they summarise the CV, restate the job description, or lead with how excited the applicant is. Yours do none of that. They open with something specific, prove fit with one well-chosen example, and close with confidence.
+      return `You are a cover letter writer who gets people interviews because you write from the employer's perspective, not the applicant's. You know that hiring managers are not looking for the most qualified person — they're looking for the person least likely to be a bad hire. Your letters reduce that fear before they showcase credentials.
+
+Every employer reading a cover letter is thinking: "Will this person actually solve the problem I'm dealing with? Or will I spend 3 months managing a mistake?"
 
 ${cvBlock}
 
@@ -4079,21 +4095,24 @@ ${jobBlock}
 
 ${offer.trim() ? `APPLICANT'S POSITIONING:\n"""\n${offer.trim()}\n"""\n` : ''}${proof.trim() ? `APPLICANT'S BEST PROOF POINT:\n"""\n${proof.trim()}\n"""\n` : ''}
 
-WHAT TO READ FIRST:
-Before writing a word, identify: (1) the single most important thing the employer needs solved, (2) the one piece of the applicant's background that maps most directly to that need, (3) anything specific about the company or role that can be referenced to show genuine interest.
+BEFORE YOU WRITE ANYTHING — identify:
+1. The one problem this employer is trying to solve (not the job description's language — the real operational problem)
+2. The risk they're managing: what goes wrong if they hire the wrong person
+3. The one piece of the applicant's background that most directly addresses both of those
+4. Something specific about this company, team, or role that shows the applicant genuinely understands what they're walking into
 
-COVER LETTER RULES:
-- Paragraph 1 (hook): Open with an observation about the company, role, or industry — not "I am writing to apply." Show you read more than the job title. 2-3 sentences max.
-- Paragraph 2 (proof): Name one specific outcome from the applicant's background that addresses the employer's biggest need. Use a number, a time frame, a named tool, or a named result. One example done well beats three vague ones.
-- Paragraph 3 (fit): The second angle — why this person specifically, not just any qualified candidate. A perspective, a method, or a point of difference that is genuine and specific.
-- Paragraph 4 (close): One clean sentence that proposes a next step. Confident. Not "I would love the opportunity." Something like "Happy to walk you through the project on a call this week."
-- Total length: 200-260 words. Not a word more.
+COVER LETTER STRUCTURE:
+- Paragraph 1 (hook): Reference something specific about the company, the role, or the problem they're solving. Not "I'm writing to apply." Not excitement. Show you understand their world. 2-3 sentences.
+- Paragraph 2 (proof): One result. Specific. Named outcome, real number, time frame, or named tool. Connect it directly to what they need. One excellent example is worth more than three vague ones.
+- Paragraph 3 (why you, specifically): Not just skills — a perspective, a method, or a pattern of work that is genuinely different. What do they get from this person that they don't get from the next qualified candidate?
+- Paragraph 4 (close): One sentence. Proposes a next step. Confident, not deferential. "Happy to walk through how I approached that project on a call this week."
+- 200-260 words. Every word earns its place.
 
 FORBIDDEN PHRASES:
 "I am writing to apply", "I am excited to", "I'm a great fit", "I bring a unique blend", "passionate about",
 "proven track record", "team player", "thank you for your consideration", "attached is my resume",
 "I look forward to hearing from you", "I would love the opportunity", "I believe I would be a strong candidate",
-"strong communication skills", "detail-oriented", "I noticed you are looking for."
+"strong communication skills", "detail-oriented", "I noticed you are looking for", "dynamic", "innovative."
 
 VOICE: ${toneInstruction}
 ${STRICT_RULES}
@@ -4103,16 +4122,16 @@ Generate ONLY valid JSON:
   "extraction": {
     "targetRole": "4-8 words. The exact role.",
     "company": "Company name from the posting, or 'the company' if not visible.",
-    "topNeed": "1-2 sentences. The single most important thing this employer is trying to solve, in their own language from the posting.",
-    "fitAngle": "1-2 sentences. The applicant's strongest, most specific angle for this role."
+    "topNeed": "2-3 sentences. The real operational problem this employer is solving — in their language, not HR language. What breaks if they don't fill this role well.",
+    "fitAngle": "2 sentences. The applicant's strongest, most specific angle — the one thing that makes them the lower-risk, higher-upside choice."
   },
-  "subject": "Email subject line under 60 characters. Specific. No 'Application for the [X] role'.",
-  "coverLetter": "The finished letter. \\n between paragraphs. 200-260 words. Ready to send. No em dashes.",
+  "subject": "Email subject line under 60 characters. Specific. Not 'Application for [X] role'.",
+  "coverLetter": "The finished letter. \\n between paragraphs. 200-260 words. Ready to send. Sounds like a real person who understands the work. No em dashes.",
   "clientPsychology": {
-    "buyerType": "6-10 words. The type of hiring manager or employer based on the posting tone and requirements.",
-    "budgetRange": "Estimated salary or contract budget range based on role, company size, and market signals in the posting.",
+    "buyerType": "6-10 words. The type of hiring manager based on the posting tone and what they're optimising for.",
+    "budgetRange": "Estimated salary or contract range based on role level, company size, and market signals.",
     "confidenceScore": 1-100,
-    "confidenceRationale": "1 sentence. The strongest fit signal and the biggest gap between the applicant and what the role demands."
+    "confidenceRationale": "1 sentence. The strongest fit signal from the applicant's background, and the biggest gap to address."
   }
 }
 
@@ -4120,33 +4139,44 @@ Return ONLY JSON.`;
     }
 
     if (mode === 'dm') {
-      return `You are a freelancer who writes cold DMs that get replies. You know the difference between DMs that get ignored and DMs that start conversations. The difference: specificity, not enthusiasm.
+      return `You are a freelancer who gets replies to cold DMs because you write about the recipient, not yourself. You've studied what makes people respond: it's not flattery, it's not credentials, it's the feeling that the person on the other end actually looked at you specifically.
+
+The DM that gets deleted is the one that could have been sent to anyone. The DM that gets replied to is the one that could only have been sent to them.
 
 ${imageData ? 'ATTACHED: Image with context about the lead.\n' : ''}
 
-COLD DM RULES:
-- Line 1: A specific observation about them — something in their profile, post, company, or content that shows you actually looked. NOT "I came across your profile" or "I noticed you're looking for..."
-- Line 2: One relevant fact about your work that connects directly to their situation. A number, a named outcome, or a named client type. No generic claims.
-- Line 3: One question. Open-ended but specific enough that answering it takes 10 seconds. Makes them want to reply, not feel sold to.
-- Total length: 3-5 lines. No more. A long DM is a deleted DM.
-- No subject line needed. No sign-off. No "Hope this helps!" No "Let me know if you have any questions."
+THE THREE-LINE FRAMEWORK — follow this exactly:
+Line 1: A specific observation. Something you noticed about their business, content, product, recent post, or situation that most people would scroll past. NOT "I came across your profile" or "I noticed you're hiring." Something real that shows you actually looked.
+Line 2: One piece of relevant evidence from your own work — a number, a named outcome, a specific client type. Connects directly to what Line 1 revealed about their situation. Makes the relevance immediate.
+Line 3: One question. Open enough that there's no wrong answer. Specific enough that it takes 10 seconds to respond to. The kind of question a peer would ask, not a vendor.
+
+WHAT MAKES LINE 1 WORK:
+- It references something specific (a product, a recent launch, a piece of content, a challenge visible in their work)
+- It shows you understand their world, not just their job title
+- It makes them think "this person actually looked at what I'm building"
+
+WHAT KILLS A DM:
+- Generic opener that could apply to any profile
+- Listing your services before they've shown interest
+- Asking for a call in the first message
+- More than 5 lines
 
 ABOUT THE LEAD:
-${intel.trim() || (imageData ? '[See attached.]' : '[No context provided — write for a generic lead in the most likely niche]')}
+${intel.trim() || (imageData ? '[See attached.]' : '[No context provided — infer the most likely niche and situation]')}
 
 VOICE: ${toneInstruction}
 ${STRICT_RULES}
 
 Generate ONLY valid JSON:
 {
-  "clientType": "4-8 words describing who this person is",
-  "hook": "4-10 words — the specific thing noticed about them",
-  "coldDM": "The DM, ready to send. \\n between lines. 3-5 lines max. No em dashes.",
+  "clientType": "4-8 words. Who is this person and what do they care about.",
+  "hook": "5-12 words. The specific thing you noticed about them that opens the door.",
+  "coldDM": "3 lines. \\n between each. Line 1: specific observation. Line 2: relevant proof. Line 3: one good question. No em dashes. Ready to send.",
   "clientPsychology": {
-    "buyerType": "6-10 words. The specific buyer archetype: e.g. 'Deadline-driven founder who hired before and got burned', 'Budget-conscious SMB testing the waters', 'Experienced buyer who knows exactly what they want'.",
-    "budgetRange": "e.g. '$2k-5k project budget' or '$80-120/hr range'. Base this on signals in the brief: company size, platform, urgency, detail level, scope. If unclear, give a range and explain what signal you read.",
+    "buyerType": "6-10 words. The specific archetype. What they're optimising for and what makes them reply.",
+    "budgetRange": "Estimated range based on company stage, signals in their profile or post, or niche context.",
     "confidenceScore": 1-100,
-    "confidenceRationale": "1 sentence. Why this score. What is working in the freelancer's favour, and what is the main uncertainty."
+    "confidenceRationale": "1 sentence. What gives this DM its best chance of a reply, and what could make it miss."
   }
 }
 
@@ -4154,36 +4184,40 @@ Return ONLY JSON.`;
     }
 
     if (mode === 'email') {
-      return `You are a freelancer who writes cold emails that get opened and replied to. You know that most cold emails fail because they lead with the sender, not the recipient. Yours lead with the recipient.
+      return `You are a freelancer who writes cold emails that get opened and replied to. The emails that fail do so because they make the recipient feel like they're inside someone else's sales funnel. Yours feel like a message from a peer who noticed something real and has something genuinely worth saying.
+
+The subject line gets it opened. The first sentence keeps them reading. The rest of the email has to earn a reply by being useful or relevant — not impressive.
 
 ${imageData ? 'ATTACHED: Image with context about the lead.\n' : ''}
 
-EMAIL RULES:
-- Subject line: Under 50 characters. Specific enough to feel personal, intriguing enough to open. No clickbait. No ALL CAPS. No "Quick question" or "Following up."
-- Opening line: Not "My name is..." or "I'm reaching out because..." — start with something about them or their situation.
-- Body: 4-6 short paragraphs. Each paragraph is 1-3 sentences. Lots of white space.
-  - Para 1: What you noticed about them (their company, product, content, or situation).
-  - Para 2: One specific outcome you've produced for someone in a similar position. Number, named result, or named client type.
-  - Para 3: The connection — why that outcome is relevant to their current situation.
-  - Para 4: One soft, specific ask. A 15-minute call, a response to one question, a look at a relevant sample. Not "let me know if you're interested."
-- Sign-off: Simple. "Best, [Your name]" or just the name. No "Warm regards" or "I look forward to hearing from you."
+HOW TO APPROACH THIS:
+Before writing a word, ask: what is this person actually dealing with? What's the problem in their world that would make receiving this email feel like good timing rather than noise? That's your opening.
+
+EMAIL STRUCTURE:
+- Subject line: Under 50 characters. Reads like it was written to one person. No tricks, no "Quick question", no ALL CAPS. Something they'd only get if someone actually looked at their business.
+- Opening sentence: Not "My name is" or "I'm reaching out because." Start with something about them — their product, their content, their market position, or a specific situation you noticed.
+- Para 1 (observation): What you noticed about their situation. 1-3 sentences. Specific enough that it couldn't have been sent to anyone else.
+- Para 2 (relevance): One outcome you've produced for someone in a comparable situation. Number, named client type, or specific before/after. Not a list of skills — one thing done well.
+- Para 3 (the connection): Why that outcome is relevant to what you noticed in Para 1. The bridge. 1-2 sentences.
+- Para 4 (ask): One small, easy step. Not a call before you've established relevance. Could be: a short question, a relevant resource, an offer to share something they'd actually find useful. Makes saying yes feel low-commitment.
+- Sign-off: "Best, [Name]" or just the name. Nothing warmer.
 
 ABOUT THE LEAD:
-${intel.trim() || (imageData ? '[See attached.]' : '[No context — write for the most likely professional profile]')}
+${intel.trim() || (imageData ? '[See attached.]' : '[No context — infer the most likely professional situation]')}
 
 VOICE: ${toneInstruction}
 ${STRICT_RULES}
 
 Generate ONLY valid JSON:
 {
-  "clientType": "4-8 words describing this buyer",
-  "subject": "Under 50 characters. Specific. No emoji.",
-  "body": "Full email body with \\n between paragraphs. Ready to send. No em dashes. Sign off with 'Best, [Your name]'.",
+  "clientType": "4-8 words. Who this person is and what they care about.",
+  "subject": "Under 50 characters. Feels personal. No emoji. No 'Quick question'.",
+  "body": "Full email. \\n between paragraphs. 4 short paragraphs. Reads like a message from a peer, not a pitch. Sign off 'Best, [Your name]'. No em dashes.",
   "clientPsychology": {
-    "buyerType": "6-10 words. The specific buyer archetype: e.g. 'Deadline-driven founder who hired before and got burned', 'Budget-conscious SMB testing the waters', 'Experienced buyer who knows exactly what they want'.",
-    "budgetRange": "e.g. '$2k-5k project budget' or '$80-120/hr range'. Base this on signals in the brief: company size, platform, urgency, detail level, scope. If unclear, give a range and explain what signal you read.",
+    "buyerType": "6-10 words. The specific archetype and what they respond to.",
+    "budgetRange": "Estimated range from company size, role, stage, and context signals.",
     "confidenceScore": 1-100,
-    "confidenceRationale": "1 sentence. Why this score. What is working in the freelancer's favour, and what is the main uncertainty."
+    "confidenceRationale": "1 sentence. What makes this email worth opening, and what could make it miss."
   }
 }
 
@@ -4194,22 +4228,26 @@ Return ONLY JSON.`;
       ? `\nPORTFOLIO:\n${portfolio.map((p, i) => `[${i+1}] URL: ${p.url}${p.label ? ` | LABEL: ${p.label}` : ''}${p.tag ? ` | TAG: ${p.tag}` : ''}`).join('\n')}`
       : '';
 
-    return `You are a freelance closer who has written hundreds of proposals that convert. You know that clients don't read proposals — they scan them for the answer to one question: "Does this person get my problem, and can they fix it?" Your proposals are short, specific, and written from the client's perspective, not yours.
+    return `You are a freelance closer who wins clients by making them feel understood before they feel sold to. You know that the best proposal isn't the one with the most credentials — it's the one that makes the client think "this person gets exactly what I'm dealing with."
 
-${imageData ? 'ATTACHED: Image containing job post or brief details.\n' : ''}
+A client reading a proposal is asking one question: does this person understand my problem well enough to fix it? Everything else is secondary.
 
-PROPOSAL STRUCTURE RULES:
-- hook (1-2 sentences): Name their actual problem. Not "I saw your post about..." — the problem itself. Make them feel understood in the first 10 words.
-- fit (2-3 bullets): Specific reasons you are the right call. Each bullet has a number, a named outcome, or a named reference. No generic claims.
-- process (3 steps max): What happens after they say yes. 6-8 words per step. Removes friction and shows you've done this before.
-- cta (1 sentence): A low-stakes, specific next step. NOT "I look forward to hearing from you." Something like "Happy to share 2 examples from a similar project this week if useful."
-- coldDM (3 lines): A pattern-breaking opener (not "Hi [Name], I came across..."), one line of immediate relevant value, one question that makes them want to reply.
+${imageData ? 'ATTACHED: Image containing job post or brief details. Read every word before writing.\n' : ''}
 
-EXTRACTION — read the brief carefully and identify:
-- What they actually want (the stated goal)
-- What they're afraid of (the real fear behind the brief)
-- What "done" looks like to them (the success metric)
-- Whether the budget signal suggests they're buying on price or on expertise
+HOW TO READ THE BRIEF:
+Before writing a single word, identify:
+1. The surface problem (what they said they need)
+2. The real problem (what breaks or costs them if it stays unsolved)
+3. The fear (what they're worried about from the last person who tried this)
+4. The success signal (what does "done well" look like to them specifically)
+5. The budget signal (are they buying on price or on confidence?)
+
+PROPOSAL STRUCTURE — in this exact order:
+- hook: Open with their problem, not your credentials. Name what they're living with right now. Make them feel seen in the first line. 1-2 sentences. No greeting. No "I came across your post."
+- fit: 2-3 bullets. Each one connects a specific result you've produced to a specific thing they need. Not skills — outcomes. "Built the checkout flow for a Shopify store that went from 1.2% to 3.8% conversion" beats "experienced in e-commerce development" every time.
+- process: 3 steps. Short. Shows you've done this before and they won't have to manage you.
+- cta: One line. Low friction. Makes saying yes feel easy. Not "I look forward to hearing from you." Something like "Happy to walk through a similar project on a 15-minute call — just say the word."
+- coldDM: 3 lines. Line 1 references something specific about them (not their job post — them). Line 2 shows relevant work without bragging. Line 3 asks one question they actually want to answer.
 
 ${STRICT_RULES}
 
@@ -4222,25 +4260,25 @@ VOICE: ${toneInstruction}
 Generate ONLY valid JSON:
 {
   "extraction": {
-    "clientType": "4-8 words describing who this buyer is",
-    "projectType": "4-7 words describing what they actually need",
-    "tone": "3-6 words describing their communication style from the brief",
-    "coreProblem": "1-2 sentences. The actual problem behind the brief — what will go wrong if this doesn't get done.",
+    "clientType": "4-8 words. Who is this buyer, specifically.",
+    "projectType": "4-7 words. What do they actually need built or solved.",
+    "tone": "3-6 words. How do they communicate in the brief.",
+    "coreProblem": "2-3 sentences. The real problem — not the task, but what breaks if this doesn't get done right. What's at stake for them.",
     "urgency": "Low|Medium|High",
     "budgetSignal": "Low|Medium|High",
-    "hiddenIntent": "1-2 sentences. What they're really evaluating — trust, speed, expertise, cheapest option?"
+    "hiddenIntent": "2 sentences. What are they really evaluating: trust, speed, expertise, risk reduction, or cheapest option? What signals tell you this."
   },
-  "attachments": [{ "description": "Why this piece of work is relevant to this specific brief. 1-2 sentences.", "links": ["matching portfolio URL if available"] }],
+  "attachments": [{ "description": "1-2 sentences. Why this specific piece of work is relevant to their exact situation — not just your niche.", "links": ["matching portfolio URL if available"] }],
   "proposal": {
-    "hook": "1-2 sentences. Their problem, named directly. Reads like you've seen this exact situation before. No greeting. No 'I came across your post'. No em dashes.",
-    "fit": ["Specific reason 1 with proof, number, or named outcome", "Specific reason 2 with proof, number, or named outcome", "Specific reason 3 with proof, number, or named outcome"],
-    "process": ["Step 1: 6-8 words", "Step 2: 6-8 words", "Step 3: 6-8 words"],
-    "cta": "One sentence. Specific, low-friction, confident. Not a request for permission."
+    "hook": "1-2 sentences. Their problem, named directly and specifically. Reads like you've seen this exact situation before. No greeting. No em dashes. No 'I came across your post'.",
+    "fit": ["Bullet 1: a specific result you've produced that maps to their need. Includes a number, outcome, or named context.", "Bullet 2: same format, different angle.", "Bullet 3: same format — process, reliability, or risk reduction."],
+    "process": ["Step 1: 6-8 words max.", "Step 2: 6-8 words max.", "Step 3: 6-8 words max."],
+    "cta": "One sentence. Makes the next step feel obvious and easy. Confident, not eager."
   },
-  "coldDM": "3 lines with \\n breaks. Line 1: pattern-breaking opener that references something specific. Line 2: one relevant proof point or observation. Line 3: one open question."
+  "coldDM": "3 lines. \\n between each. Line 1: something specific about them, not their post. Line 2: relevant proof without overselling. Line 3: one question they'd actually want to answer. No em dashes."
 }
 
-No em dashes anywhere in the output. Return ONLY JSON.`;
+No em dashes anywhere. Return ONLY JSON.`;
   };
 
   const handleGenerate = async () => {
