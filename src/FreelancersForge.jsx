@@ -4227,31 +4227,47 @@ Return ONLY JSON.`;
       ? `\nPORTFOLIO:\n${portfolio.map((p, i) => `[${i+1}] URL: ${p.url}${p.label ? ` | LABEL: ${p.label}` : ''}${p.tag ? ` | TAG: ${p.tag}` : ''}`).join('\n')}`
       : '';
 
-    return `You are a freelance closer who wins clients by making them feel understood before they feel sold to. You know that the best proposal isn't the one with the most credentials — it's the one that makes the client think "this person gets exactly what I'm dealing with."
+    return `You are a freelance closer with a 70%+ proposal win rate. You win not because you're the best writer — you win because you make the client feel like you already understand their problem better than they do. When a client reads your proposal, they think: "This person gets it. Everyone else just sent me a template."
 
-A client reading a proposal is asking one question: does this person understand my problem well enough to fix it? Everything else is secondary.
+The fundamental mistake 95% of freelancers make: they write about themselves. Skills, experience, portfolio. The client doesn't care yet. They care about their problem. Your job is to prove you understand that problem so precisely that hiring you feels like the obvious, low-risk choice.
 
-${imageData ? 'ATTACHED: Image containing job post or brief details. Read every word before writing.\n' : ''}
+${imageData ? 'ATTACHED: Job post or brief image. Read every word carefully before writing.\n' : ''}
 
-HOW TO READ THE BRIEF:
-Before writing a single word, identify:
-1. The surface problem (what they said they need)
-2. The real problem (what breaks or costs them if it stays unsolved)
-3. The fear (what they're worried about from the last person who tried this)
-4. The success signal (what does "done well" look like to them specifically)
-5. The budget signal (are they buying on price or on confidence?)
+BEFORE WRITING A SINGLE WORD — diagnose this situation:
+1. What is happening in this client's world right now? What broke, what's stuck, what's at risk?
+2. What have they probably already tried that didn't work?
+3. What does a successful outcome look like in 30, 60, 90 days?
+4. What is the real cost of this problem going unsolved — in money, time, or opportunity?
+5. What are they most afraid of: getting a bad result, wasting money, missing a deadline, or hiring someone they have to manage?
 
-PROPOSAL STRUCTURE — in this exact order:
-- hook: Open with their problem, not your credentials. Name what they're living with right now. Make them feel seen in the first line. 1-2 sentences. No greeting. No "I came across your post."
-- fit: 2-3 bullets. Each one connects a specific result you've produced to a specific thing they need. Not skills — outcomes. "Built the checkout flow for a Shopify store that went from 1.2% to 3.8% conversion" beats "experienced in e-commerce development" every time.
-- process: 3 steps. Short. Shows you've done this before and they won't have to manage you.
-- cta: One line. Low friction. Makes saying yes feel easy. Not "I look forward to hearing from you." Something like "Happy to walk through a similar project on a 15-minute call — just say the word."
-- coldDM: 3 lines. Line 1 references something specific about them (not their job post — them). Line 2 shows relevant work without bragging. Line 3 asks one question they actually want to answer.
+THE WINNING PROPOSAL STRUCTURE:
+
+HOOK — 2-3 sentences. This is the most important part.
+Do not start with "I". Do not start with "Hi". Do not mention your name or experience.
+Start with their situation. Name the specific problem they are living with. Be so precise that they think "how did this person know that?" Then in one sentence, show you know the path from where they are to where they want to be.
+Example of a weak hook: "I'm a React developer with 5 years of experience and I'd love to work on this project."
+Example of a strong hook: "Your onboarding flow is leaking users between signup and first value — that gap is costing you 40-60% of your trials before they ever see why your product is worth paying for. I've fixed this exact problem for three SaaS companies in the last year."
+
+FIT — 3 bullets. Each one is a specific result that maps directly to their specific need.
+Not: "I have experience with e-commerce."
+Yes: "Rebuilt checkout for a Shopify brand doing $2M/yr — cart abandonment dropped from 74% to 51% in 6 weeks."
+Every bullet answers: "Have you done this exact thing before, for someone like me, and did it work?"
+
+PROCESS — 3 steps maximum. Under 10 words each.
+This removes the client's fear of the unknown. Shows you've done this before. Shows they won't have to manage you.
+
+CTA — 1 sentence. Not "I look forward to hearing from you."
+Make the next step feel small, specific, and easy. Like: "Send me the Figma file and I'll have an audit back to you by Thursday." or "15 minutes this week — I'll show you exactly how I'd approach this."
+
+COLD DM — 3 lines, tightly written.
+Line 1: Reference something specific about them that proves you actually looked — not their job post, something about their business, product, or content.
+Line 2: One result from your work that is directly relevant to their situation. Precise, not impressive-sounding.
+Line 3: One question that opens a conversation. Easy to answer in 10 seconds.
 
 ${STRICT_RULES}
 
-INPUT (job post, brief, or context):
-${intel.trim() || (imageData ? '[See attached.]' : '[No input provided]')}
+INPUT:
+${intel.trim() || (imageData ? '[See attached.]' : '[No input provided — write for the most likely scenario given the niche]')}
 ${portfolioBlock}
 
 VOICE: ${toneInstruction}
@@ -4259,22 +4275,26 @@ VOICE: ${toneInstruction}
 Generate ONLY valid JSON:
 {
   "extraction": {
-    "clientType": "4-8 words. Who is this buyer, specifically.",
-    "projectType": "4-7 words. What do they actually need built or solved.",
-    "tone": "3-6 words. How do they communicate in the brief.",
-    "coreProblem": "2-3 sentences. The real problem — not the task, but what breaks if this doesn't get done right. What's at stake for them.",
+    "clientType": "4-8 words. Who is this person and what do they actually do.",
+    "projectType": "4-7 words. The real thing they need solved, not just the task.",
+    "tone": "3-6 words. How they communicate — formal, casual, urgent, technical.",
+    "coreProblem": "3-4 sentences. What is broken or stuck in their world right now. What has probably already gone wrong. What the cost of inaction is. Be specific — no generic descriptions.",
     "urgency": "Low|Medium|High",
     "budgetSignal": "Low|Medium|High",
-    "hiddenIntent": "2 sentences. What are they really evaluating: trust, speed, expertise, risk reduction, or cheapest option? What signals tell you this."
+    "hiddenIntent": "2-3 sentences. What are they really evaluating beyond the task — trust, speed, certainty of outcome, not being burned again? Name the exact signals from the brief that tell you this."
   },
-  "attachments": [{ "description": "1-2 sentences. Why this specific piece of work is relevant to their exact situation — not just your niche.", "links": ["matching portfolio URL if available"] }],
+  "attachments": [{ "description": "2 sentences. Why this specific work is relevant to their exact situation and what it proves.", "links": ["matching portfolio URL if available"] }],
   "proposal": {
-    "hook": "1-2 sentences. Their problem, named directly and specifically. Reads like you've seen this exact situation before. No greeting. No em dashes. No 'I came across your post'.",
-    "fit": ["Bullet 1: a specific result you've produced that maps to their need. Includes a number, outcome, or named context.", "Bullet 2: same format, different angle.", "Bullet 3: same format — process, reliability, or risk reduction."],
-    "process": ["Step 1: 6-8 words max.", "Step 2: 6-8 words max.", "Step 3: 6-8 words max."],
-    "cta": "One sentence. Makes the next step feel obvious and easy. Confident, not eager."
+    "hook": "2-3 sentences. Names their specific problem so precisely they feel understood. Does NOT start with I, Hi, or their name. No em dashes. Ends with a signal that you know how to fix it.",
+    "fit": [
+      "Specific result with a number, named client type, or measurable outcome — connected directly to what this client needs.",
+      "Second result from a different angle — speed, reliability, or a different type of proof.",
+      "Third result addressing their specific fear — risk reduction, quality, communication, or process."
+    ],
+    "process": ["Step 1: under 10 words.", "Step 2: under 10 words.", "Step 3: under 10 words."],
+    "cta": "1 sentence. Specific, low-effort next step. Makes replying feel obvious. Not a request for permission."
   },
-  "coldDM": "3 lines. \\n between each. Line 1: something specific about them, not their post. Line 2: relevant proof without overselling. Line 3: one question they'd actually want to answer. No em dashes."
+  "coldDM": "3 lines. \\n between each. Reads like a message from a peer who noticed something real. No selling. No em dashes."
 }
 
 No em dashes anywhere. Return ONLY JSON.`;
@@ -5381,49 +5401,135 @@ function PortfolioCard({ item, onRemove }) {
 /* ── Psychology card ──────────────────────────────────────────────────── */
 function PsychCard({ psych, delay = 0 }) {
   if (!psych) return null;
-  const score = psych.confidenceScore;
-  const scoreColor = score >= 75 ? 'var(--success)' : score >= 50 ? 'var(--warning)' : 'var(--danger)';
-  const scoreBg   = score >= 75 ? 'var(--success-bg)' : score >= 50 ? 'var(--warning-bg)' : 'var(--danger-bg)';
-  const scoreLabel = score >= 75 ? 'Strong' : score >= 50 ? 'Moderate' : 'Low';
+  const score = Math.min(100, Math.max(0, Number(psych.confidenceScore) || 0));
+  const scoreColor  = score >= 75 ? 'var(--success)'  : score >= 50 ? 'var(--warning)'  : 'var(--danger)';
+  const scoreBg     = score >= 75 ? 'var(--success-bg)': score >= 50 ? 'var(--warning-bg)': 'var(--danger-bg)';
+  const scoreBorder = score >= 75 ? 'rgba(74,222,128,0.25)' : score >= 50 ? 'rgba(251,191,36,0.25)' : 'rgba(248,113,113,0.25)';
+  const scoreLabel  = score >= 75 ? 'Strong'  : score >= 50 ? 'Moderate' : 'Low';
+  const scoreBarColor = score >= 75 ? '#4ade80' : score >= 50 ? '#fbbf24' : '#f87171';
 
   return (
-    <div className="ff-fadeup ff-card" style={{ animationDelay: `${delay}ms`, borderColor: 'var(--accent-border-soft)', background: 'var(--bg)' }}>
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <div style={{ width: 28, height: 28, borderRadius: 8, background: 'var(--accent-bg-soft)', border: '1px solid var(--accent-border-soft)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <User size={13} style={{ color: 'var(--accent)' }} />
+    <div className="ff-fadeup ff-card" style={{
+      animationDelay: `${delay}ms`,
+      padding: 0,
+      overflow: 'hidden',
+      border: '1px solid var(--border)',
+      background: 'var(--bg)',
+    }}>
+
+      {/* Header row */}
+      <div style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '16px 20px', borderBottom: '1px solid var(--border)',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+          <div style={{
+            width: 30, height: 30, borderRadius: 9,
+            background: 'var(--accent-bg-soft)', border: '1px solid var(--accent-border-soft)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <User size={14} style={{ color: 'var(--accent)' }} />
           </div>
-          <h3 className="ff-subheading" style={{ fontSize: 15, margin: 0 }}>Client psychology</h3>
+          <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-1)', letterSpacing: '-0.01em', fontFamily: 'var(--font-text)' }}>
+            Client psychology
+          </span>
         </div>
-        {/* Confidence score badge */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ fontSize: 12, color: 'var(--text-3)', fontFamily: 'var(--font-text)' }}>Proposal confidence</span>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: scoreBg, border: `1px solid ${scoreColor}30`, borderRadius: 20, padding: '4px 10px' }}>
-            <div style={{ width: 6, height: 6, borderRadius: '50%', background: scoreColor }} />
-            <span style={{ fontSize: 13, fontWeight: 700, color: scoreColor, fontFamily: 'var(--font-text)', letterSpacing: '-0.01em' }}>{score}</span>
-            <span style={{ fontSize: 12, color: scoreColor, fontFamily: 'var(--font-text)', opacity: 0.8 }}>{scoreLabel}</span>
+
+        {/* Score badge */}
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 10,
+        }}>
+          <span style={{ fontSize: 12, color: 'var(--text-3)', fontFamily: 'var(--font-text)', letterSpacing: '-0.003em' }}>
+            Proposal confidence
+          </span>
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 7,
+            background: scoreBg,
+            border: `1px solid ${scoreBorder}`,
+            borderRadius: 20, padding: '5px 12px',
+          }}>
+            <div style={{ width: 7, height: 7, borderRadius: '50%', background: scoreBarColor, flexShrink: 0 }} />
+            <span style={{ fontSize: 15, fontWeight: 800, color: scoreColor, fontFamily: 'var(--font-text)', letterSpacing: '-0.02em', lineHeight: 1 }}>
+              {score}
+            </span>
+            <span style={{ fontSize: 12, fontWeight: 600, color: scoreColor, fontFamily: 'var(--font-text)', opacity: 0.85 }}>
+              {scoreLabel}
+            </span>
           </div>
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: psych.confidenceRationale ? 14 : 0 }}>
+      {/* Progress bar */}
+      <div style={{ height: 3, background: 'var(--bg-elev-2)', position: 'relative' }}>
+        <div style={{
+          position: 'absolute', left: 0, top: 0, bottom: 0,
+          width: `${score}%`,
+          background: `linear-gradient(90deg, ${scoreBarColor}99 0%, ${scoreBarColor} 100%)`,
+          transition: 'width 800ms cubic-bezier(0.16,1,0.3,1)',
+          borderRadius: '0 2px 2px 0',
+        }} />
+      </div>
+
+      {/* Two cells */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0 }}>
         {/* Buyer type */}
-        <div style={{ background: 'var(--bg-elev-1)', border: '1px solid var(--border)', borderRadius: 'var(--r-lg)', padding: '13px 15px' }}>
-          <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-3)', letterSpacing: '0.04em', textTransform: 'uppercase', fontFamily: 'var(--font-text)', marginBottom: 5 }}>Detected buyer type</p>
-          <p style={{ fontSize: 13.5, fontWeight: 500, color: 'var(--text-1)', lineHeight: 1.4, letterSpacing: '-0.005em', fontFamily: 'var(--font-text)' }}>{psych.buyerType || '—'}</p>
+        <div style={{
+          padding: '16px 20px',
+          borderRight: '1px solid var(--border)',
+          borderBottom: psych.confidenceRationale ? '1px solid var(--border)' : 'none',
+        }}>
+          <p style={{
+            fontSize: 10.5, fontWeight: 700, color: 'var(--text-3)',
+            letterSpacing: '0.06em', textTransform: 'uppercase',
+            fontFamily: 'var(--font-text)', marginBottom: 7,
+          }}>
+            Detected buyer type
+          </p>
+          <p style={{
+            fontSize: 13.5, fontWeight: 600, color: 'var(--text-1)',
+            lineHeight: 1.45, letterSpacing: '-0.008em', fontFamily: 'var(--font-text)',
+            margin: 0,
+          }}>
+            {psych.buyerType || '—'}
+          </p>
         </div>
+
         {/* Budget range */}
-        <div style={{ background: 'var(--bg-elev-1)', border: '1px solid var(--border)', borderRadius: 'var(--r-lg)', padding: '13px 15px' }}>
-          <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-3)', letterSpacing: '0.04em', textTransform: 'uppercase', fontFamily: 'var(--font-text)', marginBottom: 5 }}>Likely budget range</p>
-          <p style={{ fontSize: 13.5, fontWeight: 500, color: 'var(--accent)', lineHeight: 1.4, letterSpacing: '-0.005em', fontFamily: 'var(--font-text)' }}>{psych.budgetRange || '—'}</p>
+        <div style={{
+          padding: '16px 20px',
+          borderBottom: psych.confidenceRationale ? '1px solid var(--border)' : 'none',
+        }}>
+          <p style={{
+            fontSize: 10.5, fontWeight: 700, color: 'var(--text-3)',
+            letterSpacing: '0.06em', textTransform: 'uppercase',
+            fontFamily: 'var(--font-text)', marginBottom: 7,
+          }}>
+            Likely budget range
+          </p>
+          <p style={{
+            fontSize: 13.5, fontWeight: 600, color: 'var(--accent)',
+            lineHeight: 1.45, letterSpacing: '-0.008em', fontFamily: 'var(--font-text)',
+            margin: 0,
+          }}>
+            {psych.budgetRange || '—'}
+          </p>
         </div>
       </div>
 
-      {/* Confidence rationale */}
+      {/* Rationale */}
       {psych.confidenceRationale && (
-        <div style={{ background: 'var(--bg-elev-1)', border: '1px solid var(--border)', borderRadius: 'var(--r-md)', padding: '11px 14px', fontSize: 13, color: 'var(--text-2)', lineHeight: 1.55, fontFamily: 'var(--font-text)' }}>
-          <strong style={{ color: 'var(--text-1)', fontWeight: 600 }}>Why: </strong>{psych.confidenceRationale}
+        <div style={{
+          padding: '14px 20px',
+          background: 'var(--bg-elev-1)',
+        }}>
+          <p style={{
+            fontSize: 13, color: 'var(--text-2)', lineHeight: 1.6,
+            fontFamily: 'var(--font-text)', margin: 0,
+            letterSpacing: '-0.005em',
+          }}>
+            <strong style={{ color: 'var(--text-1)', fontWeight: 600 }}>Why: </strong>
+            {psych.confidenceRationale}
+          </p>
         </div>
       )}
     </div>
@@ -5451,14 +5557,14 @@ function ProposalOutput({ result, pillClass, portfolio, copied, copyText, select
     <div className="space-y-5">
       {/* Breakdown */}
       <div className="ff-fadeup ff-card">
-        <h3 className="ff-subheading mb-4">Read</h3>
+        <h3 className="ff-subheading mb-4">Client diagnosis</h3>
         <div className="ff-detail-grid">
-          <Cell label="Client Type" value={result.extraction?.clientType} />
-          <Cell label="Project" value={result.extraction?.projectType} accent />
+          <Cell label="Who they are" value={result.extraction?.clientType} />
+          <Cell label="What they need" value={result.extraction?.projectType} accent />
           <Cell label="Urgency"><span className={pillClass(result.extraction?.urgency)}>{result.extraction?.urgency}</span></Cell>
-          <Cell label="Budget"><span className={pillClass(result.extraction?.budgetSignal)}>{result.extraction?.budgetSignal}</span></Cell>
-          <Cell label="Core Problem" value={result.extraction?.coreProblem} wide />
-          <Cell label="Hidden Intent" value={result.extraction?.hiddenIntent} wide />
+          <Cell label="Budget signal"><span className={pillClass(result.extraction?.budgetSignal)}>{result.extraction?.budgetSignal}</span></Cell>
+          <Cell label="The real problem" value={result.extraction?.coreProblem} wide />
+          <Cell label="What they're really evaluating" value={result.extraction?.hiddenIntent} wide />
         </div>
       </div>
 
@@ -5468,10 +5574,10 @@ function ProposalOutput({ result, pillClass, portfolio, copied, copyText, select
       {proposal && (
         <div className="ff-fadeup" style={{ animationDelay: '60ms' }}>
           <div className="flex items-center justify-between mb-3">
-            <h3 className="ff-subheading">Proposal</h3>
+            <h3 className="ff-subheading">Your proposal</h3>
             <button className="ff-icon-btn" onClick={() => copyText('proposal', proposalText)}>
               {copied.proposal ? <Check size={12} /> : <Copy size={12} />}
-              {copied.proposal ? 'Copied' : 'Copy'}
+              {copied.proposal ? 'Copied' : 'Copy all'}
             </button>
           </div>
 
@@ -5479,21 +5585,23 @@ function ProposalOutput({ result, pillClass, portfolio, copied, copyText, select
             <div className="ff-card" style={{ padding: 0, overflow: 'hidden' }}>
               {/* Hook */}
               {proposal.hook && (
-                <div style={{ padding: '18px 20px', borderBottom: '1px solid var(--border)' }}>
-                  <span className="ff-section-label" style={{ display: 'block', marginBottom: 8 }}>Hook</span>
-                  <p style={{ fontSize: 15, lineHeight: 1.55, color: 'var(--text-1)', fontWeight: 500, letterSpacing: '-0.005em', margin: 0 }}>{proposal.hook}</p>
+                <div style={{ padding: '20px 22px', borderBottom: '1px solid var(--border)', background: 'var(--bg)' }}>
+                  <span className="ff-section-label" style={{ display: 'block', marginBottom: 10, color: 'var(--accent)' }}>Opening — makes them feel understood</span>
+                  <p style={{ fontSize: 15.5, lineHeight: 1.6, color: 'var(--text-1)', fontWeight: 500, letterSpacing: '-0.008em', margin: 0 }}>{proposal.hook}</p>
                 </div>
               )}
 
               {/* Why me */}
               {proposal.fit?.length > 0 && (
-                <div style={{ padding: '18px 20px', borderBottom: '1px solid var(--border)' }}>
-                  <span className="ff-section-label" style={{ display: 'block', marginBottom: 10 }}>Why me</span>
-                  <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div style={{ padding: '20px 22px', borderBottom: '1px solid var(--border)' }}>
+                  <span className="ff-section-label" style={{ display: 'block', marginBottom: 12 }}>Proof I can solve this</span>
+                  <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 10 }}>
                     {proposal.fit.map((b, i) => (
-                      <li key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-                        <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--accent)', flexShrink: 0, marginTop: 7 }} />
-                        <span style={{ fontSize: 14, lineHeight: 1.5, color: 'var(--text-1)', letterSpacing: '-0.005em' }}>{b}</span>
+                      <li key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+                        <span style={{ width: 20, height: 20, borderRadius: 6, background: 'var(--accent-bg-soft)', border: '1px solid var(--accent-border-soft)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
+                          <span style={{ fontSize: 10, fontWeight: 800, color: 'var(--accent)' }}>{i + 1}</span>
+                        </span>
+                        <span style={{ fontSize: 14, lineHeight: 1.6, color: 'var(--text-1)', letterSpacing: '-0.005em' }}>{b}</span>
                       </li>
                     ))}
                   </ul>
@@ -5502,13 +5610,13 @@ function ProposalOutput({ result, pillClass, portfolio, copied, copyText, select
 
               {/* Process */}
               {proposal.process?.length > 0 && (
-                <div style={{ padding: '18px 20px', borderBottom: '1px solid var(--border)' }}>
-                  <span className="ff-section-label" style={{ display: 'block', marginBottom: 10 }}>How it works</span>
-                  <ol style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div style={{ padding: '20px 22px', borderBottom: '1px solid var(--border)' }}>
+                  <span className="ff-section-label" style={{ display: 'block', marginBottom: 12 }}>How we work together</span>
+                  <ol style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 10 }}>
                     {proposal.process.map((s, i) => (
-                      <li key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-                        <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--accent)', fontFamily: 'var(--font-mono)', flexShrink: 0, width: 18, paddingTop: 2 }}>{String(i + 1).padStart(2, '0')}</span>
-                        <span style={{ fontSize: 14, lineHeight: 1.5, color: 'var(--text-1)', letterSpacing: '-0.005em' }}>{s}</span>
+                      <li key={i} style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
+                        <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--accent)', fontFamily: 'var(--font-mono)', flexShrink: 0, width: 22, paddingTop: 2, letterSpacing: '0.02em' }}>{String(i + 1).padStart(2, '0')}</span>
+                        <span style={{ fontSize: 14, lineHeight: 1.55, color: 'var(--text-1)', letterSpacing: '-0.005em' }}>{s}</span>
                       </li>
                     ))}
                   </ol>
@@ -5517,9 +5625,9 @@ function ProposalOutput({ result, pillClass, portfolio, copied, copyText, select
 
               {/* CTA */}
               {proposal.cta && (
-                <div style={{ padding: '16px 20px', background: 'var(--accent-bg-soft)' }}>
-                  <span className="ff-section-label" style={{ display: 'block', marginBottom: 6, color: 'var(--accent)' }}>Next step</span>
-                  <p style={{ fontSize: 14, lineHeight: 1.5, color: 'var(--text-1)', fontWeight: 500, letterSpacing: '-0.005em', margin: 0 }}>{proposal.cta}</p>
+                <div style={{ padding: '18px 22px', background: 'var(--accent-bg-soft)', borderTop: '1px solid var(--accent-border-soft)' }}>
+                  <span className="ff-section-label" style={{ display: 'block', marginBottom: 8, color: 'var(--accent)' }}>The ask — easy to say yes to</span>
+                  <p style={{ fontSize: 15, lineHeight: 1.55, color: 'var(--text-1)', fontWeight: 600, letterSpacing: '-0.008em', margin: 0 }}>{proposal.cta}</p>
                 </div>
               )}
             </div>
