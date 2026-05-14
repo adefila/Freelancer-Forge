@@ -4231,6 +4231,15 @@ Return ONLY JSON.`;
 
 The fundamental mistake 95% of freelancers make: they write about themselves. Skills, experience, portfolio. The client doesn't care yet. They care about their problem. Your job is to prove you understand that problem so precisely that hiring you feels like the obvious, low-risk choice.
 
+BEFORE GENERATING — run these quality checks mentally:
+1. Does the hook name a specific, recognisable situation — or is it vague enough to apply to any client?
+2. Do the fit bullets have real numbers or named outcomes — or are they just rephrased skill claims?
+3. Does the process show expertise — or is it just "kickoff, work, delivery"?
+4. Does the CTA make one specific, easy action clear — or does it just say "let me know"?
+5. Would a client reading this think "this person understands my exact situation" — or "this is another template"?
+
+If any answer is weak, generate stronger. A proposal that wins is specific enough that it couldn't have been sent to anyone else.
+
 ${imageData ? 'ATTACHED: Job post or brief image. Read every word carefully before writing.\n' : ''}
 
 BEFORE WRITING A SINGLE WORD — diagnose this situation:
@@ -4294,7 +4303,13 @@ Generate ONLY valid JSON:
     "process": ["Step 1: under 10 words.", "Step 2: under 10 words.", "Step 3: under 10 words."],
     "cta": "1 sentence. Specific, low-effort next step. Makes replying feel obvious. Not a request for permission."
   },
-  "coldDM": "3 lines. \\n between each. Reads like a message from a peer who noticed something real. No selling. No em dashes."
+  "coldDM": "3 lines. \\n between each. Reads like a message from a peer who noticed something real. No selling. No em dashes.",
+  "clientPsychology": {
+    "buyerType": "6-10 words. The specific buyer archetype — e.g. 'Deadline-driven founder burned by last developer' or 'Cautious SMB owner testing before committing'.",
+    "budgetRange": "Estimated budget range based on signals: company size, platform, scope detail, urgency. Name the signal you used.",
+    "confidenceScore": 1-100,
+    "confidenceRationale": "1-2 sentences. What gives this proposal its best shot at winning, and the single biggest risk to the deal."
+  }
 }
 
 No em dashes anywhere. Return ONLY JSON.`;
@@ -5415,6 +5430,7 @@ function PsychCard({ psych, delay = 0 }) {
       overflow: 'hidden',
       border: '1px solid var(--border)',
       background: 'var(--bg)',
+      boxShadow: '0 1px 4px rgba(0,0,0,0.05)',
     }}>
 
       {/* Header row */}
