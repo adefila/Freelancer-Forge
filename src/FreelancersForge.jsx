@@ -191,59 +191,6 @@ const TONE_DIRECTIVES = {
   Playful: "Write in a PLAYFUL voice: energetic, surprising, breaks expectations. Still professional but anything but boring.",
 };
 
-Weak: "I specialise in conversion rate optimisation."
-Strong: "Your checkout page is losing people at the payment step. That's not a design problem — it's a trust problem. I've fixed this exact drop-off for three SaaS companies by [specific method], and conversion went up between 18% and 44%."
-
-The difference: the strong version names the specific problem, diagnoses why it exists, and proves the fix with evidence. The weak version is a service description.
-
-GRAMMAR AND MECHANICS — zero tolerance:
-- No em dashes (—) or en dashes (–) anywhere. Use a period, comma, colon, or parentheses.
-- No ellipsis (...) used for style.
-- No sentence fragments. Subject + verb, always.
-- Never start two consecutive sentences with the same word.
-- Active voice. "I reduced churn by 30%" not "Churn was reduced by 30%."
-- Contractions are preferred in proposals, DMs, emails, follow-ups.
-- Read every sentence out loud. If it sounds like a brochure, rewrite it.
-
-FORBIDDEN — never use these words or phrases:
-leverage, utilize, synergy, streamline, cutting-edge, innovative, world-class, best-in-class,
-top-notch, game-changer, unlock, empower, optimize, maximize, robust, seamless, transform,
-revolutionize, supercharge, level up, holistic, ecosystem, scalable, dynamic, results-driven,
-deep dive, foster, cultivate, harness, elevate, passionate about, I came across your post,
-I hope this finds you well, I wanted to reach out, excited to, thrilled to, I'd love to,
-touch base, circle back, move the needle, bandwidth, pain points, value proposition,
-solution, offering, deliverables, ensure, assist, facilitate, spearhead, at the end of the day,
-going forward, in today's landscape, needless to say, look no further.
-
-PROOF RULE — no vague claim survives:
-Every benefit, result, or capability claim must include at least one of:
-a real number, a percentage, a named client type, a dollar amount, a time frame, a named tool.
-No exceptions. If you can't quantify it, make it concrete in another way.
-
-VOICE:
-- Sounds like a practitioner, not a marketer.
-- Warm but not eager. Direct but not cold. Confident but not arrogant.
-- The reader should feel like they're talking to someone who has solved their exact problem before.
-- Average sentence: 10-13 words. Longer sentences for context. Shorter ones for impact.
-`;
-
-BULLET POINT LAW:
-Every bullet must contain at least ONE of: a number, a percentage, a dollar amount, a time frame,
-a specific tool or system name, or a named outcome. No exceptions. Delete or rewrite any bullet that fails.
-
-GRAMMAR:
-- No first-person pronouns (I, my, me, we). Subject always implied.
-- Every bullet starts with a strong verb. Past tense for past roles. Present for current.
-- Strong verbs: Shipped, Reduced, Closed, Built, Migrated, Negotiated, Cut, Scaled,
-  Launched, Authored, Architected, Recovered, Delivered, Eliminated, Generated,
-  Secured, Restructured, Automated, Deployed, Directed, Overhauled, Accelerated.
-- Never use: Responsible for, Helped, Worked on, Assisted, Managed (without specifics).
-
-FORMAT:
-- One page. Exception: 10+ years relevant experience.
-- ATS-friendly: standard headers, single column, no tables, no graphics.
-`;
-
 const stripEmDashes = (s) => {
   if (typeof s !== 'string') return s;
   return s.replace(/\s*—\s*/g, ', ').replace(/\s*–\s*/g, ', ')
