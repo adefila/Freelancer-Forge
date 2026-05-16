@@ -101,7 +101,7 @@ const PAGE_TYPES = {
     desc: 'Landing page or sales page for a product, service, or offer',
     criteria: [
       'Hook strength: Does the headline stop the scroll?',
-      'Pain articulation: Does the copy name the problem in the reader's own words?',
+      'Pain articulation: Does the copy name the problem in the reader\'s own words?',
       'Mechanism clarity: Is the unique solution explained?',
       'Proof and risk reversal: Are testimonials placed near the asks?',
       'CTA pressure: Are there enough CTAs throughout?',
