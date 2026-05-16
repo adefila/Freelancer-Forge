@@ -2526,9 +2526,6 @@ const CSS = `
   box-shadow: 0 0 8px rgba(59,130,246,0.65);
 }
 
-
-}
-
 `;
 
 const PRELOADER_SLIDES = [
