@@ -4035,10 +4035,10 @@ A great client reply does three things:
 ${imageData ? 'ATTACHED: Screenshot of the conversation.\n' : ''}
 
 THE CONVERSATION SO FAR:
-${clientMessage.trim() ? `CLIENT:\n"""\n${clientMessage.trim()}\n"""\n` : ''}
+${clientMessage.trim() ? 'CLIENT:\\n\"\"\"\\n' + clientMessage.trim() + '\\n\"\"\"\\n' : ''}
 
 THE FREELANCER'S DRAFT REPLY:
-${myMessage.trim() ? `"""\n${myMessage.trim()}\n"""` : '[No draft — write a polished reply based on the client message above]'}
+${myMessage.trim() ? '\"\"\"\\n' + myMessage.trim() + '\\n\"\"\"' : '[No draft — write a polished reply based on the client message above]'}
 
 ${goal.trim() ? 'GOAL FOR THIS REPLY: ' + goal.trim() + '\n' : ''}
 
