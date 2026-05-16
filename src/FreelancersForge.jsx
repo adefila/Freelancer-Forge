@@ -1,9 +1,9 @@
-import { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   ArrowRight, Copy, Check, Loader2, Sparkles, Paperclip, X, ImageIcon,
   Sun, Moon, Plus, ExternalLink, Link as LinkIcon, ChevronDown,
   Mail, MessageSquare, FileText, Reply, Type, Image as ImgIcon,
-  Target, Award, Briefcase, User, Layers, Wand2,
+  Target, Award, Briefcase, User, Layers, Wand2, Monitor,
   TrendingUp, Trash2, HelpCircle, PenLine, Bot, Send, RotateCcw,
   ChevronUp
 } from 'lucide-react';
@@ -156,6 +156,7 @@ const CLOSER_MODES = {
   dm: { label: 'Cold DM', icon: MessageSquare, desc: 'Short, pattern-breaking direct message', cta: 'Generate DM' },
   email: { label: 'Cold Email', icon: Mail, desc: 'Subject line and email body', cta: 'Generate Email' },
   followup: { label: 'Follow-up', icon: Reply, desc: 'Reply or re-engage based on a conversation', cta: 'Draft Follow-up' },
+  reply: { label: 'Client Reply', icon: Send, desc: 'Polish your reply to a live client conversation', cta: 'Polish My Reply' },
   coverletter: { label: 'Cover Letter', icon: PenLine, desc: 'Tailored cover letter for a specific job', cta: 'Generate Cover Letter' },
 };
 
@@ -190,32 +191,86 @@ const TONE_DIRECTIVES = {
 };
 
 const STRICT_RULES = `
-=== STRICT WRITING RULES ===
-1. EM DASHES ARE FORBIDDEN. Use periods, commas, parentheses, or colons.
-2. GRAMMAR MUST BE IMPECCABLE. Vary sentence openers.
-3. NO GENERIC AI / CORPORATE WORDS. Forbidden: leverage, utilize, synergy, streamline, cutting-edge, innovative, world-class, best-in-class, top-notch, game-changer, unlock, empower, optimize, maximize, robust, seamless, transform, revolutionize, supercharge, level up, holistic, ecosystem, paradigm, scalable, dynamic, results-driven, deep dive, foster, cultivate, harness, elevate, dive into, embark on.
-4. NO GENERIC OPENERS. No "I hope this finds you well", "I came across your post", "passionate about".
-5. PREFER SPECIFIC OVER ABSTRACT. Numbers, named outcomes, concrete time frames.
+=== MASTER WRITING RULES — EVERY OUTPUT VIOLATING THESE GETS REWRITTEN ===
+
+THE ONE RULE THAT GOVERNS EVERYTHING:
+The client doesn't care about you. They care about their problem.
+Every sentence must earn its place by being about them — their situation, their fear, their goal — not about credentials, services, or experience.
+Ask before every sentence: "Does this help the client feel understood, or does it just make the freelancer look good?"
+If it's the latter, cut it or reframe it.
+
+WHAT "UNDERSTANDING THE PROBLEM" LOOKS LIKE IN PRACTICE:
+Weak: "I specialise in conversion rate optimisation."
+Strong: "Your checkout page is losing people at the payment step. That's not a design problem — it's a trust problem. I've fixed this exact drop-off for three SaaS companies by [specific method], and conversion went up between 18% and 44%."
+
+The difference: the strong version names the specific problem, diagnoses why it exists, and proves the fix with evidence. The weak version is a service description.
+
+GRAMMAR AND MECHANICS — zero tolerance:
+- No em dashes (—) or en dashes (–) anywhere. Use a period, comma, colon, or parentheses.
+- No ellipsis (...) used for style.
+- No sentence fragments. Subject + verb, always.
+- Never start two consecutive sentences with the same word.
+- Active voice. "I reduced churn by 30%" not "Churn was reduced by 30%."
+- Contractions are preferred in proposals, DMs, emails, follow-ups.
+- Read every sentence out loud. If it sounds like a brochure, rewrite it.
+
+FORBIDDEN — never use these words or phrases:
+leverage, utilize, synergy, streamline, cutting-edge, innovative, world-class, best-in-class,
+top-notch, game-changer, unlock, empower, optimize, maximize, robust, seamless, transform,
+revolutionize, supercharge, level up, holistic, ecosystem, scalable, dynamic, results-driven,
+deep dive, foster, cultivate, harness, elevate, passionate about, I came across your post,
+I hope this finds you well, I wanted to reach out, excited to, thrilled to, I'd love to,
+touch base, circle back, move the needle, bandwidth, pain points, value proposition,
+solution, offering, deliverables, ensure, assist, facilitate, spearhead, at the end of the day,
+going forward, in today's landscape, needless to say, look no further.
+
+PROOF RULE — no vague claim survives:
+Every benefit, result, or capability claim must include at least one of:
+a real number, a percentage, a named client type, a dollar amount, a time frame, a named tool.
+No exceptions. If you can't quantify it, make it concrete in another way.
+
+VOICE:
+- Sounds like a practitioner, not a marketer.
+- Warm but not eager. Direct but not cold. Confident but not arrogant.
+- The reader should feel like they're talking to someone who has solved their exact problem before.
+- Average sentence: 10-13 words. Longer sentences for context. Shorter ones for impact.
 `;
 
 const CV_STRICT_RULES = `
-=== CV-SPECIFIC RULES (additional, NEVER violate) ===
-A. NEVER use these phrases anywhere: "results-driven", "team player", "passionate about", "proven track record", "strong communication skills", "detail-oriented", "self-motivated", "go-getter", "out-of-the-box thinker", "wear many hats", "spearheaded", "drove results", "highly motivated", "strategic thinker", "collaborate with cross-functional teams", "responsible for", "duties included", "tasked with", "helped to", "worked on", "assisted in", "References available on request".
-B. EVERY bullet point MUST contain at least ONE of: a number, a percentage, a dollar amount, a time frame (e.g. 9 months, Q3 2024), a specific tool/system name (e.g. Salesforce, Postgres), or a named outcome (e.g. Series A close, app launch). If a bullet has none of these, REWRITE it or DELETE it.
-C. ZERO first-person pronouns (no "I", "my", "me"). Subject is implied.
-D. Use ONLY active, tactical past-tense verbs (or present for current role). Examples of strong starts: Shipped, Reduced, Closed, Built, Migrated, Negotiated, Cut, Scaled, Onboarded, Launched, Authored, Architected, Recovered, Delivered, Eliminated.
-E. NEVER add "Objective", "References available on request", or photos.
-F. ATS-friendly format only: standard headers (Experience, Education, Skills), no tables, no columns, no graphics, no progress bars or rating scales.
+=== CV-SPECIFIC RULES — ADDITIONAL, NON-NEGOTIABLE ===
+
+FORBIDDEN PHRASES:
+"results-driven", "team player", "passionate about", "proven track record", "strong communication skills",
+"detail-oriented", "self-motivated", "go-getter", "out-of-the-box thinker", "wear many hats",
+"spearheaded", "drove results", "highly motivated", "strategic thinker", "cross-functional teams",
+"responsible for", "duties included", "tasked with", "helped to", "worked on", "assisted in",
+"References available on request", "Objective", "Summary of qualifications".
+
+BULLET POINT LAW:
+Every bullet must contain at least ONE of: a number, a percentage, a dollar amount, a time frame,
+a specific tool or system name, or a named outcome. No exceptions. Delete or rewrite any bullet that fails.
+
+GRAMMAR:
+- No first-person pronouns (I, my, me, we). Subject always implied.
+- Every bullet starts with a strong verb. Past tense for past roles. Present for current.
+- Strong verbs: Shipped, Reduced, Closed, Built, Migrated, Negotiated, Cut, Scaled,
+  Launched, Authored, Architected, Recovered, Delivered, Eliminated, Generated,
+  Secured, Restructured, Automated, Deployed, Directed, Overhauled, Accelerated.
+- Never use: Responsible for, Helped, Worked on, Assisted, Managed (without specifics).
+
+FORMAT:
+- One page. Exception: 10+ years relevant experience.
+- ATS-friendly: standard headers, single column, no tables, no graphics.
 `;
 
 const stripEmDashes = (s) => {
   if (typeof s !== 'string') return s;
-  return s.replace(/\s*\u2014\s*/g, ', ').replace(/\s*\u2013\s*/g, ', ')
+  return s.replace(/\s*—\s*/g, ', ').replace(/\s*–\s*/g, ', ')
     .replace(/,\s*,/g, ',').replace(/,\s*\./g, '.');
 };
 
 /* ====================================================================== */
-/* ASK ANYTHING \u2014 SUGGESTED PROMPTS                                       */
+/* ASK ANYTHING — SUGGESTED PROMPTS                                       */
 /* ====================================================================== */
 
 const SUGGESTED_PROMPTS = [
@@ -228,15 +283,14 @@ const SUGGESTED_PROMPTS = [
 ];
 
 /* ====================================================================== */
-/* DESIGN SYSTEM \u2014 Apple-inspired, blue primary                            */
+/* DESIGN SYSTEM — Apple-inspired, blue primary                            */
 /* ====================================================================== */
 
 const CSS = `
 @import url('https://rsms.me/inter/inter.css');
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&display=swap');
 
 .ff-root {
-  --font-display: 'Fraunces', 'Times New Roman', Georgia, serif;
+  --font-display: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   --font-text: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
   --font-mono: 'SF Mono', 'JetBrains Mono', ui-monospace, monospace;
 
@@ -246,9 +300,9 @@ const CSS = `
   --r-xl: 16px;
   --r-pill: 999px;
 
-  --sh-1: 0 1px 2px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.02);
-  --sh-2: 0 2px 8px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.06);
-  --sh-3: 0 12px 32px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.04);
+  --sh-1: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+  --sh-2: 0 3px 10px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.05);
+  --sh-3: 0 14px 36px rgba(0,0,0,0.10), 0 3px 8px rgba(0,0,0,0.06);
   --sh-blue: 0 4px 14px rgba(37, 99, 235, 0.32), 0 2px 6px rgba(37, 99, 235, 0.18);
   --sh-focus: 0 0 0 3px rgba(37, 99, 235, 0.18);
 
@@ -257,15 +311,15 @@ const CSS = `
   --t-slow: 380ms cubic-bezier(0.4, 0, 0.2, 1);
 
   /* LIGHT MODE */
-  --bg: #ffffff;
-  --bg-elev-1: #fafafa;
-  --bg-elev-2: #f4f4f5;
+  --bg: #f9f8f7;
+  --bg-elev-1: #f3f2f0;
+  --bg-elev-2: #ebe9e7;
   --bg-input: #ffffff;
   --text-1: #0a0a0a;
   --text-2: #4a4a4f;
   --text-3: #6b6b70;
-  --border: rgba(0, 0, 0, 0.08);
-  --border-strong: rgba(0, 0, 0, 0.12);
+  --border: rgba(0, 0, 0, 0.09);
+  --border-strong: rgba(0, 0, 0, 0.14);
   --accent: #2563eb;
   --accent-hover: #1d4ed8;
   --accent-active: #1e40af;
@@ -289,48 +343,47 @@ const CSS = `
   color: var(--text-1);
   min-height: 100vh;
   position: relative;
-  overflow-x: hidden;
+  overflow-x: clip;
   transition: background-color var(--t-slow), color var(--t-slow);
   letter-spacing: -0.01em;
 }
 
 .ff-root.dark {
-  --bg: #0a0a0c;
-  --bg-elev-1: #131316;
-  --bg-elev-2: #1a1a1e;
-  --bg-input: #0f0f12;
-  --text-1: #f5f5f7;
-  --text-2: #b8b8bd;
-  --text-3: #8a8a90;
-  --border: rgba(255, 255, 255, 0.08);
-  --border-strong: rgba(255, 255, 255, 0.14);
-  --accent: #3b82f6;
+  --bg: #111113;
+  --bg-elev-1: #1c1c20;
+  --bg-elev-2: #26262b;
+  --bg-input: #18181c;
+  --text-1: #f0f0f2;
+  --text-2: #c0c0c8;
+  --text-3: #8e8e96;
+  --border: rgba(255, 255, 255, 0.10);
+  --border-strong: rgba(255, 255, 255, 0.18);
+  --accent: #4f8ef7;
   --accent-hover: #60a5fa;
   --accent-active: #2563eb;
   --accent-vivid: #2563eb;
   --accent-vivid-hover: #3b82f6;
-  --accent-bg-soft: rgba(59, 130, 246, 0.12);
-  --accent-border-soft: rgba(59, 130, 246, 0.32);
+  --accent-bg-soft: rgba(79, 142, 247, 0.14);
+  --accent-border-soft: rgba(79, 142, 247, 0.36);
   --accent-text-on: #ffffff;
-  --warning: #f59e0b;
-  --warning-bg: rgba(245, 158, 11, 0.12);
+  --warning: #fbbf24;
+  --warning-bg: rgba(251, 191, 36, 0.14);
   --success: #4ade80;
-  --success-bg: rgba(74, 222, 128, 0.12);
+  --success-bg: rgba(74, 222, 128, 0.14);
   --danger: #f87171;
-  --danger-bg: rgba(248, 113, 113, 0.12);
-  --sh-1: 0 1px 2px rgba(0,0,0,0.5), 0 1px 3px rgba(0,0,0,0.3);
-  --sh-2: 0 2px 8px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.5);
-  --sh-3: 0 12px 32px rgba(0,0,0,0.5), 0 2px 6px rgba(0,0,0,0.3);
+  --danger-bg: rgba(248, 113, 113, 0.14);
+  --sh-1: 0 1px 3px rgba(0,0,0,0.6), 0 1px 2px rgba(0,0,0,0.4);
+  --sh-2: 0 3px 12px rgba(0,0,0,0.55), 0 1px 4px rgba(0,0,0,0.45);
+  --sh-3: 0 16px 40px rgba(0,0,0,0.65), 0 4px 10px rgba(0,0,0,0.4);
   --sh-blue: 0 4px 16px rgba(59, 130, 246, 0.4), 0 2px 6px rgba(59, 130, 246, 0.2);
   --sh-focus: 0 0 0 3px rgba(59, 130, 246, 0.25);
 }
 
 .ff-display {
   font-family: var(--font-display);
-  letter-spacing: -0.018em;
+  letter-spacing: -0.038em;
   font-weight: 500;
-  font-feature-settings: 'ss01', 'ss02';
-  font-optical-sizing: auto;
+  font-feature-settings: 'cv11', 'ss01', 'kern';
 }
 .ff-mono { font-family: var(--font-mono); font-feature-settings: 'tnum', 'zero'; }
 
@@ -352,9 +405,14 @@ const CSS = `
   transition: border-color var(--t-fast), box-shadow var(--t-fast), background-color var(--t-slow);
   border-radius: var(--r-md);
   letter-spacing: -0.01em;
+  font-size: 16px; /* prevents iOS zoom on focus */
 }
-.ff-input { font-size: 14px; padding: 10px 12px; }
-.ff-textarea { font-size: 15px; line-height: 1.5; padding: 12px 14px; resize: vertical; }
+.ff-input { padding: 11px 13px; }
+.ff-textarea { line-height: 1.5; padding: 13px 14px; resize: vertical; }
+@media (min-width: 768px) {
+  .ff-input { font-size: 14px; padding: 10px 12px; }
+  .ff-textarea { font-size: 15px; padding: 12px 14px; }
+}
 .ff-input:focus, .ff-textarea:focus {
   border-color: var(--accent);
   box-shadow: var(--sh-focus);
@@ -445,11 +503,104 @@ const CSS = `
   align-items: center;
   gap: 6px;
   transition: all var(--t-fast);
+  position: relative;
 }
 .ff-theme-toggle:hover {
   border-color: var(--border-strong);
   color: var(--text-1);
   background-color: var(--bg-elev-2);
+}
+
+/* Theme dropdown */
+.ff-theme-dropdown {
+  position: relative;
+  display: inline-block;
+}
+.ff-theme-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: var(--bg);
+  border: 1px solid var(--border-strong);
+  border-radius: 14px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.04);
+  padding: 6px;
+  min-width: 210px;
+  z-index: 200;
+  animation: ff-scalein 140ms cubic-bezier(0.16,1,0.3,1);
+  transform-origin: top right;
+}
+.ff-root.dark .ff-theme-menu {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.28), 0 1px 4px rgba(0,0,0,0.18);
+}
+
+/* Each row: [check] [icon] [label + desc] */
+.ff-theme-option {
+  display: grid;
+  grid-template-columns: 18px 20px 1fr;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 9px 10px;
+  border-radius: 9px;
+  cursor: pointer;
+  font-family: var(--font-text);
+  letter-spacing: -0.005em;
+  text-align: left;
+  transition: background var(--t-fast);
+}
+.ff-theme-option:hover { background: var(--bg-elev-1); }
+
+/* Left check slot */
+.ff-theme-option-check {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-1);
+  opacity: 0;
+  transition: opacity var(--t-fast);
+  flex-shrink: 0;
+}
+.ff-theme-option-active .ff-theme-option-check { opacity: 1; }
+
+/* Middle icon slot — bare, no box */
+.ff-theme-option-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-2);
+  flex-shrink: 0;
+  transition: color var(--t-fast);
+}
+.ff-theme-option:hover .ff-theme-option-icon { color: var(--text-1); }
+.ff-theme-option-active .ff-theme-option-icon { color: var(--text-1); }
+
+/* Right text stack */
+.ff-theme-option-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+.ff-theme-option-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-1);
+  line-height: 1.3;
+}
+.ff-theme-option-desc {
+  font-size: 11.5px;
+  color: var(--text-3);
+  line-height: 1.3;
+  font-weight: 400;
+}
+
+.ff-theme-menu-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 4px 4px;
 }
 
 .ff-attach-btn {
@@ -492,7 +643,7 @@ const CSS = `
   color: var(--text-2);
   padding: 7px 14px;
   font-family: var(--font-text);
-  font-size: 12.5px;
+  font-size: 13px;
   font-weight: 500;
   cursor: pointer;
   border-radius: var(--r-sm);
@@ -542,9 +693,15 @@ const CSS = `
 /* UNDERLINED TABS */
 .ff-tabs {
   display: flex;
-  gap: 4px;
+  gap: 0;
   border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+  overflow-y: clip;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
+.ff-tabs::-webkit-scrollbar { display: none; }
 .ff-tab {
   background: transparent;
   border: none;
@@ -554,14 +711,16 @@ const CSS = `
   font-size: 14px;
   font-weight: 500;
   letter-spacing: -0.01em;
-  padding: 14px 4px;
-  margin-right: 28px;
+  padding: 13px 0;
+  margin-right: 24px;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
   transition: color var(--t-fast), border-color var(--t-fast);
   margin-bottom: -1px;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 .ff-tab:last-child { margin-right: 0; }
 .ff-tab:hover:not(.ff-tab-active) { color: var(--text-1); }
@@ -571,14 +730,17 @@ const CSS = `
   font-weight: 600;
 }
 .ff-tab-badge {
-  font-size: 10px;
-  font-weight: 600;
-  padding: 2px 7px;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 2px 6px;
   border-radius: var(--r-pill);
   background-color: var(--accent-bg-soft);
   color: var(--accent);
-  letter-spacing: 0.02em;
-  margin-left: 2px;
+  letter-spacing: 0.03em;
+  margin-left: 1px;
+}
+@media (max-width: 640px) {
+  .ff-tab { font-size: 13px; padding: 12px 0; margin-right: 20px; gap: 6px; }
 }
 
 /* DROPDOWN */
@@ -615,6 +777,7 @@ const CSS = `
   flex-direction: column;
   border-radius: var(--r-lg);
   box-shadow: var(--sh-3);
+  backdrop-filter: none;
   overflow: hidden;
   padding: 6px;
 }
@@ -658,8 +821,9 @@ const CSS = `
   background-color: var(--bg-elev-1);
   border: 1px solid var(--border);
   border-radius: var(--r-lg);
-  padding: 24px;
-  transition: background-color var(--t-slow), border-color var(--t-slow);
+  padding: 28px;
+  box-shadow: var(--sh-1);
+  transition: background-color var(--t-slow), border-color var(--t-slow), box-shadow var(--t-slow);
 }
 .ff-card-elevated {
   background-color: var(--bg);
@@ -718,7 +882,7 @@ const CSS = `
   background-color: var(--accent-bg-soft);
   color: var(--accent);
   font-family: var(--font-text);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 500;
   border-radius: var(--r-pill);
   letter-spacing: -0.005em;
@@ -753,7 +917,7 @@ const CSS = `
 }
 .ff-score-ring-label {
   font-family: var(--font-text);
-  font-size: 10px;
+  font-size: 12px;
   color: var(--text-3);
   font-weight: 500;
   margin-top: 3px;
@@ -782,7 +946,7 @@ const CSS = `
 .ff-score-bar-high { background-color: var(--danger); }
 .ff-score-num-mini {
   font-family: var(--font-text);
-  font-size: 12.5px;
+  font-size: 13px;
   font-weight: 600;
   font-feature-settings: 'tnum';
   width: 44px;
@@ -800,7 +964,7 @@ const CSS = `
 .ff-rec-item + .ff-rec-item { border-top: 1px solid var(--border); }
 .ff-rec-prio {
   font-family: var(--font-text);
-  font-size: 10.5px;
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.02em;
   text-transform: uppercase;
@@ -832,7 +996,7 @@ const CSS = `
 }
 .ff-rec-fix-label {
   font-family: var(--font-text);
-  font-size: 10.5px;
+  font-size: 12px;
   color: var(--accent);
   font-weight: 600;
   letter-spacing: 0.02em;
@@ -851,7 +1015,7 @@ const CSS = `
 .ff-rewrite-card:last-child { margin-bottom: 0; }
 .ff-rewrite-section {
   font-family: var(--font-text);
-  font-size: 11px;
+  font-size: 12px;
   color: var(--accent);
   font-weight: 600;
   letter-spacing: 0.02em;
@@ -884,12 +1048,11 @@ const CSS = `
 .ff-optimize-headline {
   font-family: var(--font-display);
   font-size: 24px;
-  line-height: 1.2;
+  line-height: 1.15;
   font-weight: 500;
-  letter-spacing: -0.018em;
+  letter-spacing: -0.038em;
   color: var(--text-1);
   margin-bottom: 8px;
-  font-optical-sizing: auto;
 }
 .ff-optimize-sub {
   font-size: 14.5px;
@@ -905,7 +1068,7 @@ const CSS = `
   gap: 6px;
   padding: 4px 10px;
   font-family: var(--font-text);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.02em;
   text-transform: uppercase;
@@ -980,7 +1143,7 @@ const CSS = `
   align-items: center;
   gap: 6px;
   font-family: var(--font-text);
-  font-size: 12.5px;
+  font-size: 13px;
   color: var(--accent);
   text-decoration: none;
   word-break: break-all;
@@ -1009,7 +1172,7 @@ const CSS = `
 .ff-context-strip-item { display: flex; flex-direction: column; gap: 2px; }
 .ff-context-strip-label {
   font-family: var(--font-text);
-  font-size: 10.5px;
+  font-size: 12px;
   font-weight: 500;
   color: var(--text-3);
   letter-spacing: 0.02em;
@@ -1034,11 +1197,11 @@ const CSS = `
 
 .ff-section-label {
   font-family: var(--font-text);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
-  color: var(--text-3);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  color: var(--text-2);
+  letter-spacing: -0.005em;
+  text-transform: none;
 }
 
 .ff-field-label {
@@ -1062,9 +1225,8 @@ const CSS = `
   font-family: var(--font-display);
   font-size: 20px;
   font-weight: 500;
-  letter-spacing: -0.018em;
+  letter-spacing: -0.038em;
   color: var(--text-1);
-  font-optical-sizing: auto;
 }
 
 .ff-pulse { animation: ff-pulse 1.6s ease-in-out infinite; }
@@ -1200,10 +1362,10 @@ const CSS = `
   filter: blur(8px);
 }
 .ff-root.dark .ff-gradient-bg {
-  opacity: 0.5;
+  opacity: 0.6;
   background:
-    radial-gradient(ellipse 60% 50% at 75% 0%, rgba(59, 130, 246, 0.15) 0%, transparent 60%),
-    radial-gradient(ellipse 50% 40% at 25% 10%, rgba(59, 130, 246, 0.12) 0%, transparent 55%);
+    radial-gradient(ellipse 60% 50% at 75% 0%, rgba(79, 142, 247, 0.18) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 25% 10%, rgba(79, 142, 247, 0.14) 0%, transparent 55%);
 }
 
 @keyframes ff-ringfill {
@@ -1392,324 +1554,1212 @@ const CSS = `
 *::-webkit-scrollbar-thumb:hover { background: var(--text-3); }
 
 /* ====================================================================== */
-/* ASK ANYTHING \u2014 CHAT STYLES                                             */
+/* LAYOUT — RESPONSIVE CONTAINERS                                         */
 /* ====================================================================== */
 
-.ff-chat-wrap {
-  display: flex;
-  flex-direction: column;
-  height: 640px;
-  max-height: 80vh;
-  border: 1px solid var(--border);
-  border-radius: var(--r-xl);
-  overflow: hidden;
-  background: var(--bg-elev-1);
-  box-shadow: var(--sh-2);
+.ff-root-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 48px 32px 96px;
 }
 
-.ff-chat-messages {
-  flex: 1;
-  overflow-y: auto;
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.ff-chat-msg {
-  display: flex;
-  gap: 12px;
-  animation: ff-fadeup 380ms cubic-bezier(0.16, 1, 0.3, 1) backwards;
-}
-
-.ff-chat-msg-user {
-  flex-direction: row-reverse;
-}
-
-.ff-chat-avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: var(--r-pill);
+.ff-topbar {
   display: flex;
   align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  font-size: 13px;
-  font-weight: 700;
+  justify-content: space-between;
+  margin-bottom: 52px;
+  gap: 12px;
 }
 
-.ff-chat-avatar-ai {
-  background: var(--accent-bg-soft);
-  border: 1px solid var(--accent-border-soft);
-  color: var(--accent);
+.ff-hero {
+  margin-bottom: 60px;
 }
 
-.ff-chat-avatar-user {
-  background: var(--accent);
-  color: var(--accent-text-on);
+.ff-hero-heading {
+  font-size: clamp(34px, 5.6vw, 68px);
+  line-height: 1.02;
+  font-weight: 500;
+  letter-spacing: -0.038em;
+  max-width: 100%;
+  margin-bottom: 20px;
 }
 
-.ff-chat-bubble {
-  max-width: min(560px, 80%);
-  padding: 13px 16px;
-  border-radius: var(--r-lg);
-  font-size: 14.5px;
-  line-height: 1.65;
+.ff-hero-sub {
+  font-size: clamp(14px, 1.3vw, 17px);
+  line-height: 1.6;
   letter-spacing: -0.005em;
+  max-width: 640px;
+  width: 100%;
+  color: var(--text-2);
+}
+
+.ff-tabs-nav {
+  margin-bottom: 48px;
+}
+
+.ff-cv-selector {
+  margin-bottom: 36px;
+}
+
+.ff-pipeline-topbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.ff-stat-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+@media (max-width: 768px) {
+  .ff-stat-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .ff-pipeline-topbar {
+    margin-bottom: 20px;
+  }
+  .ff-cv-selector {
+    margin-bottom: 24px;
+  }
+}
+
+/* Two-col grid used in tabs */
+.ff-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 40px;
+}
+
+.ff-2col-stack {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px 64px;
+}
+
+.ff-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px 20px;
+}
+
+@media (max-width: 480px) {
+  .ff-detail-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .ff-detail-grid .col-span-2 {
+    grid-column: 1;
+  }
+}
+
+/* Apple-clean refinements */
+.ff-card {
+  border-radius: var(--r-xl);
+}
+
+.ff-empty-state {
+  border-radius: var(--r-xl);
+}
+
+.ff-optimize-cta {
+  border-radius: var(--r-xl);
 }
 
 .ff-chat-bubble-ai {
-  background: var(--bg);
-  border: 1px solid var(--border);
-  color: var(--text-1);
-  border-bottom-left-radius: var(--r-sm);
-  box-shadow: var(--sh-1);
+  border-radius: var(--r-lg) var(--r-lg) var(--r-lg) 4px;
 }
 
 .ff-chat-bubble-user {
-  background: var(--accent);
-  color: var(--accent-text-on);
-  border-bottom-right-radius: var(--r-sm);
+  border-radius: var(--r-lg) var(--r-lg) 4px var(--r-lg);
 }
 
-.ff-chat-bubble pre,
-.ff-chat-bubble code {
-  font-family: var(--font-mono);
-  font-size: 13px;
-  background: var(--bg-elev-2);
-  padding: 2px 6px;
-  border-radius: var(--r-sm);
+/* Tighter form spacing on mobile */
+@media (max-width: 768px) {
+  .space-y-5 > * + * { margin-top: 16px !important; }
+  .space-y-6 > * + * { margin-top: 20px !important; }
+  /* ff-textarea stays 16px on mobile to prevent iOS zoom */
+  .ff-output-text { font-size: 14px; }
+  .ff-subheading { font-size: 18px; }
+  .ff-dropdown-menu { min-width: min(280px, 90vw); left: 0; right: auto; }
 }
 
-.ff-chat-bubble-ai pre {
-  padding: 12px 14px;
-  border-radius: var(--r-md);
-  overflow-x: auto;
-  margin: 8px 0;
-  white-space: pre-wrap;
-  word-break: break-word;
+/* Pipeline table */
+.ff-pipeline-table-header {
+  display: grid;
+  grid-template-columns: 100px 1fr 90px 120px 90px 32px;
+  gap: 10px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  background-color: var(--bg-elev-2);
+  border-top-left-radius: var(--r-lg);
+  border-top-right-radius: var(--r-lg);
 }
 
-.ff-chat-typing {
+.ff-pipeline-row-grid {
+  display: grid;
+  grid-template-columns: 100px 1fr 90px 120px 90px 32px;
+  gap: 10px;
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--border);
+  align-items: center;
+}
+
+/* Mobile overrides */
+@media (max-width: 768px) {
+  .ff-root-inner {
+    padding: 28px 20px 56px;
+  }
+
+  .ff-topbar {
+    margin-bottom: 24px;
+  }
+
+  .ff-hero {
+    margin-bottom: 28px;
+  }
+
+  .ff-tabs-nav {
+    margin-bottom: 24px;
+  }
+
+  .ff-2col {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .ff-2col-stack {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+
+  .ff-pipeline-table-header {
+    grid-template-columns: 80px 1fr 100px 28px;
+  }
+
+  .ff-pipeline-row-grid {
+    grid-template-columns: 80px 1fr 100px 28px;
+  }
+
+  .ff-pipeline-col-type,
+  .ff-pipeline-col-value {
+    display: none;
+  }
+
+  .ff-card {
+    padding: 18px 16px;
+  }
+
+  .ff-optimize-cta {
+    padding: 20px 18px;
+  }
+
+
+  .ff-dropdown-menu {
+    min-width: 260px;
+  }
+}
+
+@media (max-width: 480px) {
+  .ff-hero-heading {
+    font-size: 28px;
+  }
+
+  .ff-2col-stack {
+    gap: 28px;
+  }
+
+
+  .ff-modal {
+    border-radius: 16px;
+  }
+}
+
+/* ====================================================================== */
+/* ASK ANYTHING — SIDEBAR + CHAT LAYOUT                                  */
+/* ====================================================================== */
+
+/* ====================================================================== */
+/* ASK ANYTHING — SIDEBAR + CHAT LAYOUT                                  */
+/* ====================================================================== */
+
+.ff-ask-layout {
+  display: grid;
+  grid-template-columns: 224px 1fr;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  overflow: hidden;
+  height: 600px;
+  background: var(--bg);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.04);
+}
+
+/* Dark mode depth enhancement */
+.ff-root.dark .ff-card {
+  background-color: var(--bg-elev-1);
+  border-color: rgba(255,255,255,0.11);
+}
+.ff-root.dark .ff-card-elevated {
+  background-color: var(--bg-elev-2);
+}
+.ff-root.dark .ff-empty-state {
+  background-color: var(--bg-elev-1);
+  border-color: rgba(255,255,255,0.11);
+}
+.ff-root.dark .ff-ask-layout {
+  box-shadow: 0 4px 24px rgba(0,0,0,0.3), 0 1px 4px rgba(0,0,0,0.2);
+}
+
+/* ---- SIDEBAR ---- */
+.ff-chat-sidebar {
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--border);
+  background: var(--bg-elev-1);
+  overflow: hidden;
+}
+
+.ff-chat-sidebar-head {
   display: flex;
   align-items: center;
-  gap: 5px;
-  padding: 4px 0;
+  justify-content: space-between;
+  padding: 16px 14px 12px;
+  flex-shrink: 0;
 }
 
-.ff-chat-typing span {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
+.ff-chat-sidebar-title {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  font-family: var(--font-text);
+}
+
+.ff-chat-new-btn {
+  width: 28px; height: 28px;
+  background: var(--bg-elev-2);
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  color: var(--text-2);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all var(--t-fast);
+  flex-shrink: 0;
+}
+.ff-chat-new-btn:hover {
   background: var(--accent);
-  animation: ff-typing-bounce 1.2s ease-in-out infinite;
-}
-.ff-chat-typing span:nth-child(2) { animation-delay: 0.15s; }
-.ff-chat-typing span:nth-child(3) { animation-delay: 0.3s; }
-
-@keyframes ff-typing-bounce {
-  0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
-  30% { transform: translateY(-5px); opacity: 1; }
+  color: white;
+  border-color: var(--accent);
+  transform: scale(1.05);
 }
 
-.ff-chat-footer {
-  padding: 16px;
-  border-top: 1px solid var(--border);
+.ff-chat-sidebar-list {
+  flex: 1; overflow-y: auto; padding: 4px 8px 8px;
+}
+
+.ff-chat-sidebar-item {
+  width: 100%; background: transparent; border: none;
+  border-radius: 10px; padding: 9px 10px; text-align: left;
+  cursor: pointer; transition: background var(--t-fast);
+  display: flex; flex-direction: column; gap: 3px;
+  margin-bottom: 2px; position: relative;
+}
+.ff-chat-sidebar-item:hover { background: var(--bg-elev-2); }
+.ff-chat-sidebar-item-active {
+  background: var(--bg) !important;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+.ff-root.dark .ff-chat-sidebar-item-active {
+  background: var(--bg-elev-2) !important;
+  box-shadow: none;
+}
+
+.ff-chat-sidebar-item-dot {
+  position: absolute; top: 11px; right: 10px;
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--accent);
+  opacity: 0;
+  transition: opacity var(--t-fast);
+}
+.ff-chat-sidebar-item-active .ff-chat-sidebar-item-dot { opacity: 1; }
+
+.ff-chat-sidebar-item-title {
+  font-size: 13px; font-weight: 600; color: var(--text-1);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  letter-spacing: -0.008em; font-family: var(--font-text);
+  padding-right: 14px;
+}
+
+.ff-chat-sidebar-item-meta {
+  font-size: 12px; color: var(--text-3);
+  font-family: var(--font-text); letter-spacing: -0.003em;
+}
+
+.ff-chat-sidebar-item-del {
+  position: absolute; top: 50%; right: 8px; transform: translateY(-50%);
+  background: none; border: none; color: var(--text-3);
+  cursor: pointer; padding: 3px; border-radius: 5px;
+  display: flex; align-items: center;
+  opacity: 0; transition: opacity var(--t-fast), color var(--t-fast), background var(--t-fast);
+}
+.ff-chat-sidebar-item:hover .ff-chat-sidebar-item-del { opacity: 1; }
+.ff-chat-sidebar-item-del:hover { color: var(--danger); background: var(--danger-bg); }
+.ff-chat-sidebar-item-active .ff-chat-sidebar-item-dot { opacity: 0; }
+.ff-chat-sidebar-item-active:hover .ff-chat-sidebar-item-del { opacity: 1; }
+
+.ff-chat-sidebar-empty {
+  padding: 32px 14px; text-align: center;
+  color: var(--text-3); font-size: 12px; line-height: 1.6;
+  font-family: var(--font-text);
+}
+
+/* ---- CHAT PANE ---- */
+.ff-chat-pane {
+  display: flex; flex-direction: column; overflow: hidden; min-width: 0;
   background: var(--bg);
 }
 
-.ff-chat-input-row {
-  display: flex;
-  gap: 10px;
-  align-items: flex-end;
-}
+.ff-chat-wrap { display: contents; }
 
-.ff-chat-textarea {
-  flex: 1;
-  background: var(--bg-elev-1);
-  border: 1px solid var(--border-strong);
-  color: var(--text-1);
-  font-family: var(--font-text);
-  font-size: 14px;
-  line-height: 1.5;
-  padding: 11px 14px;
-  border-radius: var(--r-md);
-  resize: none;
-  outline: none;
-  letter-spacing: -0.005em;
-  transition: border-color var(--t-fast), box-shadow var(--t-fast);
-  max-height: 160px;
-  overflow-y: auto;
-  min-height: 44px;
-}
-
-.ff-chat-textarea:focus {
-  border-color: var(--accent);
-  box-shadow: var(--sh-focus);
-}
-
-.ff-chat-textarea::placeholder { color: var(--text-3); }
-
-.ff-chat-send {
-  width: 42px;
-  height: 42px;
-  background: var(--accent);
-  border: none;
-  border-radius: var(--r-md);
-  color: var(--accent-text-on);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  transition: background var(--t-fast), transform var(--t-fast), box-shadow var(--t-fast);
-  box-shadow: var(--sh-1);
-}
-
-.ff-chat-send:hover:not(:disabled) {
-  background: var(--accent-hover);
-  transform: translateY(-1px);
-  box-shadow: var(--sh-blue);
-}
-
-.ff-chat-send:active:not(:disabled) {
-  transform: translateY(0) scale(0.95);
-}
-
-.ff-chat-send:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
+.ff-chat-messages {
+  flex: 1; overflow-y: auto;
+  padding: 22px 20px 8px;
+  display: flex; flex-direction: column; gap: 16px;
 }
 
 .ff-chat-empty {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 16px 24px 24px; text-align: center;
+}
+
+/* ---- MESSAGES ---- */
+.ff-chat-msg {
+  display: flex; gap: 10px;
+  animation: ff-fadeup 320ms cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+.ff-chat-msg-user { flex-direction: row-reverse; }
+
+.ff-chat-avatar {
+  width: 28px; height: 28px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; font-size: 12px; font-weight: 800;
+  letter-spacing: 0.02em;
+}
+.ff-chat-avatar-ai {
+  background: linear-gradient(135deg, var(--accent-bg-soft) 0%, #e0eaff 100%);
+  border: 1px solid var(--accent-border-soft); color: var(--accent);
+}
+.ff-root.dark .ff-chat-avatar-ai {
+  background: linear-gradient(135deg, rgba(59,130,246,0.2) 0%, rgba(99,102,241,0.15) 100%);
+}
+.ff-chat-avatar-user {
+  background: var(--text-1); color: var(--bg);
+  font-size: 12px;
+}
+
+.ff-chat-bubble {
+  max-width: min(460px, 80%); padding: 10px 14px;
+  border-radius: 16px; font-size: 13.5px; line-height: 1.65;
+  letter-spacing: -0.005em;
+}
+.ff-chat-bubble-ai {
+  background: var(--bg-elev-1);
+  border: 1px solid var(--border);
+  color: var(--text-1);
+  border-bottom-left-radius: 5px;
+}
+.ff-chat-bubble-user {
+  background: var(--text-1); color: var(--bg);
+  border-bottom-right-radius: 5px;
+}
+.ff-root.dark .ff-chat-bubble-user { background: var(--text-1); color: var(--bg); }
+
+.ff-chat-bubble pre, .ff-chat-bubble code {
+  font-family: var(--font-mono); font-size: 12px;
+  background: var(--bg-elev-2); padding: 2px 5px; border-radius: var(--r-sm);
+}
+.ff-chat-bubble-ai pre {
+  padding: 10px 12px; border-radius: 10px; overflow-x: auto;
+  margin: 8px 0; white-space: pre-wrap; word-break: break-word;
+  background: var(--bg-elev-2); border: 1px solid var(--border);
+}
+
+.ff-chat-typing { display: flex; align-items: center; gap: 4px; padding: 1px 0; }
+.ff-chat-typing span {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--accent); animation: ff-typing-bounce 1.3s ease-in-out infinite;
+}
+.ff-chat-typing span:nth-child(2) { animation-delay: 0.18s; }
+.ff-chat-typing span:nth-child(3) { animation-delay: 0.36s; }
+@keyframes ff-typing-bounce {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+  30% { transform: translateY(-5px); opacity: 1; }
+}
+
+.ff-chat-copy-btn {
+  background: transparent; border: none; color: var(--text-3); cursor: pointer;
+  padding: 3px 6px; border-radius: 6px;
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 12px; font-family: var(--font-text); font-weight: 500;
+  transition: all var(--t-fast); margin-top: 5px;
+  opacity: 0;
+}
+.ff-chat-msg:hover .ff-chat-copy-btn { opacity: 1; }
+.ff-chat-copy-btn:hover { color: var(--text-1); background: var(--bg-elev-2); opacity: 1; }
+
+.ff-chat-bubble-text { white-space: pre-wrap; }
+.ff-chat-bubble-text strong { font-weight: 700; }
+.ff-chat-bubble-text em { font-style: italic; }
+
+/* ---- SUGGESTED PROMPTS ---- */
+.ff-suggested-prompt {
+  background: var(--bg); border: 1px solid var(--border-strong); color: var(--text-2);
+  font-family: var(--font-text); font-size: 12px; font-weight: 500;
+  padding: 7px 14px; border-radius: var(--r-pill); cursor: pointer;
+  letter-spacing: -0.005em; transition: all var(--t-fast); white-space: nowrap;
+  animation: ff-fadein 400ms cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+.ff-suggested-prompt:hover {
+  border-color: var(--accent); color: var(--accent);
+  background: var(--accent-bg-soft); transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(37,99,235,0.12);
+}
+
+/* ---- FOOTER + INPUT ---- */
+.ff-chat-footer {
+  padding: 10px 14px 13px; border-top: 1px solid var(--border);
+  background: var(--bg); flex-shrink: 0;
+}
+
+.ff-chat-input-box {
+  background: var(--bg-elev-1);
+  border: 1px solid var(--border-strong);
+  border-radius: 16px;
+  transition: border-color var(--t-fast), box-shadow var(--t-fast), background var(--t-fast);
+}
+.ff-chat-input-box:focus-within {
+  background: var(--bg);
+  border-color: var(--border-strong);
+  box-shadow: 0 0 0 4px rgba(0,0,0,0.04);
+}
+.ff-root.dark .ff-chat-input-box:focus-within {
+  background: var(--bg-elev-1);
+  box-shadow: 0 0 0 4px rgba(255,255,255,0.04);
+}
+
+.ff-chat-textarea {
+  display: block; width: 100%; background: transparent; border: none;
+  color: var(--text-1); font-family: var(--font-text); font-size: 16px;
+  line-height: 1.5; padding: 12px 14px 0; resize: none; outline: none;
+  letter-spacing: -0.005em; max-height: 110px; overflow-y: auto; min-height: 24px;
+}
+@media (min-width: 768px) { .ff-chat-textarea { font-size: 14px; } }
+.ff-chat-textarea::placeholder { color: var(--text-3); }
+
+.ff-chat-input-actions {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 5px 8px 8px;
+}
+
+.ff-chat-attach-btn {
+  width: 28px; height: 28px; background: transparent; border: none;
+  border-radius: 8px; color: var(--text-3); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: all var(--t-fast);
+}
+.ff-chat-attach-btn:hover { background: var(--bg-elev-2); color: var(--text-2); }
+
+.ff-chat-send {
+  width: 28px; height: 28px;
+  background: var(--text-1);
+  border: none; border-radius: 8px; color: var(--bg); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: background var(--t-fast), transform var(--t-fast), opacity var(--t-fast);
+}
+.ff-chat-send:hover:not(:disabled) { transform: scale(1.08); }
+.ff-chat-send:active:not(:disabled) { transform: scale(0.94); }
+.ff-chat-send:disabled { opacity: 0.18; cursor: not-allowed; }
+
+/* ---- MOBILE ---- */
+.ff-chat-sidebar-toggle {
+  display: none;
+  align-items: center; gap: 7px;
+  background: var(--bg-elev-1); border: 1px solid var(--border-strong);
+  color: var(--text-2); font-size: 13px; font-weight: 600;
+  font-family: var(--font-text); cursor: pointer;
+  padding: 8px 14px; border-radius: var(--r-pill);
+  letter-spacing: -0.005em; transition: all var(--t-fast);
+}
+.ff-chat-sidebar-toggle:hover { background: var(--bg-elev-2); color: var(--text-1); }
+
+/* Mobile bottom sheet backdrop */
+.ff-sheet-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  animation: ff-fadein 200ms ease;
+}
+.ff-sheet-backdrop.open { display: block; }
+
+/* Bottom sheet drawer */
+.ff-chat-sheet {
+  display: none;
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  z-index: 50;
+  background: var(--bg);
+  border-radius: 20px 20px 0 0;
+  border-top: 1px solid var(--border);
+  box-shadow: 0 -8px 40px rgba(0,0,0,0.18);
+  flex-direction: column;
+  max-height: 72vh;
+  animation: ff-sheet-in 320ms cubic-bezier(0.16,1,0.3,1);
+}
+.ff-chat-sheet.open { display: flex; }
+@keyframes ff-sheet-in {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
+/* Sheet handle */
+.ff-chat-sheet-handle {
+  width: 36px; height: 4px;
+  background: var(--border-strong);
+  border-radius: 2px;
+  margin: 12px auto 0;
+  flex-shrink: 0;
+}
+
+/* Sheet header */
+.ff-chat-sheet-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px 10px;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--border);
+}
+.ff-chat-sheet-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-1);
+  letter-spacing: -0.01em;
+  font-family: var(--font-text);
+}
+.ff-chat-sheet-close {
+  width: 30px; height: 30px;
+  background: var(--bg-elev-2);
+  border: none; border-radius: 50%;
+  color: var(--text-2); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all var(--t-fast);
+}
+.ff-chat-sheet-close:hover { background: var(--bg-elev-1); color: var(--text-1); }
+
+/* Sheet new chat button */
+.ff-chat-sheet-new {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 10px 14px;
+  padding: 12px 14px;
+  background: var(--accent-bg-soft);
+  border: 1px solid var(--accent-border-soft);
+  border-radius: 12px;
+  cursor: pointer;
+  font-family: var(--font-text);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent);
+  transition: all var(--t-fast);
+  flex-shrink: 0;
+}
+.ff-chat-sheet-new:hover { background: var(--accent); color: white; border-color: var(--accent); }
+
+/* Sheet list */
+.ff-chat-sheet-list {
   flex: 1;
+  overflow-y: auto;
+  padding: 6px 10px 24px;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Sheet conversation row */
+.ff-chat-sheet-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 10px;
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--t-fast);
+  margin-bottom: 2px;
+}
+.ff-chat-sheet-item:hover { background: var(--bg-elev-1); }
+.ff-chat-sheet-item-active { background: var(--accent-bg-soft) !important; }
+
+.ff-chat-sheet-item-icon {
+  width: 38px; height: 38px;
+  border-radius: 10px;
+  background: var(--bg-elev-2);
+  border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; color: var(--text-3);
+  transition: all var(--t-fast);
+}
+.ff-chat-sheet-item-active .ff-chat-sheet-item-icon {
+  background: var(--accent-bg-soft);
+  border-color: var(--accent-border-soft);
+  color: var(--accent);
+}
+
+.ff-chat-sheet-item-body {
+  flex: 1; min-width: 0;
+}
+.ff-chat-sheet-item-title {
+  font-size: 14px; font-weight: 600; color: var(--text-1);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  letter-spacing: -0.008em; font-family: var(--font-text);
+  margin-bottom: 2px;
+}
+.ff-chat-sheet-item-active .ff-chat-sheet-item-title { color: var(--accent); }
+.ff-chat-sheet-item-meta {
+  font-size: 12px; color: var(--text-3); font-family: var(--font-text);
+}
+
+.ff-chat-sheet-item-del {
+  width: 28px; height: 28px;
+  background: transparent; border: none; border-radius: 8px;
+  color: var(--text-3); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: all var(--t-fast);
+}
+.ff-chat-sheet-item-del:hover { background: var(--danger-bg); color: var(--danger); }
+
+.ff-chat-sheet-empty {
+  padding: 32px 16px;
+  text-align: center;
+  color: var(--text-3);
+  font-size: 14px;
+  line-height: 1.6;
+  font-family: var(--font-text);
+}
+
+@media (max-width: 768px) {
+  .ff-ask-layout { grid-template-columns: 1fr; height: 540px; border-radius: 16px; position: relative; }
+  .ff-chat-sidebar { display: none !important; }
+  .ff-chat-sidebar-toggle { display: flex; }
+  .ff-chat-messages { padding: 16px 14px 8px; gap: 14px; }
+}
+@media (max-width: 480px) {
+  .ff-ask-layout { height: 500px; border-radius: 14px; }
+  .ff-chat-sheet { max-height: 80vh; }
+}
+
+/* ---- ATTACHMENTS ---- */
+.ff-chat-attachment-preview-icon {
+  width: 30px; height: 30px; background: var(--accent-bg-soft); border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; color: var(--accent);
+}
+.ff-chat-attachment-name {
+  flex: 1; min-width: 0; font-weight: 500; color: var(--text-1);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 13px;
+}
+.ff-chat-user-attachment {
+  max-width: 180px; border-radius: 12px; overflow: hidden; margin-bottom: 5px;
+}
+.ff-chat-user-attachment img { width: 100%; display: block; border-radius: 12px; }
+.ff-chat-user-attachment-file {
+  display: flex; align-items: center; gap: 7px; padding: 7px 10px;
+  background: rgba(255,255,255,0.18); border-radius: 10px;
+  font-size: 12px; font-weight: 500; margin-bottom: 5px;
+}
+
+/* ====================================================================== */
+/* PRELOADER — THEME ADAPTIVE                                             */
+/* ====================================================================== */
+
+.ff-preloader {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 40px 24px;
-  text-align: center;
+  padding: 32px;
+  overflow: hidden;
+  transition: background 0ms;
 }
 
-.ff-suggested-prompt {
-  background: var(--bg);
-  border: 1px solid var(--border);
-  color: var(--text-1);
-  font-family: var(--font-text);
-  font-size: 12.5px;
-  font-weight: 500;
-  padding: 9px 14px;
-  border-radius: var(--r-pill);
-  cursor: pointer;
-  letter-spacing: -0.005em;
-  transition: all var(--t-fast);
+/* Light mode preloader */
+.ff-preloader.light {
+  background: #ffffff;
+}
+
+/* Dark mode preloader */
+.ff-preloader.dark {
+  background: #080810;
+}
+
+.ff-preloader-exit {
+  animation: ff-preloader-out 600ms cubic-bezier(0.4,0,0.6,1) forwards;
+  pointer-events: none;
+}
+@keyframes ff-preloader-out {
+  0%   { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* Glow blobs — adapt to theme */
+.ff-preloader-glow {
+  position: absolute; border-radius: 50%;
+  pointer-events: none;
+}
+
+.ff-preloader.light .ff-preloader-glow-1 {
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(37,99,235,0.07) 0%, transparent 65%);
+  filter: blur(60px);
+  top: -200px; left: -100px;
+  animation: ff-glow-drift1 12s ease-in-out infinite alternate;
+}
+.ff-preloader.light .ff-preloader-glow-2 {
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(99,102,241,0.06) 0%, transparent 65%);
+  filter: blur(60px);
+  bottom: -160px; right: -80px;
+  animation: ff-glow-drift2 14s ease-in-out infinite alternate;
+}
+.ff-preloader.dark .ff-preloader-glow-1 {
+  width: 700px; height: 700px;
+  background: radial-gradient(circle, rgba(37,99,235,0.22) 0%, transparent 65%);
+  filter: blur(90px);
+  top: -280px; left: -160px;
+  animation: ff-glow-drift1 10s ease-in-out infinite alternate;
+}
+.ff-preloader.dark .ff-preloader-glow-2 {
+  width: 520px; height: 520px;
+  background: radial-gradient(circle, rgba(99,102,241,0.18) 0%, transparent 65%);
+  filter: blur(90px);
+  bottom: -180px; right: -80px;
+  animation: ff-glow-drift2 12s ease-in-out infinite alternate;
+}
+
+@keyframes ff-glow-drift1 { from { transform:translate(0,0); } to { transform:translate(36px,22px); } }
+@keyframes ff-glow-drift2 { from { transform:translate(0,0); } to { transform:translate(-28px,-18px); } }
+
+/* Wordmark top-centre */
+.ff-preloader-wordmark {
+  position: absolute; top: 28px; left: 50%; transform: translateX(-50%);
+  display: flex; align-items: center; gap: 9px;
+  animation: ff-fadein 500ms ease backwards;
   white-space: nowrap;
 }
+.ff-preloader-dot {
+  width: 6px; height: 6px; border-radius: 50%; background: #3b82f6;
+  animation: ff-dot-pulse 2.4s ease-in-out infinite;
+}
+.ff-preloader.light .ff-preloader-dot {
+  box-shadow: 0 0 10px rgba(37,99,235,0.5);
+}
+.ff-preloader.dark .ff-preloader-dot {
+  box-shadow: 0 0 16px rgba(59,130,246,0.9);
+}
+@keyframes ff-dot-pulse {
+  0%,100% { transform:scale(1); opacity:0.55; }
+  50%     { transform:scale(1.4); opacity:1; }
+}
+.ff-preloader-brand {
+  font-size: 12px; font-weight: 600; letter-spacing: 0.05em;
+  font-family: system-ui, sans-serif;
+}
+.ff-preloader.light .ff-preloader-brand { color: rgba(0,0,0,0.35); }
+.ff-preloader.dark  .ff-preloader-brand { color: rgba(255,255,255,0.32); }
 
-.ff-suggested-prompt:hover {
-  border-color: var(--accent);
-  color: var(--accent);
-  background: var(--accent-bg-soft);
-  transform: translateY(-1px);
+/* Skip button — top right */
+.ff-preloader-skip {
+  position: absolute; top: 22px; right: 24px;
+  font-size: 13px; font-weight: 500; padding: 5px 13px;
+  border-radius: 20px; cursor: pointer;
+  letter-spacing: 0.01em; transition: all 180ms ease;
+  font-family: system-ui, sans-serif;
+  animation: ff-fadein 600ms ease 700ms backwards;
+}
+.ff-preloader.light .ff-preloader-skip {
+  background: rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.1);
+  color: rgba(0,0,0,0.35);
+}
+.ff-preloader.light .ff-preloader-skip:hover {
+  background: rgba(0,0,0,0.08); color: rgba(0,0,0,0.6); border-color: rgba(0,0,0,0.18);
+}
+.ff-preloader.dark .ff-preloader-skip {
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.28);
+}
+.ff-preloader.dark .ff-preloader-skip:hover {
+  background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.6); border-color: rgba(255,255,255,0.18);
 }
 
-.ff-chat-copy-btn {
-  background: transparent;
-  border: none;
-  color: var(--text-3);
-  cursor: pointer;
-  padding: 4px 6px;
-  border-radius: var(--r-sm);
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 11px;
-  font-family: var(--font-text);
-  font-weight: 500;
-  transition: all var(--t-fast);
-  margin-top: 8px;
+/* Slide content */
+.ff-preloader-content {
+  position: relative; z-index: 2;
+  text-align: center; max-width: 540px; width: 100%;
 }
 
-.ff-chat-copy-btn:hover {
-  color: var(--text-1);
-  background: var(--bg-elev-2);
+/* Icon pill — small, elegant */
+.ff-preloader-icon-pill {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 7px 16px; border-radius: 24px;
+  margin-bottom: 28px; font-size: 13px; font-weight: 600;
+  letter-spacing: 0.03em; font-family: system-ui, sans-serif;
+  text-transform: uppercase;
+}
+.ff-preloader.light .ff-preloader-icon-pill {
+  background: rgba(37,99,235,0.07); border: 1px solid rgba(37,99,235,0.18);
+  color: rgba(37,99,235,0.8);
+}
+.ff-preloader.dark .ff-preloader-icon-pill {
+  background: rgba(59,130,246,0.12); border: 1px solid rgba(59,130,246,0.26);
+  color: rgba(96,165,250,0.9);
 }
 
-.ff-chat-bubble-text {
-  white-space: pre-wrap;
+/* Headline */
+.ff-preloader-headline {
+  font-size: clamp(22px, 3.2vw, 42px);
+  font-weight: 500; line-height: 1.08;
+  letter-spacing: -0.034em; margin-bottom: 16px;
+  font-family: 'Inter', -apple-system, system-ui, sans-serif;
+  white-space: normal;
+  max-width: 18ch;
+  margin-left: auto;
+  margin-right: auto;
+}
+@media (max-width: 640px) {
+  .ff-preloader-headline { font-size: clamp(20px, 6vw, 30px); }
+}
+.ff-preloader.light .ff-preloader-headline { color: #0a0a0a; }
+.ff-preloader.dark  .ff-preloader-headline { color: #f5f5f7; }
+.ff-preloader-headline em {
+  font-style: normal; font-weight: 500; color: #3b82f6;
+}
+.ff-preloader.light .ff-preloader-headline em { color: #2563eb; }
+
+/* Sub */
+.ff-preloader-sub {
+  font-size: clamp(13px, 1.4vw, 15.5px);
+  line-height: 1.65; letter-spacing: -0.005em; max-width: 38ch; margin: 0 auto;
+  font-family: system-ui, sans-serif; text-align: center;
+}
+.ff-preloader.light .ff-preloader-sub { color: rgba(0,0,0,0.42); }
+.ff-preloader.dark  .ff-preloader-sub { color: rgba(255,255,255,0.38); }
+
+/* Slide animations */
+.ff-preloader-slide-in .ff-preloader-icon-pill { animation: ff-pl-in-icon 480ms cubic-bezier(0.16,1,0.3,1) both; }
+.ff-preloader-slide-in .ff-preloader-headline  { animation: ff-pl-in-text 540ms cubic-bezier(0.16,1,0.3,1) 50ms both; }
+.ff-preloader-slide-in .ff-preloader-sub       { animation: ff-pl-in-text 540ms cubic-bezier(0.16,1,0.3,1) 110ms both; }
+@keyframes ff-pl-in-icon { from { opacity:0; transform:scale(0.8) translateY(6px); } to { opacity:1; transform:scale(1) translateY(0); } }
+@keyframes ff-pl-in-text { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
+
+.ff-preloader-slide-out .ff-preloader-icon-pill,
+.ff-preloader-slide-out .ff-preloader-headline,
+.ff-preloader-slide-out .ff-preloader-sub {
+  animation: ff-pl-out 360ms cubic-bezier(0.4,0,1,1) forwards !important;
+}
+@keyframes ff-pl-out { from { opacity:1; transform:translateY(0); } to { opacity:0; transform:translateY(-10px); } }
+
+/* Footer */
+.ff-preloader-footer {
+  position: absolute; bottom: 36px; left: 50%; transform: translateX(-50%);
+  z-index: 2; width: min(360px, 78vw);
+  animation: ff-fadein 500ms ease 200ms backwards;
 }
 
-.ff-chat-bubble-text strong {
-  font-weight: 700;
+.ff-preloader-bar-track {
+  width: 100%; height: 1px; border-radius: 1px;
+  overflow: hidden; margin-bottom: 18px;
+}
+.ff-preloader.light .ff-preloader-bar-track { background: rgba(0,0,0,0.08); }
+.ff-preloader.dark  .ff-preloader-bar-track { background: rgba(255,255,255,0.07); }
+
+.ff-preloader-bar-fill {
+  height: 100%; border-radius: 1px;
+  background: linear-gradient(90deg, #2563eb 0%, #818cf8 100%);
+  transition: width 100ms linear;
+}
+.ff-preloader.dark .ff-preloader-bar-fill {
+  box-shadow: 0 0 6px rgba(59,130,246,0.6);
 }
 
-.ff-chat-bubble-text em {
-  font-style: italic;
+.ff-preloader-steps {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.ff-preloader-step {
+  width: 5px; height: 5px; border-radius: 50%;
+  transition: all 380ms cubic-bezier(0.16,1,0.3,1); flex-shrink: 0;
+}
+.ff-preloader.light .ff-preloader-step { background: rgba(0,0,0,0.12); }
+.ff-preloader.dark  .ff-preloader-step { background: rgba(255,255,255,0.14); }
+.ff-preloader-step-active {
+  background: #3b82f6 !important; width: 20px; border-radius: 3px;
+}
+.ff-preloader.dark .ff-preloader-step-active {
+  box-shadow: 0 0 8px rgba(59,130,246,0.65);
 }
 
 `;
 
-/* ====================================================================== */
-/* APP                                                                    */
-/* ====================================================================== */
+const PRELOADER_SLIDES = [
+  {
+    label: 'Optimize',
+    icon: <Sparkles size={13} />,
+    headline: <>Audit any page.<br /><em>Rewrite it like the top 1%.</em></>,
+    sub: 'Score your portfolio, Upwork profile, LinkedIn, or CV against expert criteria — then get a complete rewrite in one click.',
+  },
+  {
+    label: 'Close Client',
+    icon: <Target size={13} />,
+    headline: <>Close clients with<br /><em>proposals that convert.</em></>,
+    sub: 'Generate tight, scannable proposals, cold DMs, follow-ups, and cover letters tailored to the exact lead in front of you.',
+  },
+  {
+    label: 'Pipeline',
+    icon: <TrendingUp size={13} />,
+    headline: <>Track every pitch.<br /><em>See what works.</em></>,
+    sub: 'Log proposals, DMs, and emails. Watch reply rate and win rate build over time. Saved in your browser — no account needed.',
+  },
+  {
+    label: 'Ask Anything',
+    icon: <Bot size={13} />,
+    headline: <>Ask anything.<br /><em>Get tactical answers fast.</em></>,
+    sub: 'Pricing strategy, scope creep scripts, rate increases, niche advice — your freelance mentor is one message away.',
+  },
+];
+
+const SLIDE_DURATION = 2200;
+const TICK = 50;
+
+function Preloader({ onDone, theme }) {
+  const [slide, setSlide] = useState(0);
+  const [phase, setPhase] = useState('in');
+  const [progress, setProgress] = useState(0);
+  const [exiting, setExiting] = useState(false);
+  const totalDuration = SLIDE_DURATION * PRELOADER_SLIDES.length;
+  const startTime = useRef(Date.now());
+
+  const finish = () => {
+    setExiting(true);
+    setTimeout(onDone, 620);
+  };
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      const elapsed = Date.now() - startTime.current;
+      setProgress(Math.min((elapsed / totalDuration) * 100, 100));
+      if (elapsed >= totalDuration) { clearInterval(id); finish(); }
+    }, TICK);
+    return () => clearInterval(id);
+  }, []);
+
+  useEffect(() => {
+    if (slide >= PRELOADER_SLIDES.length - 1) return;
+    const holdId = setTimeout(() => {
+      setPhase('out');
+      setTimeout(() => { setSlide(s => s + 1); setPhase('in'); }, 380);
+    }, SLIDE_DURATION - 400);
+    return () => clearTimeout(holdId);
+  }, [slide]);
+
+  const s = PRELOADER_SLIDES[slide];
+  const slideClass = phase === 'out' ? 'ff-preloader-slide-out' : 'ff-preloader-slide-in';
+  const isDark = theme === 'dark';
+  const iconColor = isDark ? '#60a5fa' : '#2563eb';
+
+  return (
+    <div className={`ff-preloader ${theme}${exiting ? ' ff-preloader-exit' : ''}`}>
+      <div className="ff-preloader-glow ff-preloader-glow-1" />
+      <div className="ff-preloader-glow ff-preloader-glow-2" />
+
+      {/* Wordmark */}
+      <div className="ff-preloader-wordmark">
+        <span className="ff-preloader-dot" />
+        <span className="ff-preloader-brand">Freelancer's Forge</span>
+      </div>
+
+      {/* Skip */}
+      <button type="button" className="ff-preloader-skip" onClick={finish}>Skip</button>
+
+      {/* Slide */}
+      <div className={`ff-preloader-content ${slideClass}`} key={slide}>
+        <div className="ff-preloader-icon-pill">
+          <span style={{ color: iconColor, display: 'flex', alignItems: 'center' }}>
+            {React.cloneElement(s.icon, { color: iconColor })}
+          </span>
+          {s.label}
+        </div>
+        <p className="ff-preloader-headline">{s.headline}</p>
+        <p className="ff-preloader-sub">{s.sub}</p>
+      </div>
+
+      {/* Footer */}
+      <div className="ff-preloader-footer">
+        <div className="ff-preloader-bar-track">
+          <div className="ff-preloader-bar-fill" style={{ width: `${progress}%` }} />
+        </div>
+        <div className="ff-preloader-steps">
+          {PRELOADER_SLIDES.map((_, i) => (
+            <div key={i} className={`ff-preloader-step${i === slide ? ' ff-preloader-step-active' : ''}`} />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Detect system preference
+function getSystemTheme() {
+  try { return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'; } catch { return 'light'; }
+}
 
 export default function FreelancersForge() {
-  const [theme, setTheme] = useState('light');
+  const [themeMode, setThemeMode] = useState('system'); // 'light' | 'dark' | 'system'
+  const [systemTheme, setSystemTheme] = useState(getSystemTheme);
+  const [themeMenuOpen, setThemeMenuOpen] = useState(false);
   const [tab, setTab] = useState('optimize');
+  const [preloading, setPreloading] = useState(true);
+  const themeMenuRef = useRef(null);
+
+  // Resolved theme: 'light' or 'dark'
+  const theme = themeMode === 'system' ? systemTheme : themeMode;
+
+  // Sync system preference changes
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    const handler = (e) => setSystemTheme(e.matches ? 'dark' : 'light');
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    if (!themeMenuOpen) return;
+    const handler = (e) => { if (themeMenuRef.current && !themeMenuRef.current.contains(e.target)) setThemeMenuOpen(false); };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [themeMenuOpen]);
+
+  const themeOptions = [
+    { id: 'system', label: 'Auto',  desc: 'Follows your device',        icon: <Monitor size={14} /> },
+    { id: 'light',  label: 'Light', desc: 'Light background, dark text', icon: <Sun size={14} /> },
+    { id: 'dark',   label: 'Dark',  desc: 'Dark background, light text', icon: <Moon size={14} /> },
+  ];
+
+  const activeOption = themeOptions.find(o => o.id === themeMode);
 
   return (
     <div className={`ff-root ${theme}`}>
       <style>{CSS}</style>
 
+      {preloading && <Preloader onDone={() => setPreloading(false)} theme={theme} />}
+
       <div className="ff-gradient-bg" aria-hidden="true"></div>
-      <div className="max-w-7xl mx-auto px-6 md:px-10 py-8 md:py-12" style={{ position: 'relative', zIndex: 1 }}>
+      <div className="ff-root-inner" style={{ position: 'relative', zIndex: 1 }}>
 
         {/* HEADER */}
-        <div className="flex items-center justify-between mb-12 gap-4">
+        <div className="ff-topbar">
           <div className="flex items-center gap-3">
             <span className="ff-status-dot"></span>
             <span className="ff-meta-text">Freelancer's Forge</span>
           </div>
-          <button
-            type="button"
-            className="ff-theme-toggle"
-            onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}
-          >
-            {theme === 'dark' ? <Sun size={13} /> : <Moon size={13} />}
-            {theme === 'dark' ? 'Light' : 'Dark'}
-          </button>
+
+          {/* Theme dropdown */}
+          <div className="ff-theme-dropdown" ref={themeMenuRef}>
+            <button
+              type="button"
+              className="ff-theme-toggle"
+              onClick={() => setThemeMenuOpen(o => !o)}
+              aria-label="Change theme"
+            >
+              {activeOption && React.cloneElement(activeOption.icon, { size: 13 })}
+              <span style={{ color: 'var(--text-3)', fontWeight: 400 }}>Theme:</span>
+              {activeOption?.label}
+              <ChevronDown size={10} style={{
+                opacity: 0.4,
+                transition: 'transform 160ms ease',
+                transform: themeMenuOpen ? 'rotate(180deg)' : 'none',
+                marginLeft: -2,
+              }} />
+            </button>
+
+            {themeMenuOpen && (
+              <div className="ff-theme-menu">
+                <div style={{
+                  padding: '6px 10px 4px',
+                  fontSize: 12,
+                  fontWeight: 700,
+                  letterSpacing: '0.07em',
+                  textTransform: 'uppercase',
+                  color: 'var(--text-3)',
+                  fontFamily: 'var(--font-text)',
+                }}>
+                  Theme
+                </div>
+                {themeOptions.map((opt, i) => (
+                  <React.Fragment key={opt.id}>
+                    {i === 1 && <div className="ff-theme-menu-divider" />}
+                    <button
+                      type="button"
+                      className={`ff-theme-option${themeMode === opt.id ? ' ff-theme-option-active' : ''}`}
+                      onClick={() => { setThemeMode(opt.id); setThemeMenuOpen(false); }}
+                    >
+                      <span className="ff-theme-option-check">
+                        <Check size={13} strokeWidth={2.5} />
+                      </span>
+                      <span className="ff-theme-option-icon">{opt.icon}</span>
+                      <span className="ff-theme-option-text">
+                        <span className="ff-theme-option-label">{opt.label}</span>
+                        <span className="ff-theme-option-desc">{opt.desc}</span>
+                      </span>
+                    </button>
+                  </React.Fragment>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* TITLE */}
-        <div className="mb-12 md:mb-16">
-          <h1
-            className="ff-display ff-text-1 mb-5"
-            style={{
-              fontSize: 'clamp(40px, 5.6vw, 64px)',
-              lineHeight: 1.06,
-              fontWeight: 500,
-              letterSpacing: '-0.022em',
-              maxWidth: '20ch',
-            }}
-          >
-            Audit any page. Rewrite it like{' '}
-            <span style={{ color: 'var(--accent)', fontStyle: 'italic', fontWeight: 500 }}>the top one percent.</span>
+        <div className="ff-hero">
+          <h1 className="ff-display ff-text-1 ff-hero-heading">
+            Your freelance edge.<br />
+            <span style={{ color: 'var(--accent)', fontWeight: 500 }}>Built to win clients.</span>
           </h1>
-          <p
-            className="ff-text-2"
-            style={{
-              fontSize: 'clamp(15px, 1.3vw, 18px)',
-              lineHeight: 1.55,
-              letterSpacing: '-0.01em',
-              maxWidth: '52ch',
-            }}
-          >
-            Score against expert criteria, then one-click rewrite using the patterns of top performers.
+          <p className="ff-text-2 ff-hero-sub">
+            Audit your pages, close more clients, track your pipeline, and get expert freelance advice — all in one place.
           </p>
         </div>
 
         {/* TABS */}
-        <div className="ff-tabs mb-10">
+        <div className="ff-tabs ff-tabs-nav">
           <button
             type="button"
             className={`ff-tab ${tab === 'optimize' ? 'ff-tab-active' : ''}`}
@@ -1743,6 +2793,7 @@ export default function FreelancersForge() {
             <Bot size={15} />
             Ask Anything
           </button>
+
         </div>
 
         {tab === 'optimize' && <OptimizeTab />}
@@ -1760,8 +2811,7 @@ export default function FreelancersForge() {
 /* ====================================================================== */
 
 function formatMessageText(text) {
-  const lines = text.split('\
-');
+  const lines = text.split('\n');
   return lines.map((line, i) => {
     const parts = line.split(/(\*\*[^*]+\*\*|\*[^*]+\*)/g);
     return (
@@ -1781,67 +2831,201 @@ function formatMessageText(text) {
   });
 }
 
+
+const CHAT_STORAGE_KEY = 'ff_chat_v2';
+const CHAT_RETENTION_DAYS = 15;
+
+function genId() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+}
+
+function loadConversations() {
+  try {
+    const raw = localStorage.getItem(CHAT_STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    const cutoff = Date.now() - CHAT_RETENTION_DAYS * 24 * 60 * 60 * 1000;
+    return parsed
+      .filter(c => c && c.id && Array.isArray(c.messages))
+      .map(c => ({
+        ...c,
+        messages: c.messages.filter(m => m && m.role && m.content && (!m.ts || m.ts >= cutoff)),
+      }))
+      .filter(c => c.messages.length > 0);
+  } catch { return []; }
+}
+
+function saveConversations(convos) {
+  try {
+    const slim = convos.map(c => ({
+      ...c,
+      messages: c.messages.map(m => ({
+        ...m,
+        attachment: m.attachment ? { type: m.attachment.type, name: m.attachment.name, preview: null } : null,
+      })),
+    }));
+    localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(slim));
+  } catch {}
+}
+
+function getConvoTitle(messages) {
+  const first = messages.find(m => m.role === 'user');
+  if (!first) return 'New conversation';
+  const text = first.content || '';
+  return text.length > 36 ? text.slice(0, 36).trimEnd() + '…' : text;
+}
+
+function timeAgo(ts) {
+  if (!ts) return '';
+  const diff = Math.floor((Date.now() - ts) / 1000);
+  if (diff < 60) return 'just now';
+  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+  return `${Math.floor(diff / 86400)}d ago`;
+}
+
 function AskAnythingTab() {
-  const [messages, setMessages] = useState([]);
+  const [convos, setConvos] = useState(() => loadConversations());
+  const [activeId, setActiveId] = useState(() => {
+    const loaded = loadConversations();
+    return loaded.length > 0 ? loaded[0].id : null;
+  });
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [copiedIdx, setCopiedIdx] = useState(null);
+  const [attachment, setAttachment] = useState(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const messagesContainerRef = useRef(null);
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
+  const fileInputRef = useRef(null);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
+  const messages = convos.find(c => c.id === activeId)?.messages || [];
 
   useEffect(() => {
-    scrollToBottom();
+    // Scroll only within the chat container — never scrollIntoView which scrolls the page
+    if (!messagesContainerRef.current || messages.length === 0) return;
+    const el = messagesContainerRef.current;
+    el.scrollTop = el.scrollHeight;
   }, [messages, loading]);
+
+  useEffect(() => {
+    saveConversations(convos);
+  }, [convos]);
+
+  const updateMessages = (id, updater) => {
+    setConvos(prev => prev.map(c => c.id === id ? { ...c, messages: updater(c.messages), updatedAt: Date.now() } : c));
+  };
+
+  const startNewChat = () => {
+    const id = genId();
+    setConvos(prev => [{ id, messages: [], createdAt: Date.now(), updatedAt: Date.now() }, ...prev]);
+    setActiveId(id);
+    setInput('');
+    setAttachment(null);
+    setError('');
+    setSidebarOpen(false);
+  };
+
+  const deleteConvo = (id, e) => {
+    e.stopPropagation();
+    setConvos(prev => {
+      const next = prev.filter(c => c.id !== id);
+      if (activeId === id) setActiveId(next.length > 0 ? next[0].id : null);
+      return next;
+    });
+  };
 
   const autoResize = () => {
     const ta = textareaRef.current;
     if (!ta) return;
     ta.style.height = 'auto';
-    ta.style.height = Math.min(ta.scrollHeight, 160) + 'px';
+    ta.style.height = Math.min(ta.scrollHeight, 110) + 'px';
+  };
+
+  const handleAttachFile = (file) => {
+    if (!file) return;
+    const isImage = file.type.startsWith('image/');
+    const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+    const maxSize = isPdf ? 20 * 1024 * 1024 : 5 * 1024 * 1024;
+    if (file.size > maxSize) { setError(`File too large (max ${isPdf ? '20MB' : '5MB'}).`); return; }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const dataUrl = e.target.result;
+      setAttachment({ type: isImage ? 'image' : (isPdf ? 'pdf' : 'file'), data: dataUrl.split(',')[1], mediaType: isPdf ? 'application/pdf' : file.type, name: file.name, preview: isImage ? dataUrl : null });
+    };
+    reader.readAsDataURL(file);
   };
 
   const sendMessage = async (text) => {
     const trimmed = (text || input).trim();
-    if (!trimmed || loading) return;
+    if ((!trimmed && !attachment) || loading) return;
 
-    const userMsg = { role: 'user', content: trimmed };
-    const updatedMessages = [...messages, userMsg];
-    setMessages(updatedMessages);
-    setInput('');
-    setError('');
-    setLoading(true);
-
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
+    // Create conversation if none active
+    let currentId = activeId;
+    if (!currentId || !convos.find(c => c.id === currentId)) {
+      const id = genId();
+      currentId = id;
+      setConvos(prev => [{ id, messages: [], createdAt: Date.now(), updatedAt: Date.now() }, ...prev]);
+      setActiveId(id);
     }
 
+    const userMsg = { role: 'user', content: trimmed || `[Attached: ${attachment?.name}]`, attachment: attachment ? { type: attachment.type, name: attachment.name, preview: attachment.preview } : null, ts: Date.now() };
+    const currentMsgs = convos.find(c => c.id === currentId)?.messages || [];
+    const updatedMsgs = [...currentMsgs, userMsg];
+
+    setConvos(prev => prev.map(c => c.id === currentId ? { ...c, messages: updatedMsgs, updatedAt: Date.now() } : c));
+    setInput('');
+    setAttachment(null);
+    setError('');
+    setLoading(true);
+    if (textareaRef.current) textareaRef.current.style.height = 'auto';
+
     try {
-      const apiMessages = updatedMessages.map(m => ({
-        role: m.role,
-        content: m.content,
-      }));
+      const apiMessages = updatedMsgs.map((m, idx) => {
+        const isLast = idx === updatedMsgs.length - 1;
+        if (m.role !== 'user') return { role: m.role, content: m.content };
+        const parts = [];
+        if (isLast && attachment) {
+          if (attachment.type === 'image') parts.push({ type: 'image', source: { type: 'base64', media_type: attachment.mediaType, data: attachment.data } });
+          else if (attachment.type === 'pdf') parts.push({ type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: attachment.data } });
+        }
+        if (trimmed) parts.push({ type: 'text', text: trimmed });
+        return { role: 'user', content: parts.length === 1 && parts[0].type === 'text' ? parts[0].text : parts };
+      });
 
       const response = await fetch('/api/claude', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: 'claude-sonnet-4-5',
-          max_tokens: 1000,
-          system: `You are Forge AI, the expert assistant built into Freelancer's Forge. You specialize in helping freelancers, independent contractors, and solopreneurs with:
-- Positioning, pricing, and niche strategy
-- Writing copy (bios, proposals, pitches, profiles)
-- Client management (handling objections, scope creep, difficult conversations)
-- Rates, contracts, and negotiation
-- Platform-specific advice (Upwork, Fiverr, LinkedIn, portfolio sites)
-- Business development and pipeline strategy
-- Job applications, cover letters, and career moves
+          model: 'claude-sonnet-4-5', max_tokens: 800,
+          system: `You are Forge AI — a straight-talking advisor for freelancers and independent consultants. You've seen every mistake freelancers make: underpricing, chasing bad clients, writing proposals about themselves instead of the client's problem, giving up too early on follow-ups, and positioning themselves as a commodity when they're not.
 
-You give direct, tactical advice. No fluff. No buzzwords. No "it depends" without immediately saying what it depends on and giving a concrete answer anyway. You write like a sharp mentor who has done this work, not like a consultant. Short sentences. Specific numbers when possible. Opinions that you'd defend.`,
+You give advice the way a trusted senior freelancer would at a coffee meeting — direct, specific, and immediately actionable. Not abstract frameworks. Not "it depends" without a real answer. Not the safe, hedge-everything answer.
+
+HOW YOU ANSWER:
+- Lead with the answer, not the context. If someone asks what to charge, give a number first.
+- Be specific. If you're recommending a tactic, give the exact words or approach.
+- Say when something is a bad idea. Freelancers need honest feedback, not validation.
+- If you need more information to give a useful answer, say exactly what you need and why.
+- Short paragraphs. Direct sentences. No bullet points unless the answer is genuinely a list.
+
+WHAT YOU KNOW DEEPLY:
+- Freelance pricing by niche, experience level, and market
+- What actually works on Upwork, LinkedIn, Contra, Toptal, and direct outreach
+- How to write proposals, DMs, and follow-ups that get replies
+- Client psychology: how they evaluate freelancers, what makes them hesitate, what closes them
+- Scope creep, difficult conversations, rate increases, contract terms
+- How to get off the feast-or-famine cycle
+- What separates freelancers earning $50/hr from those earning $200/hr (it's rarely skill)
+
+WHAT YOU NEVER DO:
+- Use buzzwords or corporate language
+- Hedge everything to avoid being wrong
+- Give generic advice that applies to everyone and helps no one
+- Tell someone what they want to hear if it's not what they need to hear
+- Use em dashes`,
           messages: apiMessages,
         }),
       });
@@ -1850,216 +3034,258 @@ You give direct, tactical advice. No fluff. No buzzwords. No "it depends" withou
         const errBody = await response.text().catch(() => '');
         throw new Error(`Request failed (${response.status}). ${errBody.slice(0, 200)}`);
       }
-
       const data = await response.json();
       const replyText = data.content.filter(b => b.type === 'text').map(b => b.text).join('').trim();
-
-      setMessages(prev => [...prev, { role: 'assistant', content: replyText }]);
+      setConvos(prev => prev.map(c => c.id === currentId
+        ? { ...c, messages: [...c.messages, { role: 'assistant', content: replyText, ts: Date.now() }], updatedAt: Date.now() }
+        : c
+      ));
     } catch (err) {
-      console.error('Ask error:', err);
       setError(err.message || 'Something went wrong. Try again.');
-      setMessages(prev => prev.slice(0, -1));
+      setConvos(prev => prev.map(c => c.id === currentId ? { ...c, messages: c.messages.slice(0, -1) } : c));
     } finally {
       setLoading(false);
     }
   };
 
   const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
-    }
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
   };
 
   const copyMessage = async (text, idx) => {
     try {
-      if (navigator.clipboard && window.isSecureContext) {
-        await navigator.clipboard.writeText(text);
-      } else {
-        const ta = document.createElement('textarea');
-        ta.value = text;
-        ta.style.position = 'fixed'; ta.style.left = '-9999px';
-        document.body.appendChild(ta); ta.select();
-        document.execCommand('copy');
-        document.body.removeChild(ta);
+      if (navigator.clipboard && window.isSecureContext) await navigator.clipboard.writeText(text);
+      else {
+        const ta = document.createElement('textarea'); ta.value = text; ta.style.position = 'fixed'; ta.style.left = '-9999px';
+        document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
       }
-      setCopiedIdx(idx);
-      setTimeout(() => setCopiedIdx(null), 1800);
+      setCopiedIdx(idx); setTimeout(() => setCopiedIdx(null), 1800);
     } catch {}
   };
 
-  const clearChat = () => {
-    setMessages([]);
-    setError('');
-  };
-
   const isEmpty = messages.length === 0;
+  const sortedConvos = [...convos].sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
 
   return (
     <div className="ff-fadeup">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+      {/* Compact header */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14, gap: 10, flexWrap: 'wrap' }}>
         <div>
-          <h2 className="ff-display ff-text-1" style={{ fontSize: 28, fontWeight: 500, letterSpacing: '-0.018em' }}>
-            Ask anything
-          </h2>
-          <p className="ff-text-2 mt-1" style={{ fontSize: 14, lineHeight: 1.5 }}>
-            Freelance strategy, pricing, copy, clients. Direct answers, no fluff.
-          </p>
+          <h2 className="ff-display ff-text-1" style={{ fontSize: 24, letterSpacing: '-0.038em', marginBottom: 2 }}>Ask anything</h2>
+          <p className="ff-text-3" style={{ fontSize: 13, lineHeight: 1.4 }}>Strategy, pricing, copy, clients — direct answers.</p>
         </div>
-        {messages.length > 0 && (
-          <button
-            type="button"
-            className="ff-btn ff-btn-secondary"
-            onClick={clearChat}
-            style={{ width: 'auto', padding: '10px 16px' }}
-          >
-            <RotateCcw size={13} />
-            New chat
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <button type="button" className="ff-chat-sidebar-toggle" onClick={() => setSidebarOpen(true)}>
+            <MessageSquare size={14} />
+            Chats{convos.length > 0 ? ` (${convos.length})` : ''}
           </button>
-        )}
+          <button type="button" className="ff-btn ff-btn-secondary" onClick={startNewChat} style={{ width: 'auto', padding: '7px 13px', fontSize: 13, gap: 6 }}>
+            <Plus size={13} /> New chat
+          </button>
+        </div>
       </div>
 
-      {/* Chat window */}
-      <div className="ff-chat-wrap">
-        {/* Messages area */}
-        <div className="ff-chat-messages">
-          {isEmpty && !loading && (
-            <div className="ff-chat-empty">
-              <div style={{
-                width: 52,
-                height: 52,
-                borderRadius: '50%',
-                background: 'var(--accent-bg-soft)',
-                border: '1px solid var(--accent-border-soft)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginBottom: 16,
-              }}>
-                <Bot size={22} style={{ color: 'var(--accent)' }} />
-              </div>
-              <p className="ff-display ff-text-1 mb-2" style={{ fontSize: 20, lineHeight: 1.3, fontWeight: 500, letterSpacing: '-0.018em' }}>
-                What do you want to know?
-              </p>
-              <p className="ff-text-3 mb-8" style={{ fontSize: 13.5, lineHeight: 1.55, maxWidth: '36ch' }}>
-                Ask about pricing, niches, client scripts, copy help, or anything freelance.
-              </p>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center', maxWidth: 560 }}>
-                {SUGGESTED_PROMPTS.map((p, i) => (
-                  <button
-                    key={i}
-                    type="button"
-                    className="ff-suggested-prompt"
-                    onClick={() => sendMessage(p.text)}
-                    style={{ animationDelay: `${i * 50}ms` }}
-                  >
-                    {p.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
+      {/* Mobile bottom sheet backdrop */}
+      <div className={`ff-sheet-backdrop${sidebarOpen ? ' open' : ''}`} onClick={() => setSidebarOpen(false)} />
 
-          {messages.map((msg, i) => (
-            <div key={i} className={`ff-chat-msg ${msg.role === 'user' ? 'ff-chat-msg-user' : ''}`}>
-              <div className={`ff-chat-avatar ${msg.role === 'user' ? 'ff-chat-avatar-user' : 'ff-chat-avatar-ai'}`}>
-                {msg.role === 'user' ? 'You' : <Bot size={15} />}
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: msg.role === 'user' ? 'flex-end' : 'flex-start' }}>
-                <div className={`ff-chat-bubble ${msg.role === 'user' ? 'ff-chat-bubble-user' : 'ff-chat-bubble-ai'}`}>
-                  <div className="ff-chat-bubble-text">
-                    {formatMessageText(msg.content)}
-                  </div>
-                </div>
-                {msg.role === 'assistant' && (
-                  <button
-                    type="button"
-                    className="ff-chat-copy-btn"
-                    onClick={() => copyMessage(msg.content, i)}
-                  >
-                    {copiedIdx === i ? <Check size={11} /> : <Copy size={11} />}
-                    {copiedIdx === i ? 'Copied' : 'Copy'}
-                  </button>
-                )}
-              </div>
-            </div>
-          ))}
-
-          {loading && (
-            <div className="ff-chat-msg ff-fadein">
-              <div className="ff-chat-avatar ff-chat-avatar-ai">
-                <Bot size={15} />
-              </div>
-              <div className="ff-chat-bubble ff-chat-bubble-ai">
-                <div className="ff-chat-typing">
-                  <span></span>
-                  <span></span>
-                  <span></span>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {error && (
-            <div className="ff-fadeup" style={{
-              background: 'var(--danger-bg)',
-              color: 'var(--danger)',
-              padding: '10px 14px',
-              borderRadius: 'var(--r-md)',
-              fontSize: 13,
-              fontWeight: 500,
-              textAlign: 'center',
-            }}>
-              {error}
-            </div>
-          )}
-
-          <div ref={messagesEndRef} />
+      {/* Mobile bottom sheet */}
+      <div className={`ff-chat-sheet${sidebarOpen ? ' open' : ''}`}>
+        <div className="ff-chat-sheet-handle" />
+        <div className="ff-chat-sheet-head">
+          <span className="ff-chat-sheet-title">Your Chats</span>
+          <button type="button" className="ff-chat-sheet-close" onClick={() => setSidebarOpen(false)}>
+            <X size={14} />
+          </button>
         </div>
-
-        {/* Input footer */}
-        <div className="ff-chat-footer">
-          {messages.length > 0 && messages.length < 3 && (
-            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 10 }}>
-              {SUGGESTED_PROMPTS.slice(0, 3).map((p, i) => (
-                <button
-                  key={i}
-                  type="button"
-                  className="ff-suggested-prompt"
-                  onClick={() => sendMessage(p.text)}
-                  style={{ fontSize: 11.5, padding: '6px 11px' }}
-                >
-                  {p.label}
-                </button>
-              ))}
+        <button type="button" className="ff-chat-sheet-new" onClick={() => { startNewChat(); setSidebarOpen(false); }}>
+          <Plus size={15} />
+          Start a new chat
+        </button>
+        <div className="ff-chat-sheet-list">
+          {sortedConvos.length === 0 ? (
+            <div className="ff-chat-sheet-empty">
+              <div style={{ fontSize: 28, marginBottom: 8 }}>💬</div>
+              No conversations yet.<br />Start chatting to save history.
             </div>
-          )}
-
-          <div className="ff-chat-input-row">
-            <textarea
-              ref={textareaRef}
-              className="ff-chat-textarea"
-              placeholder="Ask anything about freelancing\u2026"
-              value={input}
-              onChange={(e) => { setInput(e.target.value); autoResize(); }}
-              onKeyDown={handleKeyDown}
-              rows={1}
-              disabled={loading}
-            />
+          ) : sortedConvos.map(c => (
             <button
+              key={c.id}
               type="button"
-              className="ff-chat-send"
-              onClick={() => sendMessage()}
-              disabled={loading || !input.trim()}
-              aria-label="Send message"
+              className={`ff-chat-sheet-item${c.id === activeId ? ' ff-chat-sheet-item-active' : ''}`}
+              onClick={() => { setActiveId(c.id); setSidebarOpen(false); setError(''); }}
             >
-              {loading ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
+              <div className="ff-chat-sheet-item-icon">
+                <MessageSquare size={15} />
+              </div>
+              <div className="ff-chat-sheet-item-body">
+                <div className="ff-chat-sheet-item-title">{getConvoTitle(c.messages)}</div>
+                <div className="ff-chat-sheet-item-meta">{timeAgo(c.updatedAt)} · {Math.floor(c.messages.length / 2)} message{c.messages.length / 2 !== 1 ? 's' : ''}</div>
+              </div>
+              <button
+                type="button"
+                className="ff-chat-sheet-item-del"
+                onClick={(e) => deleteConvo(c.id, e)}
+                title="Delete"
+              >
+                <Trash2 size={13} />
+              </button>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Main layout */}
+      <div className="ff-ask-layout" style={{ position: 'relative' }}>
+
+        {/* Sidebar (desktop only) */}
+        <div className="ff-chat-sidebar">
+          <div className="ff-chat-sidebar-head">
+            <span className="ff-chat-sidebar-title">Chats</span>
+            <button className="ff-chat-new-btn" onClick={startNewChat} title="New chat" type="button">
+              <Plus size={12} />
             </button>
           </div>
-          <p className="ff-text-3 mt-2" style={{ fontSize: 11, textAlign: 'center', letterSpacing: '-0.003em' }}>
-            Enter to send, Shift+Enter for new line
-          </p>
+          <div className="ff-chat-sidebar-list">
+            {sortedConvos.length === 0 ? (
+              <div className="ff-chat-sidebar-empty">
+                <div style={{ fontSize: 22, marginBottom: 6 }}>💬</div>
+                No chats yet.<br />Start a conversation.
+              </div>
+            ) : sortedConvos.map(c => (
+              <button
+                key={c.id}
+                type="button"
+                className={`ff-chat-sidebar-item${c.id === activeId ? ' ff-chat-sidebar-item-active' : ''}`}
+                onClick={() => { setActiveId(c.id); setSidebarOpen(false); setError(''); }}
+              >
+                <span className="ff-chat-sidebar-item-dot" />
+                <span className="ff-chat-sidebar-item-title">{getConvoTitle(c.messages)}</span>
+                <span className="ff-chat-sidebar-item-meta">{timeAgo(c.updatedAt)}</span>
+                <button
+                  type="button"
+                  className="ff-chat-sidebar-item-del"
+                  onClick={(e) => deleteConvo(c.id, e)}
+                  title="Delete"
+                >
+                  <X size={10} />
+                </button>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Chat pane */}
+        <div className="ff-chat-pane">
+          <div className="ff-chat-messages" ref={messagesContainerRef}>
+            {isEmpty && !loading && (
+              <div className="ff-chat-empty">
+                <div style={{
+                  width: 44, height: 44, borderRadius: '50%',
+                  background: 'linear-gradient(135deg, var(--accent-bg-soft) 0%, #e8f0fe 100%)',
+                  border: '1px solid var(--accent-border-soft)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 14,
+                }}>
+                  <Bot size={19} style={{ color: 'var(--accent)' }} />
+                </div>
+                <p className="ff-display ff-text-1" style={{ fontSize: 18, letterSpacing: '-0.038em', marginBottom: 6, lineHeight: 1.2 }}>
+                  What do you want to know?
+                </p>
+                <p className="ff-text-3" style={{ fontSize: 13, lineHeight: 1.55, maxWidth: '30ch', marginBottom: 20 }}>
+                  Ask about rates, niches, client scripts, or upload a file.
+                </p>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, justifyContent: 'center', maxWidth: 420 }}>
+                  {SUGGESTED_PROMPTS.map((p, i) => (
+                    <button key={i} type="button" className="ff-suggested-prompt" onClick={() => sendMessage(p.text)} style={{ animationDelay: `${i * 50}ms` }}>
+                      {p.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {messages.map((msg, i) => (
+              <div key={i} className={`ff-chat-msg ${msg.role === 'user' ? 'ff-chat-msg-user' : ''}`}>
+                <div className={`ff-chat-avatar ${msg.role === 'user' ? 'ff-chat-avatar-user' : 'ff-chat-avatar-ai'}`}>
+                  {msg.role === 'user' ? 'You' : <Bot size={12} />}
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: msg.role === 'user' ? 'flex-end' : 'flex-start', minWidth: 0 }}>
+                  {msg.attachment && msg.attachment.preview && (
+                    <div className="ff-chat-user-attachment"><img src={msg.attachment.preview} alt={msg.attachment.name} /></div>
+                  )}
+                  {msg.attachment && !msg.attachment.preview && (
+                    <div className="ff-chat-user-attachment-file"><FileText size={11} /> {msg.attachment.name}</div>
+                  )}
+                  {msg.content && (
+                    <div className={`ff-chat-bubble ${msg.role === 'user' ? 'ff-chat-bubble-user' : 'ff-chat-bubble-ai'}`}>
+                      <div className="ff-chat-bubble-text">{formatMessageText(msg.content)}</div>
+                    </div>
+                  )}
+                  {msg.role === 'assistant' && (
+                    <button type="button" className="ff-chat-copy-btn" onClick={() => copyMessage(msg.content, i)}>
+                      {copiedIdx === i ? <Check size={10} /> : <Copy size={10} />}
+                      {copiedIdx === i ? 'Copied' : 'Copy'}
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
+
+            {loading && (
+              <div className="ff-chat-msg ff-fadein">
+                <div className="ff-chat-avatar ff-chat-avatar-ai"><Bot size={12} /></div>
+                <div className="ff-chat-bubble ff-chat-bubble-ai">
+                  <div className="ff-chat-typing"><span /><span /><span /></div>
+                </div>
+              </div>
+            )}
+
+            {error && (
+              <div className="ff-fadeup" style={{ background: 'var(--danger-bg)', color: 'var(--danger)', padding: '8px 12px', borderRadius: 10, fontSize: 13, fontWeight: 500, textAlign: 'center' }}>
+                {error}
+              </div>
+            )}
+
+            <div ref={messagesEndRef} />
+          </div>
+
+          {/* Footer */}
+          <div className="ff-chat-footer">
+            {isEmpty && messages.length < 1 && (
+              <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', marginBottom: 8 }}>
+                {SUGGESTED_PROMPTS.slice(0, 3).map((p, i) => (
+                  <button key={i} type="button" className="ff-suggested-prompt" onClick={() => sendMessage(p.text)} style={{ fontSize: 12, padding: '5px 10px' }}>{p.label}</button>
+                ))}
+              </div>
+            )}
+
+            <div className="ff-chat-input-box">
+              {attachment && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px 0' }}>
+                  {attachment.preview
+                    ? <img src={attachment.preview} alt={attachment.name} style={{ width: 28, height: 28, objectFit: 'cover', borderRadius: 7, flexShrink: 0 }} />
+                    : <div className="ff-chat-attachment-preview-icon"><FileText size={13} /></div>
+                  }
+                  <span className="ff-chat-attachment-name">{attachment.name}</span>
+                  <button onClick={() => setAttachment(null)} style={{ background: 'none', border: 'none', color: 'var(--text-3)', cursor: 'pointer', padding: 3, display: 'flex', alignItems: 'center', borderRadius: 4, flexShrink: 0 }}>
+                    <X size={12} />
+                  </button>
+                </div>
+              )}
+              <input ref={fileInputRef} type="file" accept="image/*,application/pdf,.txt,.md,.csv,.json,.doc,.docx" style={{ display: 'none' }} onChange={e => { handleAttachFile(e.target.files?.[0]); e.target.value = ''; }} />
+              <textarea ref={textareaRef} className="ff-chat-textarea" placeholder="Ask anything about freelancing…" value={input} onChange={(e) => { setInput(e.target.value); autoResize(); }} onKeyDown={handleKeyDown} rows={1} disabled={loading} />
+              <div className="ff-chat-input-actions">
+                <button type="button" className="ff-chat-attach-btn" onClick={() => fileInputRef.current?.click()} aria-label="Attach file">
+                  <Paperclip size={14} />
+                </button>
+                <button type="button" className="ff-chat-send" onClick={() => sendMessage()} disabled={loading || (!input.trim() && !attachment)} aria-label="Send">
+                  {loading ? <Loader2 size={12} className="animate-spin" /> : <ArrowRight size={13} />}
+                </button>
+              </div>
+            </div>
+            <p className="ff-text-3" style={{ fontSize: 12, textAlign: 'center', marginTop: 5, letterSpacing: '-0.003em' }}>
+              Enter to send · Chats saved 15 days
+            </p>
+          </div>
         </div>
       </div>
     </div>
@@ -2067,8 +3293,10 @@ You give direct, tactical advice. No fluff. No buzzwords. No "it depends" withou
 }
 
 /* ====================================================================== */
-/* OPTIMIZE TAB                                                           */
+/* HEADSHOT AI TAB                                                         */
 /* ====================================================================== */
+
+
 
 function OptimizeTab() {
   const [pageType, setPageType] = useState('portfolio');
@@ -2135,10 +3363,7 @@ function OptimizeTab() {
   };
 
   const buildPageInputBlock = () => {
-    if (method === 'paste') return `PAGE COPY:\
-"""\
-${pasteText.trim()}\
-"""`;
+    if (method === 'paste') return `PAGE COPY:\n"""\n${pasteText.trim()}\n"""`;
     if (imageData?.isPdf) return '[CV is attached as a PDF document. Read it carefully.]';
     return '[See attached image.]';
   };
@@ -2164,7 +3389,7 @@ ${pasteText.trim()}\
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         model: "claude-sonnet-4-5",
-        max_tokens: 8000,
+        max_tokens: 1500,
         system: "You are a JSON-only API. You MUST respond with valid, complete JSON only. No prose, no markdown, no commentary, no code fences. Start your response with { and end with }. Every string must be properly escaped. Do not truncate. Make sure all brackets and braces close properly.",
         messages: [{ role: "user", content }]
       })
@@ -2220,38 +3445,59 @@ ${pasteText.trim()}\
     setAuditing(true);
 
     const pt = PAGE_TYPES[pageType];
-    const criteriaList = pt.criteria.map((c, i) => `${i + 1}. ${c}`).join('\
-');
+    const criteriaList = pt.criteria.map((c, i) => `${i + 1}. ${c}`).join('\n');
 
-    const prompt = `You are an elite conversion strategist auditing a freelancer page. You audit ONLY based on the actual content provided. Do not invent details, do not guess about content not shown. If something is missing, flag it as missing.
+    const prompt = `You are a conversion strategist who has audited thousands of freelancer pages and worked with clients who hire them. You see both sides. You know exactly what makes a client click away and what makes them reach out. You tell the truth bluntly, because sugar-coating costs the freelancer money.
+
+You audit ONLY what is in front of you. Never invent content. If something is absent, name it as absent — that absence is often the biggest problem.
+
 ${pageType === 'cv' && imageData
   ? (imageData.isPdf
-    ? 'NOTE: The applicant's CV is attached as a PDF. Read every section carefully. Pull exact phrases, role names, time frames, and metrics from the document.\
-'
-    : 'NOTE: The applicant's CV is attached as an image. Read every visible detail.\
-')
-  : (imageData && method === 'image' ? 'NOTE: A screenshot of the page is attached. Read every visible detail.\
-' : '')}
-PAGE TYPE: ${pt.label}
-PAGE TYPE DESCRIPTION: ${pt.desc}
+    ? 'ATTACHED: The CV as a PDF. Read every line. Pull exact phrases, company names, dates, metrics, and tools before writing a single word.\n'
+    : 'ATTACHED: The CV as an image. Read every visible detail carefully.\n')
+  : (imageData && method === 'image' ? 'ATTACHED: A screenshot of the page. Read every visible element — headline, body, CTAs, social proof, everything — before writing.\n' : '')}
 
-AUDIT CRITERIA (score each 1-10):
+PAGE TYPE: ${pt.label}
+WHAT BUYERS OF THIS TYPE ACTUALLY CARE ABOUT: ${pt.desc}
+
+SCORING (1-10 each):
 ${criteriaList}
 
-${audience.trim() ? `TARGET AUDIENCE: ${audience.trim()}\
-` : ''}${goal.trim() ? `GOAL: ${goal.trim()}\
-` : ''}
+HOW A REAL CLIENT READS THIS PAGE:
+A buyer lands here with a specific problem and a limited attention span. They're asking:
+1. Do they understand my specific situation? (or are they speaking generically?)
+2. Have they done this before for someone like me? (proof, not claims)
+3. Can I trust them not to waste my time and money? (credibility signals)
+4. What happens if I reach out? (clear next step)
+Score and evaluate every criterion through this lens — not through the lens of what looks professional.
+
 ${buildPageInputBlock()}
 
-Generate ONLY a JSON object:
+VERDICT: Lead with the most damaging problem — the one costing them clients right now. Quote the actual copy. Say exactly what a real buyer would feel when they read it. End with the single highest-leverage fix.
+
+RECOMMENDATIONS: Each one names the exact line, section, or element. Each fix is the actual thing to do — not "consider adding" but "replace X with Y."
+
+REWRITES: Before = verbatim from the page. After = finished, ready-to-use copy that a real client would respond to.
+
+Generate ONLY valid JSON:
 {
-  "overall": { "score": 0-100, "verdict": "3-5 sentences. Lead with a definitive judgment (e.g. 'This page buries the lede.' or 'This profile reads like 90% of competitors.'). Quote or reference an exact phrase from the page when relevant. Then explain what works, what's broken, and the single biggest issue. Brutally honest, no hedging.", "headline": "5-8 word verdict, definitive not vague" },
-  "scores": [{ "criterion": "label", "score": 1-10, "note": "one short sentence referencing actual page content" }],
-  "recommendations": [{ "priority": "High|Medium|Low", "issue": "1-2 sentences citing what's actually on the page", "fix": "tactical, 1-2 sentences" }],
-  "rewrites": [{ "section": "name", "before": "current copy from the page (verbatim or near-verbatim if visible)", "after": "rewritten" }]
+  "overall": {
+    "score": 0-100,
+    "headline": "5-8 words. A definitive verdict that names the core problem. Not a description. e.g. 'Credentials everywhere. Client problem nowhere.' or 'Sounds like every other freelancer in this niche.'",
+    "verdict": "4-6 sentences. Start with what a real buyer would feel reading this. Quote the most damaging phrase. Explain why it costs them clients. Name what works. Name what doesn't. End with the one change that would most immediately improve conversion. No em dashes. No hedging."
+  },
+  "scores": [
+    { "criterion": "exact label from above", "score": 1-10, "note": "One sentence. Name a specific phrase or element — not a general area." }
+  ],
+  "recommendations": [
+    { "priority": "High|Medium|Low", "issue": "The exact problem, named precisely. Where it is. What it costs. 2 sentences.", "fix": "The specific action. Not 'consider' — the actual copy or change. 1-2 sentences." }
+  ],
+  "rewrites": [
+    { "section": "Element name", "before": "Exact copy from the page", "after": "Finished replacement. Problem-aware. Specific. Ready to paste. No em dashes." }
+  ]
 }
 
-RULES: Score every criterion. 4-7 recommendations, 3-5 rewrites. Be specific.
+3-4 recommendations, 2-3 rewrites. Score every criterion. Be specific, be direct, be useful.
 ${STRICT_RULES}
 ${pageType === 'cv' ? CV_STRICT_RULES : ''}
 Return ONLY JSON. No em dashes.`;
@@ -2277,8 +3523,7 @@ Return ONLY JSON. No em dashes.`;
     setError(''); setOptimizing(true); setOptimized(null);
 
     const pt = PAGE_TYPES[pageType];
-    const sectionsList = pt.rewriteSections.map(s => `- ${s}`).join('\
-');
+    const sectionsList = pt.rewriteSections.map(s => `- ${s}`).join('\n');
 
     const platformKeywordGuidance = {
       portfolio: "Weave SEO-friendly niche keywords into the hero headline, subheadline, and About section.",
@@ -2288,7 +3533,7 @@ Return ONLY JSON. No em dashes.`;
       cv: "Pull 8-12 ATS keywords from the target role / target audience. Weave them naturally into the professional summary, skills section, and top 2 experience entries. Use the exact phrasing recruiters and ATS systems search for. No keyword stuffing. If no target role is given, infer the most likely role from the CV itself and optimize for that.",
     };
 
-    const prompt = `You are an elite copywriter who studies what TOP-PERFORMING freelancers do, AND you weave in search keywords.
+    const prompt = `You are a direct-response copywriter who wins clients for freelancers by making buyers feel understood, not impressed. You know that a buyer skimming a freelancer's page is asking one thing: "Does this person get what I'm dealing with?" Your rewrites answer that question in the first three sentences.
 
 PAGE TYPE: ${pt.label}
 
@@ -2297,42 +3542,45 @@ ${TOP_PERFORMER_PATTERNS[pageType]}
 KEYWORD STRATEGY:
 ${platformKeywordGuidance[pageType]}
 
-PAGE WAS AUDITED. Do NOT repeat these mistakes:
+AUDIT FINDINGS TO FIX:
 - Verdict: ${result.overall?.headline || 'Underperforming'}
-- Issues: ${(result.recommendations || []).map(r => r.issue).join(' | ')}
+- Problems: ${(result.recommendations || []).map(r => r.issue).join(' | ')}
 - Score: ${result.overall?.score || 0}/100
 
-${audience.trim() ? `TARGET: ${audience.trim()}\
-` : ''}${goal.trim() ? `GOAL: ${goal.trim()}\
-` : ''}
-
-ORIGINAL:
+ORIGINAL PAGE:
 ${buildPageInputBlock()}
 
-YOUR TASK:
-1. Identify the niche, pull 6-10 highest-search keywords buyers use to find this kind of freelancer.
-2. Rewrite the entire page as ONE continuous, ready-to-paste block. Use ALL CAPS section headers (followed by blank line). Sections to cover:
-${sectionsList}
-3. Weave keywords naturally where they have maximum search impact. No stuffing.
-4. Voice: human, specific, direct. No corporate buzzwords. No em dashes. If the original page has any voice (sarcastic, warm, blunt, technical), preserve and amplify it. Do NOT flatten it into generic "professional" tone. The rewrite should sound like the same person, just sharper.
-5. Specificity rule: every claim needs a number, named outcome, time frame, or specific niche term. No abstractions. Bad: "I help startups grow." Good: "I help Series A SaaS founders cut churn 18-40% in 90 days."
+REWRITE RULES:
+1. Pull 6-10 keywords buyers actually search when they have this problem. Place them naturally — not stuffed.
 
-Generate ONLY:
+2. Write the full page as one ready-to-paste block. ALL CAPS section headers, two line breaks, then the section. Sections:
+${sectionsList}
+
+3. Every section must answer one of these buyer questions:
+   - "Do they understand my specific situation?" (opening, headline, about)
+   - "Have they actually done this for someone like me?" (proof, portfolio, results)
+   - "Why them and not the next person in the list?" (differentiator, approach)
+   - "What happens if I message them right now?" (CTA)
+   If a section doesn't answer one of these, it gets cut or rewritten.
+
+4. Voice: if the original has a personality, keep it and sharpen it. If it's generic, write as someone who has been in the trenches of this specific work — not a professional, a practitioner. Someone who knows what goes wrong and why.
+
+5. Replace every vague sentence with a specific one. "I help businesses grow" becomes "Helped a bootstrapped SaaS go from 400 to 2,200 monthly active users in 5 months by rewriting their trial-to-paid onboarding."
+
+6. CTA: makes reaching out feel like the obvious next move. Not "contact me" — something like "Send me the brief. I'll tell you in a few hours if it's a fit and how I'd approach it."
+
+Generate ONLY valid JSON:
 {
   "summary": {
-    "headline": "5-8 word strategic shift",
-    "shift": "2 sentences. First explains positioning move. Second explains keyword strategy.",
-    "patterns_applied": ["short label", "short label", "short label"],
-    "niche": "the niche identified",
-    "keywords": ["keyword 1", "keyword 2", "..."]
+    "headline": "5-8 words. The core repositioning — what fundamentally changed.",
+    "shift": "2 sentences. What problem-aware angle was taken and why it works for this buyer.",
+    "patterns_applied": ["specific pattern 1", "specific pattern 2", "specific pattern 3"],
+    "niche": "The specific niche identified",
+    "keywords": ["kw1", "kw2", "kw3", "kw4", "kw5", "kw6"]
   },
-  "fullRewrite": "COMPLETE rewritten page as one continuous text. ALL CAPS section headers followed by \\
-\\
- then content. Use \\
- for line breaks within sections. All sections: ${pt.rewriteSections.join(', ')}. No commentary."
+  "fullRewrite": "Complete rewritten page, under 500 words. ALL CAPS section headers, two newlines then content. Every section listed must appear. No placeholders. Written as the freelancer. Sounds like a real person who knows this work inside out. No em dashes anywhere."
 }
 
-REQUIRED: fullRewrite is finished page copy, not a template. Every section appears in fullRewrite. Keywords woven naturally.
 ${STRICT_RULES}
 ${pageType === 'cv' ? CV_STRICT_RULES : ''}
 Return ONLY JSON. No em dashes.`;
@@ -2348,9 +3596,6 @@ Return ONLY JSON. No em dashes.`;
         parsed.fullRewrite = stripEmDashes(parsed.fullRewrite);
       }
       setOptimized(parsed);
-      setTimeout(() => {
-        document.querySelector('[data-optimized-anchor]')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 100);
     } catch (err) {
       console.error('Optimize error:', err);
       setError(err.message || 'Optimization failed.');
@@ -2389,7 +3634,7 @@ Return ONLY JSON. No em dashes.`;
 
   return (
     <>
-      <div className={pageType === 'cv' ? 'mb-10' : 'grid md:grid-cols-2 gap-6 mb-10'}>
+      <div className={pageType === 'cv' ? 'ff-cv-selector' : 'ff-2col'}>
         <div>
           <label className="ff-section-label mb-3" style={{ display: 'inline-flex', alignItems: 'center' }}>
             Page Type
@@ -2412,7 +3657,7 @@ Return ONLY JSON. No em dashes.`;
         )}
       </div>
 
-      <div className="grid md:grid-cols-2 gap-10 md:gap-14">
+      <div className="ff-2col-stack">
         <div>
           <h2 className="ff-section-label mb-5">The Page</h2>
 
@@ -2466,7 +3711,7 @@ Return ONLY JSON. No em dashes.`;
                       <div className="flex items-center gap-2 mt-1" style={{ fontSize: 12, color: 'var(--text-3)' }}>
                         {imageData.isPdf ? <FileText size={11} /> : <ImageIcon size={11} />}
                         <span>{imageData.sizeKb} KB</span>
-                        <span>\u00b7</span>
+                        <span>·</span>
                         <span style={{ color: 'var(--accent)', fontWeight: 500 }}>Attached</span>
                       </div>
                     </div>
@@ -2475,40 +3720,6 @@ Return ONLY JSON. No em dashes.`;
                 )}
               </div>
             )}
-
-            <div>
-              <label className="ff-field-label" style={{ display: 'inline-flex', alignItems: 'center' }}>
-                {pageType === 'cv' ? 'Target role' : 'Audience'}
-                <span className="ff-field-hint" style={{ fontWeight: 400, marginLeft: 6 }}>\u00b7 optional</span>
-                <Tooltip text={pageType === 'cv'
-                  ? "The specific role you're applying for. Used to pull the right ATS keywords and align the rewrite to what hiring managers scan for."
-                  : "The specific kind of buyer you want this page to attract. The more specific, the sharper the rewrite. 'Series A SaaS founders' beats 'tech companies'."} />
-              </label>
-              <input
-                type="text"
-                className="ff-input"
-                placeholder={pageType === 'cv' ? 'e.g. Senior Product Designer at a Series B SaaS' : 'e.g. Series A SaaS founders'}
-                value={audience}
-                onChange={e => setAudience(e.target.value)}
-              />
-            </div>
-
-            <div>
-              <label className="ff-field-label" style={{ display: 'inline-flex', alignItems: 'center' }}>
-                {pageType === 'cv' ? 'Top outcome to highlight' : 'Goal of the page'}
-                <span className="ff-field-hint" style={{ fontWeight: 400, marginLeft: 6 }}>\u00b7 optional</span>
-                <Tooltip text={pageType === 'cv'
-                  ? "The single result you most want hiring managers to remember. Pushed to the top of the rewrite where it lands first."
-                  : "The single action you want a visitor to take. Used to score whether your CTAs and structure actually push toward that outcome."} />
-              </label>
-              <input
-                type="text"
-                className="ff-input"
-                placeholder={pageType === 'cv' ? 'e.g. Cut churn 28% in 9 months as PM at Stripe' : 'e.g. Book a discovery call'}
-                value={goal}
-                onChange={e => setGoal(e.target.value)}
-              />
-            </div>
 
             {error && (
               <div className="ff-fadeup" style={{ background: 'var(--danger-bg)', color: 'var(--danger)', padding: '10px 14px', borderRadius: 'var(--r-md)', fontSize: 13, fontWeight: 500 }}>
@@ -2566,7 +3777,7 @@ function OptimizeOutput({ result, pageType, optimized, onOptimize, optimizing, c
             </div>
           </div>
           <div className="flex-1 min-w-[200px]">
-            <p className="ff-mono mb-2" style={{ fontSize: 11, color: 'var(--accent)', fontWeight: 600, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+            <p className="ff-mono mb-2" style={{ fontSize: 12, color: 'var(--accent)', fontWeight: 600, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
               {result.overall?.headline}
             </p>
             <p className="ff-verdict">{result.overall?.verdict}</p>
@@ -2590,7 +3801,7 @@ function OptimizeOutput({ result, pageType, optimized, onOptimize, optimizing, c
                   {s.score}/10
                 </span>
               </div>
-              {s.note && <p className="ff-text-3" style={{ fontSize: 12.5, marginTop: -2, marginBottom: 6 }}>{s.note}</p>}
+              {s.note && <p className="ff-text-3" style={{ fontSize: 13, marginTop: -2, marginBottom: 6 }}>{s.note}</p>}
             </div>
           ))}
         </div>
@@ -2664,7 +3875,7 @@ function OptimizeOutput({ result, pageType, optimized, onOptimize, optimizing, c
 
           {optimized.summary && (
             <div className="ff-card mb-4">
-              <p className="ff-mono mb-3" style={{ fontSize: 11, color: 'var(--accent)', fontWeight: 600, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+              <p className="ff-mono mb-3" style={{ fontSize: 12, color: 'var(--accent)', fontWeight: 600, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
                 {optimized.summary.headline}
               </p>
               {optimized.summary.niche && (
@@ -2731,6 +3942,351 @@ function OptimizeOutput({ result, pageType, optimized, onOptimize, optimizing, c
 /* ====================================================================== */
 /* CLOSE TAB                                                              */
 /* ====================================================================== */
+
+function buildPrompt(mode, intel, imageData, tone, portfolio, clientMessage, myMessage, goal, jobDescription, offer, proof, cvFile) {
+  const toneInstruction = tone === 'Auto' ? 'Adapt naturally.' : `${TONE_DIRECTIVES[tone]} Apply consistently.`;
+
+  if (mode === 'reply') {
+    return `You are a communication strategist who helps freelancers sound professional, clear, and confident in live client conversations. Your job is to take the freelancer's draft reply and make it sharper — not more formal, sharper. Clear thinking, precise language, no filler.
+
+A great client reply does three things:
+1. Acknowledges what the client said (shows you actually read it)
+2. Answers directly — no hedging, no over-explaining
+3. Moves the conversation forward with a clear next step or clear position
+
+${imageData ? 'ATTACHED: Screenshot of the conversation.\n' : ''}
+
+THE CONVERSATION SO FAR:
+${clientMessage.trim() ? 'CLIENT:\\n\"\"\"\\n' + clientMessage.trim() + '\\n\"\"\"\\n' : ''}
+
+THE FREELANCER'S DRAFT REPLY:
+${myMessage.trim() ? '\"\"\"\\n' + myMessage.trim() + '\\n\"\"\"' : '[No draft — write a polished reply based on the client message above]'}
+
+${goal.trim() ? 'GOAL FOR THIS REPLY: ' + goal.trim() + '\n' : ''}
+
+HOW TO POLISH THIS REPLY:
+- Read what the client said. What are they actually asking, signalling, or worried about?
+- Does the draft reply address the real question — or does it go around it?
+- Cut everything that doesn't directly serve the response. No "Great question!", no "Thanks for reaching out", no "As I mentioned."
+- If the draft hedges or apologises unnecessarily, remove it. Replace with a direct, clear statement.
+- If anything is vague ("soon", "shortly", "as needed", "we can discuss"), replace it with something specific.
+- If there's a next step needed, make sure the reply ends with one concrete action.
+- Keep the freelancer's voice. Don't make it sound like a different person — make it sound like the best version of them.
+- Match the client's register: if they're casual, stay human; if they're formal, be precise and professional.
+
+GRAMMAR CHECK — before outputting:
+- Read every sentence. Fix any grammar, punctuation, or awkward phrasing.
+- No run-on sentences. No sentence fragments used for style. Subject and verb always present.
+- No em dashes. Use commas, colons, or periods instead.
+- No filler words: "just", "actually", "basically", "literally", "very", "really", "simply."
+- No weak openers: "So,", "Well,", "Look,", "Honestly,".
+
+VOICE: ${toneInstruction}
+${STRICT_RULES}
+
+Generate ONLY valid JSON:
+${'{'}
+"clientRead": "2-3 sentences. What is the client actually communicating — stated and unstated? What is their tone, their priority, their concern?",
+"issues": ["Issue found in the draft and why it weakens the reply", "Second issue if present", "Third issue if present"],
+"polishedReply": "The finished, ready-to-send reply. Sounds like the freelancer at their best. Direct, clear, professional without being stiff. No em dashes. No filler. Ends with a concrete next step if one is needed.",
+"whatChanged": "2-3 sentences. The key changes made and why each one makes the reply stronger.",
+"clientPsychology": ${'{'}
+  "buyerType": "6-10 words. What kind of person is this client based on how they communicate.",
+  "budgetRange": "Estimated range or 'Not enough signal' if the conversation doesn't indicate budget.",
+  "confidenceScore": 1-100,
+  "confidenceRationale": "1 sentence. How well-positioned is the freelancer in this conversation and why."
+${'}'} 
+${'}'} 
+
+Return ONLY JSON.`;
+  }
+    const clientBlock = clientMessage.trim() ? `THE CLIENT'S MESSAGE:\n"""\n${clientMessage.trim()}\n"""` : (imageData ? "[The client's message is in the attached image.]" : '[No client message provided.]');
+    const myBlock = myMessage.trim() ? `MY LAST REPLY (what I sent before):\n"""\n${myMessage.trim()}\n"""` : '[I have not replied yet, this is the first follow-up.]';
+
+    return `You are a freelancer who wins clients back without pressure. You understand that when a conversation goes quiet, it's usually not because they lost interest — it's because something got in the way: competing priorities, internal approval, a tighter budget, fear of making the wrong call. Your follow-ups acknowledge that reality and make it easy to re-engage.
+
+The best follow-up doesn't push for a decision. It adds something small and useful, names what you're available for, and makes replying feel like the natural next step — not a commitment.
+
+${imageData ? 'ATTACHED: Image that may contain the conversation.\n' : ''}
+
+${clientBlock}
+
+${myBlock}
+
+GOAL: ${goal.trim() || 'Re-open the conversation and move toward a clear next step without creating pressure.'}
+
+HOW TO READ THIS CONVERSATION:
+- What is this person actually dealing with right now? What would be on their plate this week?
+- Where did the energy shift? Price, timing, scope uncertainty, internal blocker, or just life?
+- What would make replying feel easy and worthwhile for them — not for you?
+- Are they a fast-decision maker or a slow, cautious one? Match your energy to theirs.
+
+FOLLOW-UP RULES:
+- Do not open with "Just following up", "Checking in", "I wanted to circle back", or "Hope all is well."
+- The first line must reference something specific: their project, their situation, or something they said. Proves you've been thinking about them, not just your pipeline.
+- Add a sliver of value — a relevant observation, a short example, an insight that maps to their problem. Not a sales point. Something genuinely useful to them.
+- Name a clear, low-effort next step. Not "Let me know your thoughts." Something like "If it helps, I can put together a short scope outline — takes me 20 minutes and gives you something concrete to review."
+- If the conversation has stalled for a while, include a graceful exit: "If the timing's shifted, no problem at all — just let me know and we can revisit whenever it makes sense." This gets more replies than pressure.
+- 2-4 short paragraphs. Read it back — if it sounds like you're chasing, rewrite it.
+
+VOICE: ${toneInstruction}
+${STRICT_RULES}
+
+Generate ONLY valid JSON:
+${'{'}
+"clientRead": "2-3 sentences. Who is this buyer, what are they likely going through right now, and what does their communication style tell you about how to approach them.",
+"situation": "2 sentences. What's the actual state of this conversation, and what is the single most likely reason it stalled. Name it plainly.",
+"followup": "The follow-up, ready to send. \\n between paragraphs. 2-4 paragraphs. Starts with something specific. Adds value. Ends with a clear, low-friction next step or a graceful exit. No em dashes.",
+"clientPsychology": ${'{'}
+  "buyerType": "6-10 words. The specific archetype based on their communication style and behaviour.",
+  "budgetRange": "Estimated range based on signals in the conversation. Name the signal you read.",
+  "confidenceScore": 1-100,
+  "confidenceRationale": "1 sentence. What's working in your favour here, and what's the main risk to the deal."
+${'}'} 
+${'}'} 
+
+Return ONLY JSON.`;
+  }
+
+  if (mode === 'coverletter') {
+    const cvBlock = cvFile
+      ? '[The applicant\'s CV is attached. Read it carefully and pull specific outcomes, roles, time frames, and named tools to weave into the letter.]'
+      : '[No CV attached. Use only the positioning and proof fields below to write the letter.]';
+
+    const jobBlock = jobDescription.trim()
+      ? `JOB DESCRIPTION / POSTING:\n"""\n${jobDescription.trim()}\n"""`
+      : `JOB CONTEXT (no full posting given):\n"""\n${intel.trim() || '[Nothing provided.]'}\n"""`;
+
+    return `You are a cover letter writer who gets people interviews because you write from the employer's perspective, not the applicant's. You know that hiring managers are not looking for the most qualified person — they're looking for the person least likely to be a bad hire. Your letters reduce that fear before they showcase credentials.
+
+Every employer reading a cover letter is thinking: "Will this person actually solve the problem I'm dealing with? Or will I spend 3 months managing a mistake?"
+
+${cvBlock}
+
+${jobBlock}
+
+${offer.trim() ? 'APPLICANT\'S POSITIONING:\n"""\n' + offer.trim() + '\n"""\n' : ''}${proof.trim() ? 'APPLICANT\'S BEST PROOF POINT:\n"""\n' + proof.trim() + '\n"""\n' : ''}
+
+BEFORE YOU WRITE ANYTHING — identify:
+1. The one problem this employer is trying to solve (not the job description's language — the real operational problem)
+2. The risk they're managing: what goes wrong if they hire the wrong person
+3. The one piece of the applicant's background that most directly addresses both of those
+4. Something specific about this company, team, or role that shows the applicant genuinely understands what they're walking into
+
+COVER LETTER STRUCTURE:
+- Paragraph 1 (hook): Reference something specific about the company, the role, or the problem they're solving. Not "I'm writing to apply." Not excitement. Show you understand their world. 2-3 sentences.
+- Paragraph 2 (proof): One result. Specific. Named outcome, real number, time frame, or named tool. Connect it directly to what they need. One excellent example is worth more than three vague ones.
+- Paragraph 3 (why you, specifically): Not just skills — a perspective, a method, or a pattern of work that is genuinely different. What do they get from this person that they don't get from the next qualified candidate?
+- Paragraph 4 (close): One sentence. Proposes a next step. Confident, not deferential. "Happy to walk through how I approached that project on a call this week."
+- 200-260 words. Every word earns its place.
+
+FORBIDDEN PHRASES:
+"I am writing to apply", "I am excited to", "I'm a great fit", "I bring a unique blend", "passionate about",
+"proven track record", "team player", "thank you for your consideration", "attached is my resume",
+"I look forward to hearing from you", "I would love the opportunity", "I believe I would be a strong candidate",
+"strong communication skills", "detail-oriented", "I noticed you are looking for", "dynamic", "innovative."
+
+VOICE: ${toneInstruction}
+${STRICT_RULES}
+
+Generate ONLY valid JSON:
+${'{'}
+"extraction": ${'{'}
+  "targetRole": "4-8 words. The exact role.",
+  "company": "Company name from the posting, or 'the company' if not visible.",
+  "topNeed": "2-3 sentences. The real operational problem this employer is solving — in their language, not HR language. What breaks if they don't fill this role well.",
+  "fitAngle": "2 sentences. The applicant's strongest, most specific angle — the one thing that makes them the lower-risk, higher-upside choice."
+${'}'},
+"subject": "Email subject line under 60 characters. Specific. Not 'Application for [X] role'.",
+"coverLetter": "The finished letter. \\n between paragraphs. 200-260 words. Ready to send. Sounds like a real person who understands the work. No em dashes.",
+"clientPsychology": ${'{'}
+  "buyerType": "6-10 words. The type of hiring manager based on the posting tone and what they're optimising for.",
+  "budgetRange": "Estimated salary or contract range based on role level, company size, and market signals.",
+  "confidenceScore": 1-100,
+  "confidenceRationale": "1 sentence. The strongest fit signal from the applicant's background, and the biggest gap to address."
+${'}'} 
+${'}'} 
+
+Return ONLY JSON.`;
+  }
+
+  if (mode === 'dm') {
+    return `You are a freelancer who gets replies to cold DMs because you write about the recipient, not yourself. You've studied what makes people respond: it's not flattery, it's not credentials, it's the feeling that the person on the other end actually looked at you specifically.
+
+The DM that gets deleted is the one that could have been sent to anyone. The DM that gets replied to is the one that could only have been sent to them.
+
+${imageData ? 'ATTACHED: Image with context about the lead.\n' : ''}
+
+THE THREE-LINE FRAMEWORK — follow this exactly:
+Line 1: A specific observation. Something you noticed about their business, content, product, recent post, or situation that most people would scroll past. NOT "I came across your profile" or "I noticed you're hiring." Something real that shows you actually looked.
+Line 2: One piece of relevant evidence from your own work — a number, a named outcome, a specific client type. Connects directly to what Line 1 revealed about their situation. Makes the relevance immediate.
+Line 3: One question. Open enough that there's no wrong answer. Specific enough that it takes 10 seconds to respond to. The kind of question a peer would ask, not a vendor.
+
+WHAT MAKES LINE 1 WORK:
+- It references something specific (a product, a recent launch, a piece of content, a challenge visible in their work)
+- It shows you understand their world, not just their job title
+- It makes them think "this person actually looked at what I'm building"
+
+WHAT KILLS A DM:
+- Generic opener that could apply to any profile
+- Listing your services before they've shown interest
+- Asking for a call in the first message
+- More than 5 lines
+
+ABOUT THE LEAD:
+${intel.trim() || (imageData ? '[See attached.]' : '[No context provided — infer the most likely niche and situation]')}
+
+VOICE: ${toneInstruction}
+${STRICT_RULES}
+
+Generate ONLY valid JSON:
+${'{'}
+"clientType": "4-8 words. Who is this person and what do they care about.",
+"hook": "5-12 words. The specific thing you noticed about them that opens the door.",
+"coldDM": "3 lines. \\n between each. Line 1: specific observation. Line 2: relevant proof. Line 3: one good question. No em dashes. Ready to send.",
+"clientPsychology": ${'{'}
+  "buyerType": "6-10 words. The specific archetype. What they're optimising for and what makes them reply.",
+  "budgetRange": "Estimated range based on company stage, signals in their profile or post, or niche context.",
+  "confidenceScore": 1-100,
+  "confidenceRationale": "1 sentence. What gives this DM its best chance of a reply, and what could make it miss."
+${'}'} 
+${'}'} 
+
+Return ONLY JSON.`;
+  }
+
+  if (mode === 'email') {
+    return `You are a freelancer who writes cold emails that get opened and replied to. The emails that fail do so because they make the recipient feel like they're inside someone else's sales funnel. Yours feel like a message from a peer who noticed something real and has something genuinely worth saying.
+
+The subject line gets it opened. The first sentence keeps them reading. The rest of the email has to earn a reply by being useful or relevant — not impressive.
+
+${imageData ? 'ATTACHED: Image with context about the lead.\n' : ''}
+
+HOW TO APPROACH THIS:
+Before writing a word, ask: what is this person actually dealing with? What's the problem in their world that would make receiving this email feel like good timing rather than noise? That's your opening.
+
+EMAIL STRUCTURE:
+- Subject line: Under 50 characters. Reads like it was written to one person. No tricks, no "Quick question", no ALL CAPS. Something they'd only get if someone actually looked at their business.
+- Opening sentence: Not "My name is" or "I'm reaching out because." Start with something about them — their product, their content, their market position, or a specific situation you noticed.
+- Para 1 (observation): What you noticed about their situation. 1-3 sentences. Specific enough that it couldn't have been sent to anyone else.
+- Para 2 (relevance): One outcome you've produced for someone in a comparable situation. Number, named client type, or specific before/after. Not a list of skills — one thing done well.
+- Para 3 (the connection): Why that outcome is relevant to what you noticed in Para 1. The bridge. 1-2 sentences.
+- Para 4 (ask): One small, easy step. Not a call before you've established relevance. Could be: a short question, a relevant resource, an offer to share something they'd actually find useful. Makes saying yes feel low-commitment.
+- Sign-off: "Best, [Name]" or just the name. Nothing warmer.
+
+ABOUT THE LEAD:
+${intel.trim() || (imageData ? '[See attached.]' : '[No context — infer the most likely professional situation]')}
+
+VOICE: ${toneInstruction}
+${STRICT_RULES}
+
+Generate ONLY valid JSON:
+${'{'}
+"clientType": "4-8 words. Who this person is and what they care about.",
+"subject": "Under 50 characters. Feels personal. No emoji. No 'Quick question'.",
+"body": "Full email. \\n between paragraphs. 4 short paragraphs. Reads like a message from a peer, not a pitch. Sign off 'Best, [Your name]'. No em dashes.",
+"clientPsychology": ${'{'}
+  "buyerType": "6-10 words. The specific archetype and what they respond to.",
+  "budgetRange": "Estimated range from company size, role, stage, and context signals.",
+  "confidenceScore": 1-100,
+  "confidenceRationale": "1 sentence. What makes this email worth opening, and what could make it miss."
+${'}'} 
+${'}'} 
+
+Return ONLY JSON.`;
+  }
+
+  const portfolioBlock = portfolio.length > 0
+    ? `\nPORTFOLIO:\n${portfolio.map((p, i) => `[${i+1}] URL: ${p.url}${p.label ? ` | LABEL: ${p.label}` : ''}${p.tag ? ` | TAG: ${p.tag}` : ''}`).join('\n')}`
+    : '';
+
+  return `You are a freelance closer with a 70%+ proposal win rate. You win not because you're the best writer — you win because you make the client feel like you already understand their problem better than they do. When a client reads your proposal, they think: "This person gets it. Everyone else just sent me a template."
+
+The fundamental mistake 95% of freelancers make: they write about themselves. Skills, experience, portfolio. The client doesn't care yet. They care about their problem. Your job is to prove you understand that problem so precisely that hiring you feels like the obvious, low-risk choice.
+
+BEFORE GENERATING — run these quality checks mentally:
+1. Does the hook name a specific, recognisable situation — or is it vague enough to apply to any client?
+2. Do the fit bullets have real numbers or named outcomes — or are they just rephrased skill claims?
+3. Does the process show expertise — or is it just "kickoff, work, delivery"?
+4. Does the CTA make one specific, easy action clear — or does it just say "let me know"?
+5. Would a client reading this think "this person understands my exact situation" — or "this is another template"?
+
+If any answer is weak, generate stronger. A proposal that wins is specific enough that it couldn't have been sent to anyone else.
+
+${imageData ? 'ATTACHED: Job post or brief image. Read every word carefully before writing.\n' : ''}
+
+BEFORE WRITING A SINGLE WORD — diagnose this situation:
+1. What is happening in this client's world right now? What broke, what's stuck, what's at risk?
+2. What have they probably already tried that didn't work?
+3. What does a successful outcome look like in 30, 60, 90 days?
+4. What is the real cost of this problem going unsolved — in money, time, or opportunity?
+5. What are they most afraid of: getting a bad result, wasting money, missing a deadline, or hiring someone they have to manage?
+
+THE WINNING PROPOSAL STRUCTURE:
+
+HOOK — 2-3 sentences. This is the most important part.
+Do not start with "I". Do not start with "Hi". Do not mention your name or experience.
+Start with their situation. Name the specific problem they are living with. Be so precise that they think "how did this person know that?" Then in one sentence, show you know the path from where they are to where they want to be.
+Example of a weak hook: "I'm a React developer with 5 years of experience and I'd love to work on this project."
+Example of a strong hook: "Your onboarding flow is leaking users between signup and first value — that gap is costing you 40-60% of your trials before they ever see why your product is worth paying for. I've fixed this exact problem for three SaaS companies in the last year."
+
+FIT — 3 bullets. Each one is a specific result that maps directly to their specific need.
+Not: "I have experience with e-commerce."
+Yes: "Rebuilt checkout for a Shopify brand doing $2M/yr — cart abandonment dropped from 74% to 51% in 6 weeks."
+Every bullet answers: "Have you done this exact thing before, for someone like me, and did it work?"
+
+PROCESS — 3 steps maximum. Under 10 words each.
+This removes the client's fear of the unknown. Shows you've done this before. Shows they won't have to manage you.
+
+CTA — 1 sentence. Not "I look forward to hearing from you."
+Make the next step feel small, specific, and easy. Like: "Send me the Figma file and I'll have an audit back to you by Thursday." or "15 minutes this week — I'll show you exactly how I'd approach this."
+
+COLD DM — 3 lines, tightly written.
+Line 1: Reference something specific about them that proves you actually looked — not their job post, something about their business, product, or content.
+Line 2: One result from your work that is directly relevant to their situation. Precise, not impressive-sounding.
+Line 3: One question that opens a conversation. Easy to answer in 10 seconds.
+
+${STRICT_RULES}
+
+INPUT:
+${intel.trim() || (imageData ? '[See attached.]' : '[No input provided — write for the most likely scenario given the niche]')}
+${portfolioBlock}
+
+VOICE: ${toneInstruction}
+
+Generate ONLY valid JSON:
+${'{'}
+"extraction": ${'{'}
+  "clientType": "4-8 words. Who is this person and what do they actually do.",
+  "projectType": "4-7 words. The real thing they need solved, not just the task.",
+  "tone": "3-6 words. How they communicate — formal, casual, urgent, technical.",
+  "coreProblem": "3-4 sentences. What is broken or stuck in their world right now. What has probably already gone wrong. What the cost of inaction is. Be specific — no generic descriptions.",
+  "urgency": "Low|Medium|High",
+  "budgetSignal": "Low|Medium|High",
+  "hiddenIntent": "2-3 sentences. What are they really evaluating beyond the task — trust, speed, certainty of outcome, not being burned again? Name the exact signals from the brief that tell you this."
+${'}'},
+"attachments": [{ "description": "2 sentences. Why this specific work is relevant to their exact situation and what it proves.", "links": ["matching portfolio URL if available"] }],
+"proposal": ${'{'}
+  "hook": "2-3 sentences. Names their specific problem so precisely they feel understood. Does NOT start with I, Hi, or their name. No em dashes. Ends with a signal that you know how to fix it.",
+  "fit": [
+    "Specific result with a number, named client type, or measurable outcome — connected directly to what this client needs.",
+    "Second result from a different angle — speed, reliability, or a different type of proof.",
+    "Third result addressing their specific fear — risk reduction, quality, communication, or process."
+  ],
+  "process": ["Step 1: under 10 words.", "Step 2: under 10 words.", "Step 3: under 10 words."],
+  "cta": "1 sentence. Specific, low-effort next step. Makes replying feel obvious. Not a request for permission."
+${'}'},
+"coldDM": "3 lines. \\n between each. Reads like a message from a peer who noticed something real. No selling. No em dashes.",
+"clientPsychology": ${'{'}
+  "buyerType": "6-10 words. The specific buyer archetype — e.g. 'Deadline-driven founder burned by last developer' or 'Cautious SMB owner testing before committing'.",
+  "budgetRange": "Estimated budget range based on signals: company size, platform, scope detail, urgency. Name the signal you used.",
+  "confidenceScore": 1-100,
+  "confidenceRationale": "1-2 sentences. What gives this proposal its best shot at winning, and the single biggest risk to the deal."
+${'}'} 
+${'}'} 
+
+No em dashes anywhere. Return ONLY JSON.`;
+}
 
 function CloseTab() {
   const [mode, setMode] = useState('proposal');
@@ -2810,185 +4366,15 @@ function CloseTab() {
 
   const removePortfolioItem = (id) => setPortfolio(p => p.filter(x => x.id !== id));
 
-  const buildPrompt = () => {
-    const toneInstruction = tone === 'Auto' ? 'Adapt naturally.' : `${TONE_DIRECTIVES[tone]} Apply consistently.`;
-
-    if (mode === 'followup') {
-      const clientBlock = clientMessage.trim() ? `THE CLIENT'S MESSAGE:\
-"""\
-${clientMessage.trim()}\
-"""` : (imageData ? "[The client's message is in the attached image.]" : '[No client message provided.]');
-      const myBlock = myMessage.trim() ? `MY LAST REPLY (what I sent before):\
-"""\
-${myMessage.trim()}\
-"""` : '[I have not replied yet, this is the first follow-up.]';
-
-      return `You are an expert freelance closer drafting a follow-up message.
-${imageData ? 'NOTE: Image attached, may contain the conversation.\
-' : ''}
-
-${clientBlock}
-
-${myBlock}
-
-GOAL OF THIS FOLLOW-UP: ${goal.trim() || 'Re-engage and move the conversation forward.'}
-
-Generate ONLY this JSON:
-{
-  "clientRead": "1-2 sentences. What kind of client is this? (e.g. 'Cautious buyer testing fit, mentions budget twice.' or 'Decisive operator, wants to move fast.')",
-  "situation": "1-2 sentences reading the room. What's the actual state of this conversation? Where did it stall, or what is the client really asking?",
-  "followup": "The follow-up message, ready to send. Use \\
- for line breaks. 3-6 short paragraphs max. No greeting fluff like 'Hope you're well.'"
-}
-
-RULES:
-- Match the client's energy and formality from their message.
-- Acknowledge without summarizing what they said back to them.
-- Move toward the goal without being pushy.
-- Offer a soft off-ramp if the client has gone silent (e.g. "If timing isn't right, no worries, just let me know.").
-- Reference something specific from their message to prove you read it.
-- If I haven't replied yet, treat this as a fresh follow-up that opens new energy. If I have replied, build on what I last said.
-
-VOICE: ${toneInstruction}
-${STRICT_RULES}
-
-Return ONLY JSON. No em dashes.`;
-    }
-
-    if (mode === 'coverletter') {
-      const cvBlock = cvFile
-        ? '[The applicant\'s CV is attached. Read it carefully and pull specific outcomes, roles, time frames, and named tools to weave into the letter.]'
-        : '[No CV attached. Use only the positioning and proof fields below to write the letter.]';
-
-      const jobBlock = jobDescription.trim()
-        ? `JOB DESCRIPTION / POSTING:\
-"""\
-${jobDescription.trim()}\
-"""`
-        : `JOB CONTEXT (no full posting given):\
-"""\
-${intel.trim() || '[Nothing provided.]'}\
-"""`;
-
-      return `You are an elite cover letter writer who has gotten people interviews at top companies. You are NOT a cliche generator. Your letters sound like a real, specific person.
-
-${cvBlock}
-
-${jobBlock}
-
-${offer.trim() ? `APPLICANT POSITIONING (their angle):\
-"""\
-${offer.trim()}\
-"""\
-` : ''}${proof.trim() ? `APPLICANT PROOF POINT:\
-"""\
-${proof.trim()}\
-"""\
-` : ''}
-
-Generate ONLY this JSON:
-{
-  "extraction": {
-    "targetRole": "4-8 words. The actual role being applied for.",
-    "company": "The company name if visible, else 'the company'.",
-    "topNeed": "1-2 sentences. The single biggest thing this employer is solving for, pulled from the posting.",
-    "fitAngle": "1-2 sentences. The applicant's strongest angle for this role, pulled from CV or proof."
-  },
-  "subject": "Email subject line if applicable. <60 chars. Specific. No 'Application for the X role'.",
-  "coverLetter": "The full letter, ready to send. 3-4 short paragraphs max. Use \\
- for line breaks between paragraphs."
-}
-
-RULES:
-- Open with a specific observation about the company, role, or industry. NEVER 'I am writing to apply for' or 'I came across' or 'I'm excited to'.
-- Paragraph 1: Hook. State why this role specifically (1-2 sentences max). Reference something concrete from the posting.
-- Paragraph 2: Best-fit proof. Pull ONE specific outcome from the CV that matches the role's biggest need. Use a number, time frame, named tool, or dollar figure.
-- Paragraph 3: A second angle or point of difference. Why this person, not just any qualified candidate.
-- Paragraph 4 (close): One clean sentence asking for the next step. Confident, not begging.
-- NEVER use these phrases: 'I am writing to apply', 'I am excited to', 'I'm a great fit', 'I bring a unique blend', 'passionate about', 'proven track record', 'team player', 'I hope this finds you well', 'thank you for your consideration', 'attached is my resume', 'please find my CV', 'I look forward to hearing from you', 'I would love the opportunity'.
-- NEVER restate the job posting back at them.
-- NEVER use first person more than necessary. Active voice. Present tense for current work, past tense for past wins.
-- ZERO buzzwords. Every claim has proof.
-- Length: 200-280 words total. Tight.
-
-VOICE: ${toneInstruction}
-${STRICT_RULES}
-
-Return ONLY JSON. No em dashes.`;
-    }
-
-    if (mode === 'dm') {
-      return `You are an expert freelance closer.
-${imageData ? 'NOTE: Image attached.\
-' : ''}
-Generate ONLY: { "clientType": "4-8 words", "hook": "4-10 words", "coldDM": "3-5 lines max, \\
- breaks" }
-RULES: pattern-breaking opener, reference specific, value fast, soft CTA.
-VOICE: ${toneInstruction}
-${STRICT_RULES}
-INPUT: ${intel.trim() || (imageData ? '[See attached.]' : '')}
-${offer.trim() ? `\
-OFFER: ${offer}` : ''}
-${proof.trim() ? `\
-PROOF: ${proof}` : ''}
-Return ONLY JSON. No em dashes.`;
-    }
-
-    if (mode === 'email') {
-      return `You are an expert freelance closer.
-${imageData ? 'NOTE: Image attached.\
-' : ''}
-Generate ONLY: { "clientType": "4-8 words", "subject": "<50 chars no emoji", "body": "4-7 short paragraphs, \\
- breaks, sign 'Best, [Your name]'" }
-RULES: subject <50 chars, hook in first line, specific reference in first 2 sentences, one low-friction CTA.
-VOICE: ${toneInstruction}
-${STRICT_RULES}
-INPUT: ${intel.trim() || (imageData ? '[See attached.]' : '')}
-${offer.trim() ? `\
-OFFER: ${offer}` : ''}
-${proof.trim() ? `\
-PROOF: ${proof}` : ''}
-Return ONLY JSON. No em dashes.`;
-    }
-
-    const portfolioBlock = portfolio.length > 0
-      ? `\
-PORTFOLIO:\
-${portfolio.map((p, i) => `[${i+1}] URL: ${p.url}${p.label ? ` | LABEL: ${p.label}` : ''}${p.tag ? ` | TAG: ${p.tag}` : ''}`).join('\
-')}`
-      : '';
-
-    return `You are an expert freelance closer.
-${imageData ? 'NOTE: Image attached.\
-' : ''}
-Generate ONLY:
-{
-  "extraction": { "clientType": "4-8 words", "projectType": "4-7 words", "tone": "3-6 words", "coreProblem": "1-2 sentences", "urgency": "Low|Medium|High", "budgetSignal": "Low|Medium|High", "hiddenIntent": "1-2 sentences" },
-  "attachments": [{ "description": "1-2 sentences", "links": ["url from portfolio if matches"] }],
-  "proposal": "full proposal, \\
- breaks",
-  "coldDM": "3-5 lines, \\
- breaks"
-}
-RULES: 3-5 attachments. Include EVERY matching portfolio URL. Never invent URLs.
-VOICE: ${toneInstruction}
-${STRICT_RULES}
-INPUT: ${intel.trim() || (imageData ? '[See attached.]' : '')}
-${offer.trim() ? `\
-OFFER: ${offer}` : ''}
-${proof.trim() ? `\
-PROOF: ${proof}` : ''}
-${portfolioBlock}
-Return ONLY JSON. No em dashes.`;
-  };
 
   const handleGenerate = async () => {
+    if (mode === 'reply' && !clientMessage.trim() && !imageData) { setError("Paste the client's message so we know what to reply to."); return; }
     if (mode === 'followup' && !clientMessage.trim() && !myMessage.trim() && !imageData) { setError("Paste either the client's message or your last reply."); return; }
     if (mode === 'coverletter' && !jobDescription.trim() && !intel.trim() && !cvFile) {
       setError('Paste the job description or upload your CV.');
       return;
     }
-    if (mode !== 'followup' && mode !== 'coverletter' && !intel.trim() && !imageData) { setError('Add intel.'); return; }
+    if (mode !==  'followup' && mode !== 'coverletter' && !intel.trim() && !imageData) { setError('Add intel.'); return; }
     setError(''); setLoading(true); setResult(null);
 
     try {
@@ -3007,14 +4393,14 @@ Return ONLY JSON. No em dashes.`;
         }
       }
       if (imageData) content.push({ type: 'image', source: { type: 'base64', media_type: imageData.mediaType, data: imageData.data } });
-      content.push({ type: 'text', text: buildPrompt() });
+      content.push({ type: 'text', text: buildPrompt(mode, intel, imageData, tone, portfolio, clientMessage, myMessage, goal, jobDescription, offer, proof, cvFile) });
 
       const response = await fetch("/api/claude", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           model: "claude-sonnet-4-5",
-          max_tokens: 4000,
+          max_tokens: 2000,
           system: "You are a JSON-only API. You MUST respond with valid, complete JSON only. No prose, no markdown, no commentary, no code fences. Start your response with { and end with }. Every string must be properly escaped.",
           messages: [{ role: "user", content }]
         })
@@ -3052,6 +4438,17 @@ Return ONLY JSON. No em dashes.`;
 
       Object.keys(parsed).forEach(k => { if (typeof parsed[k] === 'string') parsed[k] = stripEmDashes(parsed[k]); });
       if (parsed.extraction) Object.keys(parsed.extraction).forEach(k => { if (typeof parsed.extraction[k] === 'string') parsed.extraction[k] = stripEmDashes(parsed.extraction[k]); });
+      // Handle structured proposal object
+      if (parsed.proposal && typeof parsed.proposal === 'object') {
+        const p = parsed.proposal;
+        if (typeof p.hook === 'string') p.hook = stripEmDashes(p.hook);
+        if (typeof p.cta === 'string') p.cta = stripEmDashes(p.cta);
+        if (Array.isArray(p.fit)) p.fit = p.fit.map(s => stripEmDashes(s));
+        if (Array.isArray(p.process)) p.process = p.process.map(s => stripEmDashes(s));
+      } else if (typeof parsed.proposal === 'string') {
+        parsed.proposal = stripEmDashes(parsed.proposal);
+      }
+      if (typeof parsed.coldDM === 'string') parsed.coldDM = stripEmDashes(parsed.coldDM);
       if (Array.isArray(parsed.attachments)) {
         const portfolioUrls = new Set(portfolio.map(p => p.url));
         parsed.attachments = parsed.attachments.map(a => {
@@ -3101,7 +4498,7 @@ Return ONLY JSON. No em dashes.`;
 
   return (
     <>
-      <div className="grid md:grid-cols-2 gap-6 mb-10">
+      <div className="ff-2col">
         <div>
           <label className="ff-section-label mb-3" style={{ display: 'inline-flex', alignItems: 'center' }}>
             Mode
@@ -3120,12 +4517,68 @@ Return ONLY JSON. No em dashes.`;
         </div>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-10 md:gap-14">
+      <div className="ff-2col-stack">
         <div>
           <h2 className="ff-section-label mb-5">The Input</h2>
 
           <div className="space-y-5">
-            {mode === 'followup' ? (
+            {mode === 'reply' ? (
+              <>
+                <div>
+                  <label className="ff-field-label" style={{ display: 'inline-flex', alignItems: 'center' }}>
+                    Client's message <span className="ff-text-accent" style={{ marginLeft: 4 }}>*</span>
+                    <Tooltip text="Paste what the client sent. The more context you give, the more precisely the reply can address what they actually need." />
+                  </label>
+                  <textarea
+                    className="ff-textarea"
+                    rows={5}
+                    placeholder="Paste what the client said..."
+                    value={clientMessage}
+                    onChange={e => setClientMessage(e.target.value)}
+                  />
+                  <p className="ff-field-hint mt-2">Used to understand their tone, intent, and what they're really asking.</p>
+                </div>
+
+                <div>
+                  <label className="ff-field-label" style={{ display: 'inline-flex', alignItems: 'center' }}>
+                    Your draft reply
+                    <span className="ff-field-hint" style={{ fontWeight: 400, marginLeft: 6 }}>· optional but recommended</span>
+                    <Tooltip text="Paste what you were going to send. Leave blank and we'll write a reply from scratch based on the client's message." />
+                  </label>
+                  <textarea
+                    className="ff-textarea"
+                    rows={5}
+                    placeholder="Paste your draft — we'll sharpen it. Or leave blank and we'll write one from scratch."
+                    value={myMessage}
+                    onChange={e => setMyMessage(e.target.value)}
+                  />
+                </div>
+
+                <div>
+                  <label className="ff-field-label" style={{ display: 'inline-flex', alignItems: 'center' }}>
+                    Or upload a screenshot <span className="ff-field-hint" style={{ fontWeight: 400 }}>· optional</span>
+                  </label>
+                  {!imageData && (
+                    <>
+                      <input ref={fileInputRef} type="file" accept="image/*" onChange={e => { handleFileSelect(e.target.files?.[0]); e.target.value = ''; }} style={{ display: 'none' }} />
+                      <button type="button" className="ff-attach-btn" onClick={() => fileInputRef.current?.click()}>
+                        <Paperclip size={13} /> Attach Screenshot
+                      </button>
+                    </>
+                  )}
+                  {imageData && <ImagePreview data={imageData} onRemove={() => setImageData(null)} />}
+                </div>
+
+                <div>
+                  <label className="ff-field-label" style={{ display: 'inline-flex', alignItems: 'center' }}>
+                    Goal for this reply
+                    <span className="ff-field-hint" style={{ fontWeight: 400, marginLeft: 6 }}>· optional</span>
+                    <Tooltip text="What do you want to happen after they read this? Move to a call, confirm a detail, set a boundary, close the project. Shapes the ending of the reply." />
+                  </label>
+                  <textarea className="ff-textarea" rows={2} placeholder='e.g. "Get sign-off on the brief" or "Address scope concerns without losing the deal"' value={goal} onChange={e => setGoal(e.target.value)} />
+                </div>
+              </>
+            ) : mode === 'followup' ? (
               <>
                 <div>
                   <label className="ff-field-label" style={{ display: 'inline-flex', alignItems: 'center' }}>
@@ -3145,7 +4598,7 @@ Return ONLY JSON. No em dashes.`;
                 <div>
                   <label className="ff-field-label" style={{ display: 'inline-flex', alignItems: 'center' }}>
                     Your last reply
-                    <span className="ff-field-hint" style={{ fontWeight: 400, marginLeft: 6 }}>\u00b7 optional</span>
+                    <span className="ff-field-hint" style={{ fontWeight: 400, marginLeft: 6 }}>· optional</span>
                     <Tooltip text="What you sent before. Leave blank if you're following up for the first time." />
                   </label>
                   <textarea
@@ -3159,7 +4612,7 @@ Return ONLY JSON. No em dashes.`;
 
                 <div>
                   <label className="ff-field-label">
-                    Or upload a screenshot <span className="ff-field-hint" style={{ fontWeight: 400 }}>\u00b7 optional</span>
+                    Or upload a screenshot <span className="ff-field-hint" style={{ fontWeight: 400 }}>· optional</span>
                   </label>
                   {!imageData && (
                     <>
@@ -3199,7 +4652,7 @@ Return ONLY JSON. No em dashes.`;
                 <div>
                   <label className="ff-field-label" style={{ display: 'inline-flex', alignItems: 'center' }}>
                     Your CV / Resume
-                    <span className="ff-field-hint" style={{ fontWeight: 400, marginLeft: 6 }}>\u00b7 optional but strongly recommended</span>
+                    <span className="ff-field-hint" style={{ fontWeight: 400, marginLeft: 6 }}>· optional but strongly recommended</span>
                     <Tooltip text="Upload your CV so the letter pulls real outcomes, time frames, and named tools from your actual experience. PDF works best." />
                   </label>
                   {!cvFile && (
@@ -3238,7 +4691,7 @@ Return ONLY JSON. No em dashes.`;
                         <div className="flex items-center gap-2 mt-1" style={{ fontSize: 12, color: 'var(--text-3)' }}>
                           {cvFile.isPdf ? <FileText size={11} /> : <ImageIcon size={11} />}
                           <span>{cvFile.sizeKb} KB</span>
-                          <span>\u00b7</span>
+                          <span>·</span>
                           <span style={{ color: 'var(--accent)', fontWeight: 500 }}>Attached</span>
                         </div>
                       </div>
@@ -3247,33 +4700,6 @@ Return ONLY JSON. No em dashes.`;
                   )}
                 </div>
 
-                <div>
-                  <label className="ff-field-label" style={{ display: 'inline-flex', alignItems: 'center' }}>
-                    Your positioning <span className="ff-field-hint" style={{ fontWeight: 400, marginLeft: 6 }}>\u00b7 optional</span>
-                    <Tooltip text="A one-line angle on why you're right for this role. If you skip this, the letter pulls positioning from the CV." />
-                  </label>
-                  <textarea
-                    className="ff-textarea"
-                    rows={3}
-                    placeholder="e.g. I help fintech startups go from 0 to first 1k paying users."
-                    value={offer}
-                    onChange={e => setOffer(e.target.value)}
-                  />
-                </div>
-
-                <div>
-                  <label className="ff-field-label" style={{ display: 'inline-flex', alignItems: 'center' }}>
-                    One specific proof point <span className="ff-field-hint" style={{ fontWeight: 400, marginLeft: 6 }}>\u00b7 optional</span>
-                    <Tooltip text="A single result with numbers and named outcome you most want this employer to hear. Used as the lead proof in paragraph 2." />
-                  </label>
-                  <textarea
-                    className="ff-textarea"
-                    rows={3}
-                    placeholder="e.g. Cut churn 28% in 9 months by rebuilding onboarding at Stripe."
-                    value={proof}
-                    onChange={e => setProof(e.target.value)}
-                  />
-                </div>
               </>
             ) : (
               <>
@@ -3294,29 +4720,11 @@ Return ONLY JSON. No em dashes.`;
                   {imageData && <ImagePreview data={imageData} onRemove={() => setImageData(null)} />}
                 </div>
 
-                <div>
-                  <label className="ff-field-label" style={{ display: 'inline-flex', alignItems: 'center' }}>
-                    Positioning
-                    <span className="ff-field-hint" style={{ fontWeight: 400, marginLeft: 6 }}>\u00b7 optional</span>
-                    <Tooltip text="Your one-line pitch. Who you serve and what outcome you produce. Used to weave your angle naturally into the message." />
-                  </label>
-                  <textarea className="ff-textarea" rows={3} placeholder="e.g. I close inbound calls for coaches." value={offer} onChange={e => setOffer(e.target.value)} />
-                </div>
-
-                <div>
-                  <label className="ff-field-label" style={{ display: 'inline-flex', alignItems: 'center' }}>
-                    Proof
-                    <span className="ff-field-hint" style={{ fontWeight: 400, marginLeft: 6 }}>\u00b7 optional</span>
-                    <Tooltip text="A specific result you've produced. Numbers and named outcomes work best. Skip vague claims like 'helped grow revenue'." />
-                  </label>
-                  <textarea className="ff-textarea" rows={3} placeholder="e.g. Took a $40k/mo coach to $110k/mo." value={proof} onChange={e => setProof(e.target.value)} />
-                </div>
-
                 {mode === 'proposal' && (
                   <div>
                     <label className="ff-field-label" style={{ display: 'inline-flex', alignItems: 'center' }}>
                       Portfolio Library
-                      <span className="ff-field-hint" style={{ fontWeight: 400, marginLeft: 6 }}>\u00b7 {portfolioCount} {portfolioCount === 1 ? 'link' : 'links'}</span>
+                      <span className="ff-field-hint" style={{ fontWeight: 400, marginLeft: 6 }}>· {portfolioCount} {portfolioCount === 1 ? 'link' : 'links'}</span>
                       <Tooltip text="Add links to past work with optional labels and tags. Relevant pieces will be matched and recommended as attachments in the proposal." />
                     </label>
                     {portfolio.length > 0 && (
@@ -3358,6 +4766,7 @@ Return ONLY JSON. No em dashes.`;
           {result && resultMode === 'proposal' && <ProposalOutput result={result} pillClass={pillClass} portfolio={portfolio} copied={copied} copyText={copyText} selectAllText={selectAllText} />}
           {result && resultMode === 'dm' && <DMOutput result={result} copied={copied} copyText={copyText} selectAllText={selectAllText} />}
           {result && resultMode === 'email' && <EmailOutput result={result} copied={copied} copyText={copyText} selectAllText={selectAllText} />}
+          {result && resultMode === 'reply' && <ReplyOutput result={result} copied={copied} copyText={copyText} selectAllText={selectAllText} />}
           {result && resultMode === 'followup' && <FollowupOutput result={result} copied={copied} copyText={copyText} selectAllText={selectAllText} />}
           {result && resultMode === 'coverletter' && <CoverLetterOutput result={result} copied={copied} copyText={copyText} selectAllText={selectAllText} />}
         </div>
@@ -3535,9 +4944,9 @@ function PipelineTab() {
 
   return (
     <div className="ff-fadeup">
-      <div className="flex items-center justify-between mb-8 flex-wrap gap-3">
+      <div className="ff-pipeline-topbar">
         <div>
-          <h2 className="ff-display ff-text-1" style={{ fontSize: 28, fontWeight: 500, letterSpacing: '-0.018em' }}>
+          <h2 className="ff-display ff-text-1" style={{ fontSize: 28, fontWeight: 500, letterSpacing: '-0.038em' }}>
             Your pipeline
           </h2>
           <p className="ff-text-2 mt-1" style={{ fontSize: 14, lineHeight: 1.5 }}>
@@ -3566,17 +4975,17 @@ function PipelineTab() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
+      <div className="ff-stat-cards">
         <StatCard label="Total Sent" value={stats.total} />
         <StatCard label="Replies" value={`${stats.replied + stats.inTalks + stats.won + stats.lost}`} sub={`${replyRate}% reply rate`} />
         <StatCard label="Closed Won" value={stats.won} sub={winRate > 0 ? `${winRate}% win rate` : null} accent />
-        <StatCard label="Revenue" value={totalValue > 0 ? `$${totalValue.toLocaleString()}` : '\u2014'} sub="from closed deals" />
+        <StatCard label="Revenue" value={totalValue > 0 ? `$${totalValue.toLocaleString()}` : '—'} sub="from closed deals" />
       </div>
 
       {showForm && (
         <div className="ff-card ff-fadeup mb-8" style={{ padding: 20 }}>
           <h3 className="ff-subheading mb-4" style={{ fontSize: 16 }}>New entry</h3>
-          <div className="grid md:grid-cols-2 gap-4">
+          <div className="ff-2col">
             <div>
               <label className="ff-field-label" style={{ display: 'inline-flex', alignItems: 'center' }}>
                 Date sent
@@ -3618,7 +5027,7 @@ function PipelineTab() {
             </div>
             <div>
               <label className="ff-field-label" style={{ display: 'inline-flex', alignItems: 'center' }}>
-                Value <span className="ff-field-hint" style={{ fontWeight: 400, marginLeft: 6 }}>\u00b7 optional</span>
+                Value <span className="ff-field-hint" style={{ fontWeight: 400, marginLeft: 6 }}>· optional</span>
                 <Tooltip text="Deal size." align="right" />
               </label>
               <input type="text" className="ff-input" placeholder="e.g. $5,000 or $2k/mo" value={value} onChange={e => setValue(e.target.value)} />
@@ -3626,7 +5035,7 @@ function PipelineTab() {
           </div>
           <div className="mt-4">
             <label className="ff-field-label">
-              Notes <span className="ff-field-hint" style={{ fontWeight: 400 }}>\u00b7 optional</span>
+              Notes <span className="ff-field-hint" style={{ fontWeight: 400 }}>· optional</span>
             </label>
             <textarea className="ff-textarea" rows={2} placeholder="Brief context, where you found them, etc." value={notes} onChange={e => setNotes(e.target.value)} />
           </div>
@@ -3644,14 +5053,14 @@ function PipelineTab() {
       {entries.length === 0 && !showForm && (
         <div className="ff-empty-state">
           <TrendingUp size={28} style={{ color: 'var(--text-3)', display: 'inline-block', marginBottom: 12, opacity: 0.5 }} />
-          <p className="ff-display ff-text-1 mb-3" style={{ fontSize: 22, lineHeight: 1.3, fontWeight: 500, letterSpacing: '-0.018em' }}>
+          <p className="ff-display ff-text-1 mb-3" style={{ fontSize: 22, lineHeight: 1.3, fontWeight: 500, letterSpacing: '-0.038em' }}>
             Nothing logged yet.
           </p>
           <p className="ff-text-3" style={{ fontSize: 13, lineHeight: 1.55 }}>
             Add an entry every time you send a proposal, DM, or email.<br/>
             Track replies and close rates over time.
           </p>
-          <p className="ff-text-3 mt-4" style={{ fontSize: 11, lineHeight: 1.5, fontStyle: 'italic' }}>
+          <p className="ff-text-3 mt-4" style={{ fontSize: 12, lineHeight: 1.5, fontStyle: 'italic' }}>
             Saved in your browser for 15 days. No account needed.
           </p>
         </div>
@@ -3659,20 +5068,12 @@ function PipelineTab() {
 
       {entries.length > 0 && (
         <div className="ff-card" style={{ padding: 0 }}>
-          <div className="grid items-center" style={{
-            gridTemplateColumns: '110px 1fr 110px 130px 110px 32px',
-            gap: 12,
-            padding: '12px 18px',
-            borderBottom: '1px solid var(--border)',
-            backgroundColor: 'var(--bg-elev-2)',
-            borderTopLeftRadius: 'var(--r-lg)',
-            borderTopRightRadius: 'var(--r-lg)',
-          }}>
-            <span className="ff-section-label" style={{ fontSize: 10 }}>Date</span>
-            <span className="ff-section-label" style={{ fontSize: 10 }}>Client</span>
-            <span className="ff-section-label" style={{ fontSize: 10 }}>Type</span>
-            <span className="ff-section-label" style={{ fontSize: 10 }}>Status</span>
-            <span className="ff-section-label" style={{ fontSize: 10 }}>Value</span>
+          <div className="ff-pipeline-table-header">
+            <span className="ff-section-label" style={{ fontSize: 12 }}>Date</span>
+            <span className="ff-section-label" style={{ fontSize: 12 }}>Client</span>
+            <span className="ff-section-label ff-pipeline-col-type" style={{ fontSize: 12 }}>Type</span>
+            <span className="ff-section-label" style={{ fontSize: 12 }}>Status</span>
+            <span className="ff-section-label ff-pipeline-col-value" style={{ fontSize: 12 }}>Value</span>
             <span></span>
           </div>
           {entries.map((entry, i) => (
@@ -3703,19 +5104,19 @@ function PipelineTab() {
 function StatCard({ label, value, sub, accent }) {
   return (
     <div className="ff-card ff-fadeup" style={{ padding: 18 }}>
-      <p className="ff-section-label mb-2" style={{ fontSize: 10.5 }}>{label}</p>
+      <p className="ff-section-label mb-2" style={{ fontSize: 12 }}>{label}</p>
       <p style={{
         fontFamily: 'var(--font-display)',
         fontSize: 28,
         lineHeight: 1.1,
         fontWeight: 500,
-        letterSpacing: '-0.022em',
+        letterSpacing: '-0.038em',
         color: accent ? 'var(--accent)' : 'var(--text-1)',
         fontFeatureSettings: "'tnum'",
       }}>
         {value}
       </p>
-      {sub && <p className="ff-text-3 mt-1" style={{ fontSize: 11.5 }}>{sub}</p>}
+      {sub && <p className="ff-text-3 mt-1" style={{ fontSize: 13 }}>{sub}</p>}
     </div>
   );
 }
@@ -3767,7 +5168,7 @@ function ActivityModal({ open, onClose, period, setPeriod, week, month, year }) 
         <div className="ff-modal-head">
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <TrendingUp size={16} style={{ color: 'var(--accent)' }} />
-            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 500, letterSpacing: '-0.018em', color: 'var(--text-1)', margin: 0 }}>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 500, letterSpacing: '-0.038em', color: 'var(--text-1)', margin: 0 }}>
               Activity
             </h2>
           </div>
@@ -3787,7 +5188,7 @@ function ActivityModal({ open, onClose, period, setPeriod, week, month, year }) 
                     background: active ? 'var(--bg-elev-1)' : 'transparent',
                     color: active ? 'var(--text-1)' : 'var(--text-3)',
                     padding: '7px 16px', borderRadius: 7,
-                    fontSize: 12.5, fontWeight: 600, fontFamily: 'var(--font-text)',
+                    fontSize: 13, fontWeight: 600, fontFamily: 'var(--font-text)',
                     cursor: 'pointer',
                     transition: 'background 220ms, color 220ms',
                     boxShadow: active ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
@@ -3802,14 +5203,14 @@ function ActivityModal({ open, onClose, period, setPeriod, week, month, year }) 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16, paddingBottom: 24, borderBottom: '1px solid var(--border)', marginBottom: 24 }}>
             <SummaryStat label="Reply rate" value={`${replyRate}%`} />
             <SummaryStat label="Win rate" value={`${winRate}%`} accent />
-            <SummaryStat label="Revenue" value={data.revenue > 0 ? `$${data.revenue.toLocaleString()}` : '\u2014'} />
+            <SummaryStat label="Revenue" value={data.revenue > 0 ? `$${data.revenue.toLocaleString()}` : '—'} />
             <SummaryStat label="Period" value={periodLabels[period]} muted />
           </div>
 
           <div>
             <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 18 }}>
-              <span className="ff-section-label" style={{ fontSize: 10.5 }}>Breakdown</span>
-              <span style={{ fontSize: 11.5, color: 'var(--text-3)', fontFeatureSettings: "'tnum'" }}>{data.sent} {data.sent === 1 ? 'entry' : 'entries'}</span>
+              <span className="ff-section-label" style={{ fontSize: 12 }}>Breakdown</span>
+              <span style={{ fontSize: 13, color: 'var(--text-3)', fontFeatureSettings: "'tnum'" }}>{data.sent} {data.sent === 1 ? 'entry' : 'entries'}</span>
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -3817,7 +5218,7 @@ function ActivityModal({ open, onClose, period, setPeriod, week, month, year }) 
                 const widthPct = data.sent > 0 ? (bar.value / maxBarValue) * 100 : 0;
                 return (
                   <div key={bar.label} style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                    <div style={{ width: 72, fontSize: 12.5, color: 'var(--text-2)', fontWeight: 500, flexShrink: 0 }}>{bar.label}</div>
+                    <div style={{ width: 72, fontSize: 13, color: 'var(--text-2)', fontWeight: 500, flexShrink: 0 }}>{bar.label}</div>
                     <div style={{ flex: 1, height: 26, background: 'var(--bg-elev-2)', borderRadius: 7, overflow: 'hidden' }}>
                       <div
                         key={`${period}-${bar.label}`}
@@ -3844,8 +5245,8 @@ function ActivityModal({ open, onClose, period, setPeriod, week, month, year }) 
 function SummaryStat({ label, value, accent, muted }) {
   return (
     <div>
-      <p className="ff-section-label" style={{ fontSize: 10, marginBottom: 6 }}>{label}</p>
-      <p style={{ fontFamily: 'var(--font-display)', fontSize: 22, fontWeight: 500, letterSpacing: '-0.02em', color: accent ? 'var(--accent)' : (muted ? 'var(--text-2)' : 'var(--text-1)'), margin: 0, lineHeight: 1.1 }}>
+      <p className="ff-section-label" style={{ fontSize: 12, marginBottom: 6 }}>{label}</p>
+      <p style={{ fontFamily: 'var(--font-display)', fontSize: 22, fontWeight: 500, letterSpacing: '-0.038em', color: accent ? 'var(--accent)' : (muted ? 'var(--text-2)' : 'var(--text-1)'), margin: 0, lineHeight: 1.1 }}>
         {value}
       </p>
     </div>
@@ -3866,11 +5267,8 @@ function PipelineRow({ entry, onStatusChange, onRemove, delay }) {
 
   return (
     <div
-      className="ff-fadein"
+      className="ff-fadein ff-pipeline-row-grid"
       style={{
-        display: 'grid',
-        gridTemplateColumns: '110px 1fr 110px 130px 110px 32px',
-        gap: 12, padding: '14px 18px',
         borderBottom: '1px solid var(--border)',
         alignItems: 'center',
         animationDelay: `${delay}ms`,
@@ -3880,13 +5278,13 @@ function PipelineRow({ entry, onStatusChange, onRemove, delay }) {
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
         <span className="ff-mono" style={{ fontSize: 12, color: 'var(--text-2)', fontWeight: 500 }}>{formatShortDate(entry.date)}</span>
-        <span style={{ fontSize: 11, color: 'var(--text-3)' }}>{daysAgoLabel(entry.date)}</span>
+        <span style={{ fontSize: 12, color: 'var(--text-3)' }}>{daysAgoLabel(entry.date)}</span>
       </div>
       <div style={{ minWidth: 0 }}>
         <p style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--text-1)', letterSpacing: '-0.005em' }} className="truncate">{entry.client}</p>
         {entry.notes && <p className="truncate" style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 2 }}>{entry.notes}</p>}
       </div>
-      <span style={{ fontSize: 12, color: 'var(--text-2)', fontWeight: 500 }}>{type?.label}</span>
+      <span className="ff-pipeline-col-type" style={{ fontSize: 12, color: 'var(--text-2)', fontWeight: 500 }}>{type?.label}</span>
       <div className="ff-dropdown" ref={ref} style={{ width: '100%' }}>
         <button
           type="button"
@@ -3896,7 +5294,7 @@ function PipelineRow({ entry, onStatusChange, onRemove, delay }) {
             color: status?.color || 'var(--text-2)',
             border: 'none', padding: '4px 10px',
             borderRadius: 'var(--r-pill)',
-            fontSize: 11, fontWeight: 600, letterSpacing: '0.02em', textTransform: 'uppercase',
+            fontSize: 12, fontWeight: 600, letterSpacing: '0.02em', textTransform: 'uppercase',
             cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 4,
           }}
         >
@@ -3919,7 +5317,7 @@ function PipelineRow({ entry, onStatusChange, onRemove, delay }) {
           </div>
         )}
       </div>
-      <span style={{ fontSize: 13, color: 'var(--text-1)', fontWeight: 500, fontFeatureSettings: "'tnum'" }}>{entry.value || '\u2014'}</span>
+      <span className="ff-pipeline-col-value" style={{ fontSize: 13, color: 'var(--text-1)', fontWeight: 500, fontFeatureSettings: "'tnum'" }}>{entry.value || '—'}</span>
       <button
         onClick={onRemove}
         style={{ background: 'transparent', border: 'none', color: 'var(--text-3)', cursor: 'pointer', padding: 4, borderRadius: 'var(--r-sm)', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all var(--t-fast)' }}
@@ -4100,7 +5498,7 @@ function ImagePreview({ data, onRemove }) {
         <div className="flex items-center gap-2 mt-1" style={{ fontSize: 12, color: 'var(--text-3)' }}>
           <ImageIcon size={11} />
           <span>{data.sizeKb} KB</span>
-          <span>\u00b7</span>
+          <span>·</span>
           <span style={{ color: 'var(--accent)', fontWeight: 500 }}>Attached</span>
         </div>
       </div>
@@ -4125,25 +5523,252 @@ function PortfolioCard({ item, onRemove }) {
   );
 }
 
-function ProposalOutput({ result, pillClass, portfolio, copied, copyText, selectAllText }) {
+/* ── Psychology card ──────────────────────────────────────────────────── */
+function PsychCard({ psych, delay = 0 }) {
+  if (!psych) return null;
+  const score = Math.min(100, Math.max(0, Number(psych.confidenceScore) || 0));
+  const scoreColor  = score >= 75 ? 'var(--success)'  : score >= 50 ? 'var(--warning)'  : 'var(--danger)';
+  const scoreBg     = score >= 75 ? 'var(--success-bg)': score >= 50 ? 'var(--warning-bg)': 'var(--danger-bg)';
+  const scoreBorder = score >= 75 ? 'rgba(74,222,128,0.25)' : score >= 50 ? 'rgba(251,191,36,0.25)' : 'rgba(248,113,113,0.25)';
+  const scoreLabel  = score >= 75 ? 'Strong'  : score >= 50 ? 'Moderate' : 'Low';
+  const scoreBarColor = score >= 75 ? '#4ade80' : score >= 50 ? '#fbbf24' : '#f87171';
+
   return (
-    <div className="space-y-6">
-      <div className="ff-fadeup ff-card">
-        <h3 className="ff-subheading mb-4">Breakdown</h3>
-        <div className="grid grid-cols-2 gap-x-5 gap-y-4">
-          <Cell label="Client Type" value={result.extraction?.clientType} />
-          <Cell label="Project Type" value={result.extraction?.projectType} accent />
-          <Cell label="Tone" value={result.extraction?.tone} wide />
-          <Cell label="Urgency"><span className={pillClass(result.extraction?.urgency)}>{result.extraction?.urgency}</span></Cell>
-          <Cell label="Budget Signal"><span className={pillClass(result.extraction?.budgetSignal)}>{result.extraction?.budgetSignal}</span></Cell>
-          <Cell label="Core Problem" value={result.extraction?.coreProblem} wide />
-          <Cell label="Hidden Intent" value={result.extraction?.hiddenIntent} wide />
+    <div className="ff-fadeup ff-card" style={{
+      animationDelay: `${delay}ms`,
+      padding: 0,
+      overflow: 'hidden',
+      border: '1px solid var(--border)',
+      background: 'var(--bg)',
+      boxShadow: '0 1px 4px rgba(0,0,0,0.05)',
+    }}>
+
+      {/* Header row */}
+      <div style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '16px 20px', borderBottom: '1px solid var(--border)',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+          <div style={{
+            width: 30, height: 30, borderRadius: 9,
+            background: 'var(--accent-bg-soft)', border: '1px solid var(--accent-border-soft)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <User size={14} style={{ color: 'var(--accent)' }} />
+          </div>
+          <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-1)', letterSpacing: '-0.01em', fontFamily: 'var(--font-text)' }}>
+            Client psychology
+          </span>
+        </div>
+
+        {/* Score badge */}
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 10,
+        }}>
+          <span style={{ fontSize: 12, color: 'var(--text-3)', fontFamily: 'var(--font-text)', letterSpacing: '-0.003em' }}>
+            Proposal confidence
+          </span>
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 7,
+            background: scoreBg,
+            border: `1px solid ${scoreBorder}`,
+            borderRadius: 20, padding: '5px 12px',
+          }}>
+            <div style={{ width: 7, height: 7, borderRadius: '50%', background: scoreBarColor, flexShrink: 0 }} />
+            <span style={{ fontSize: 15, fontWeight: 800, color: scoreColor, fontFamily: 'var(--font-text)', letterSpacing: '-0.02em', lineHeight: 1 }}>
+              {score}
+            </span>
+            <span style={{ fontSize: 12, fontWeight: 600, color: scoreColor, fontFamily: 'var(--font-text)', opacity: 0.85 }}>
+              {scoreLabel}
+            </span>
+          </div>
         </div>
       </div>
 
+      {/* Progress bar */}
+      <div style={{ height: 3, background: 'var(--bg-elev-2)', position: 'relative' }}>
+        <div style={{
+          position: 'absolute', left: 0, top: 0, bottom: 0,
+          width: `${score}%`,
+          background: `linear-gradient(90deg, ${scoreBarColor}99 0%, ${scoreBarColor} 100%)`,
+          transition: 'width 800ms cubic-bezier(0.16,1,0.3,1)',
+          borderRadius: '0 2px 2px 0',
+        }} />
+      </div>
+
+      {/* Two cells */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0 }}>
+        {/* Buyer type */}
+        <div style={{
+          padding: '16px 20px',
+          borderRight: '1px solid var(--border)',
+          borderBottom: psych.confidenceRationale ? '1px solid var(--border)' : 'none',
+        }}>
+          <p style={{
+            fontSize: 10.5, fontWeight: 700, color: 'var(--text-3)',
+            letterSpacing: '0.06em', textTransform: 'uppercase',
+            fontFamily: 'var(--font-text)', marginBottom: 7,
+          }}>
+            Detected buyer type
+          </p>
+          <p style={{
+            fontSize: 13.5, fontWeight: 600, color: 'var(--text-1)',
+            lineHeight: 1.45, letterSpacing: '-0.008em', fontFamily: 'var(--font-text)',
+            margin: 0,
+          }}>
+            {psych.buyerType || '—'}
+          </p>
+        </div>
+
+        {/* Budget range */}
+        <div style={{
+          padding: '16px 20px',
+          borderBottom: psych.confidenceRationale ? '1px solid var(--border)' : 'none',
+        }}>
+          <p style={{
+            fontSize: 10.5, fontWeight: 700, color: 'var(--text-3)',
+            letterSpacing: '0.06em', textTransform: 'uppercase',
+            fontFamily: 'var(--font-text)', marginBottom: 7,
+          }}>
+            Likely budget range
+          </p>
+          <p style={{
+            fontSize: 13.5, fontWeight: 600, color: 'var(--accent)',
+            lineHeight: 1.45, letterSpacing: '-0.008em', fontFamily: 'var(--font-text)',
+            margin: 0,
+          }}>
+            {psych.budgetRange || '—'}
+          </p>
+        </div>
+      </div>
+
+      {/* Rationale */}
+      {psych.confidenceRationale && (
+        <div style={{
+          padding: '14px 20px',
+          background: 'var(--bg-elev-1)',
+        }}>
+          <p style={{
+            fontSize: 13, color: 'var(--text-2)', lineHeight: 1.6,
+            fontFamily: 'var(--font-text)', margin: 0,
+            letterSpacing: '-0.005em',
+          }}>
+            <strong style={{ color: 'var(--text-1)', fontWeight: 600 }}>Why: </strong>
+            {psych.confidenceRationale}
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ProposalOutput({ result, pillClass, portfolio, copied, copyText, selectAllText }) {
+  // Build plain-text version for copying
+  const proposalText = (() => {
+    const p = result.proposal;
+    if (!p) return '';
+    if (typeof p === 'string') return p;
+    const lines = [];
+    if (p.hook) lines.push(p.hook);
+    if (p.fit?.length) { lines.push(''); p.fit.forEach(b => lines.push(`• ${b}`)); }
+    if (p.process?.length) { lines.push(''); p.process.forEach((s, i) => lines.push(`${i + 1}. ${s}`)); }
+    if (p.cta) { lines.push(''); lines.push(p.cta); }
+    return lines.join('\n');
+  })();
+
+  const proposal = result.proposal;
+  const isStructured = proposal && typeof proposal === 'object';
+
+  return (
+    <div className="space-y-5">
+      {/* Breakdown */}
+      <div className="ff-fadeup ff-card">
+        <h3 className="ff-subheading mb-4">Client diagnosis</h3>
+        <div className="ff-detail-grid">
+          <Cell label="Who they are" value={result.extraction?.clientType} />
+          <Cell label="What they need" value={result.extraction?.projectType} accent />
+          <Cell label="Urgency"><span className={pillClass(result.extraction?.urgency)}>{result.extraction?.urgency}</span></Cell>
+          <Cell label="Budget signal"><span className={pillClass(result.extraction?.budgetSignal)}>{result.extraction?.budgetSignal}</span></Cell>
+          <Cell label="The real problem" value={result.extraction?.coreProblem} wide />
+          <Cell label="What they're really evaluating" value={result.extraction?.hiddenIntent} wide />
+        </div>
+      </div>
+
+      <PsychCard psych={result.clientPsychology} delay={30} />
+
+      {/* Structured Proposal */}
+      {proposal && (
+        <div className="ff-fadeup" style={{ animationDelay: '60ms' }}>
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="ff-subheading">Your proposal</h3>
+            <button className="ff-icon-btn" onClick={() => copyText('proposal', proposalText)}>
+              {copied.proposal ? <Check size={12} /> : <Copy size={12} />}
+              {copied.proposal ? 'Copied' : 'Copy all'}
+            </button>
+          </div>
+
+          {isStructured ? (
+            <div className="ff-card" style={{ padding: 0, overflow: 'hidden' }}>
+              {/* Hook */}
+              {proposal.hook && (
+                <div style={{ padding: '20px 22px', borderBottom: '1px solid var(--border)', background: 'var(--bg)' }}>
+                  <span className="ff-section-label" style={{ display: 'block', marginBottom: 10, color: 'var(--accent)' }}>Opening — makes them feel understood</span>
+                  <p style={{ fontSize: 15.5, lineHeight: 1.6, color: 'var(--text-1)', fontWeight: 500, letterSpacing: '-0.008em', margin: 0 }}>{proposal.hook}</p>
+                </div>
+              )}
+
+              {/* Why me */}
+              {proposal.fit?.length > 0 && (
+                <div style={{ padding: '20px 22px', borderBottom: '1px solid var(--border)' }}>
+                  <span className="ff-section-label" style={{ display: 'block', marginBottom: 12 }}>Proof I can solve this</span>
+                  <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    {proposal.fit.map((b, i) => (
+                      <li key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+                        <span style={{ width: 20, height: 20, borderRadius: 6, background: 'var(--accent-bg-soft)', border: '1px solid var(--accent-border-soft)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
+                          <span style={{ fontSize: 10, fontWeight: 800, color: 'var(--accent)' }}>{i + 1}</span>
+                        </span>
+                        <span style={{ fontSize: 14, lineHeight: 1.6, color: 'var(--text-1)', letterSpacing: '-0.005em' }}>{b}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Process */}
+              {proposal.process?.length > 0 && (
+                <div style={{ padding: '20px 22px', borderBottom: '1px solid var(--border)' }}>
+                  <span className="ff-section-label" style={{ display: 'block', marginBottom: 12 }}>How we work together</span>
+                  <ol style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    {proposal.process.map((s, i) => (
+                      <li key={i} style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
+                        <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--accent)', fontFamily: 'var(--font-mono)', flexShrink: 0, width: 22, paddingTop: 2, letterSpacing: '0.02em' }}>{String(i + 1).padStart(2, '0')}</span>
+                        <span style={{ fontSize: 14, lineHeight: 1.55, color: 'var(--text-1)', letterSpacing: '-0.005em' }}>{s}</span>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              )}
+
+              {/* CTA */}
+              {proposal.cta && (
+                <div style={{ padding: '18px 22px', background: 'var(--accent-bg-soft)', borderTop: '1px solid var(--accent-border-soft)' }}>
+                  <span className="ff-section-label" style={{ display: 'block', marginBottom: 8, color: 'var(--accent)' }}>The ask — easy to say yes to</span>
+                  <p style={{ fontSize: 15, lineHeight: 1.55, color: 'var(--text-1)', fontWeight: 600, letterSpacing: '-0.008em', margin: 0 }}>{proposal.cta}</p>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="ff-card">
+              <p className="ff-output-text" onClick={selectAllText} style={{ cursor: 'text' }}>{proposalText}</p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Suggested Attachments */}
       {result.attachments?.length > 0 && (
-        <div className="ff-fadeup ff-card" style={{ animationDelay: '60ms' }}>
-          <h3 className="ff-subheading mb-4">Suggested Attachments</h3>
+        <div className="ff-fadeup ff-card" style={{ animationDelay: '120ms' }}>
+          <h3 className="ff-subheading mb-4">Attachments to send</h3>
           <ul className="ff-attach-list">
             {result.attachments.map((item, i) => (
               <li key={i} className="ff-attach-item">
@@ -4175,7 +5800,7 @@ function ProposalOutput({ result, pillClass, portfolio, copied, copyText, select
         </div>
       )}
 
-      <OutputBlock title="Proposal" text={result.proposal} copyKey="proposal" copied={copied} copyText={copyText} selectAllText={selectAllText} delay={120} />
+      {/* Cold DM */}
       <OutputBlock title="Cold DM" text={result.coldDM} copyKey="dm" copied={copied} copyText={copyText} selectAllText={selectAllText} delay={180} />
     </div>
   );
@@ -4199,14 +5824,13 @@ function DMOutput({ result, copied, copyText, selectAllText }) {
         </div>
       </div>
       <OutputBlock title="Cold DM" text={result.coldDM} copyKey="dm" copied={copied} copyText={copyText} selectAllText={selectAllText} delay={60} />
+      <PsychCard psych={result.clientPsychology} delay={90} />
     </div>
   );
 }
 
 function EmailOutput({ result, copied, copyText, selectAllText }) {
-  const fullEmail = `Subject: ${result.subject || ''}\
-\
-${result.body || ''}`;
+  const fullEmail = `Subject: ${result.subject || ''}\n\n${result.body || ''}`;
   return (
     <div className="space-y-5">
       <div className="ff-fadeup">
@@ -4247,6 +5871,66 @@ ${result.body || ''}`;
           <p className="ff-output-text" onClick={selectAllText} style={{ cursor: 'text' }}>{result.body}</p>
         </div>
       </div>
+      <PsychCard psych={result.clientPsychology} delay={150} />
+    </div>
+  );
+}
+
+function ReplyOutput({ result, copied, copyText, selectAllText }) {
+  return (
+    <div className="space-y-5">
+      {/* Client read */}
+      {result.clientRead && (
+        <div className="ff-fadeup ff-card">
+          <p className="ff-section-label mb-2">What they're really saying</p>
+          <p style={{ fontSize: 14, color: 'var(--text-1)', lineHeight: 1.6, letterSpacing: '-0.005em' }}>{result.clientRead}</p>
+        </div>
+      )}
+
+      {/* Issues found */}
+      {result.issues?.length > 0 && (
+        <div className="ff-fadeup ff-card" style={{ animationDelay: '30ms' }}>
+          <p className="ff-section-label mb-3">What was weak in the draft</p>
+          <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {result.issues.filter(Boolean).map((issue, i) => (
+              <li key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                <span style={{ width: 18, height: 18, borderRadius: '50%', background: 'var(--danger-bg)', border: '1px solid rgba(248,113,113,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
+                  <span style={{ fontSize: 9, fontWeight: 800, color: 'var(--danger)' }}>{i + 1}</span>
+                </span>
+                <span style={{ fontSize: 13.5, lineHeight: 1.55, color: 'var(--text-2)', letterSpacing: '-0.005em' }}>{issue}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* Polished reply */}
+      {result.polishedReply && (
+        <div className="ff-fadeup" style={{ animationDelay: '60ms' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+            <h3 className="ff-subheading">Polished reply</h3>
+            <button className="ff-icon-btn" onClick={() => copyText('reply', result.polishedReply)}>
+              {copied.reply ? <Check size={12} /> : <Copy size={12} />}
+              {copied.reply ? 'Copied' : 'Copy'}
+            </button>
+          </div>
+          <div className="ff-card" style={{ borderLeft: '3px solid var(--accent)' }}>
+            <p className="ff-output-text" onClick={selectAllText} style={{ cursor: 'text', fontSize: 15, lineHeight: 1.7, letterSpacing: '-0.005em' }}>
+              {result.polishedReply}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* What changed */}
+      {result.whatChanged && (
+        <div className="ff-fadeup ff-card" style={{ animationDelay: '90ms', background: 'var(--accent-bg-soft)', border: '1px solid var(--accent-border-soft)' }}>
+          <p className="ff-section-label mb-2" style={{ color: 'var(--accent)' }}>What changed and why</p>
+          <p style={{ fontSize: 13.5, color: 'var(--text-1)', lineHeight: 1.6, letterSpacing: '-0.005em' }}>{result.whatChanged}</p>
+        </div>
+      )}
+
+      <PsychCard psych={result.clientPsychology} delay={120} />
     </div>
   );
 }
@@ -4271,22 +5955,21 @@ function FollowupOutput({ result, copied, copyText, selectAllText }) {
         </div>
       )}
       <OutputBlock title="Follow-up" text={result.followup} copyKey="followup" copied={copied} copyText={copyText} selectAllText={selectAllText} delay={60} />
+      <PsychCard psych={result.clientPsychology} delay={90} />
     </div>
   );
 }
 
 function CoverLetterOutput({ result, copied, copyText, selectAllText }) {
   const fullText = result.subject
-    ? `Subject: ${result.subject}\
-\
-${result.coverLetter || ''}`
+    ? `Subject: ${result.subject}\n\n${result.coverLetter || ''}`
     : (result.coverLetter || '');
   return (
     <div className="space-y-5">
       {result.extraction && (
         <div className="ff-fadeup ff-card">
           <h3 className="ff-subheading mb-4">Read of the role</h3>
-          <div className="grid grid-cols-2 gap-x-5 gap-y-4">
+          <div className="ff-detail-grid">
             <Cell label="Target role" value={result.extraction.targetRole} accent />
             <Cell label="Company" value={result.extraction.company} />
             <Cell label="Their top need" value={result.extraction.topNeed} wide />
@@ -4332,6 +6015,7 @@ ${result.coverLetter || ''}`
           </p>
         </div>
       </div>
+      <PsychCard psych={result.clientPsychology} delay={150} />
     </div>
   );
 }
@@ -4356,7 +6040,7 @@ function OutputBlock({ title, text, copyKey, copied, copyText, selectAllText, de
 function Cell({ label, value, children, wide, accent }) {
   return (
     <div className={wide ? 'col-span-2' : ''}>
-      <div className="ff-section-label mb-1.5" style={{ fontSize: 10.5 }}>{label}</div>
+      <div className="ff-section-label mb-1.5" style={{ fontSize: 12 }}>{label}</div>
       {children || (
         <p style={{ fontSize: 13.5, lineHeight: 1.5, color: accent ? 'var(--accent)' : 'var(--text-1)', fontWeight: accent ? 600 : 400, letterSpacing: '-0.005em' }}>
           {value || '...'}
@@ -4369,10 +6053,10 @@ function Cell({ label, value, children, wide, accent }) {
 function OptimizeEmpty() {
   return (
     <div className="ff-empty-state">
-      <div className="ff-mono ff-pulse mb-4" style={{ fontSize: 11, color: 'var(--text-3)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+      <div className="ff-mono ff-pulse mb-4" style={{ fontSize: 12, color: 'var(--text-3)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
         Awaiting Page
       </div>
-      <p className="ff-display ff-text-1 mb-4" style={{ fontSize: 22, lineHeight: 1.3, fontWeight: 500, letterSpacing: '-0.018em' }}>
+      <p className="ff-display ff-text-1 mb-4" style={{ fontSize: 22, lineHeight: 1.3, fontWeight: 500, letterSpacing: '-0.038em' }}>
         Your audit, scores, and<br/>rewrites will appear here.
       </p>
       <p className="ff-text-3" style={{ fontSize: 13, lineHeight: 1.55 }}>
@@ -4387,7 +6071,7 @@ function OptimizeLoading({ message }) {
     <div className="ff-card">
       <div className="flex items-center gap-2 mb-5">
         <span className="ff-status-dot ff-pulse"></span>
-        <span className="ff-mono" style={{ fontSize: 11, color: 'var(--accent)', fontWeight: 600, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+        <span className="ff-mono" style={{ fontSize: 12, color: 'var(--accent)', fontWeight: 600, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
           Working
         </span>
       </div>
@@ -4404,18 +6088,11 @@ function OptimizeLoading({ message }) {
 
 function CloserEmpty({ mode }) {
   const messages = {
-    proposal: 'Your proposal, DM,\
-and matched links\
-will appear here.',
-    dm: 'Your cold DM\
-will appear here.',
-    email: 'Your subject line\
-and email body\
-will appear here.',
-    followup: 'Your follow-up\
-will appear here.',
-    coverletter: 'Your tailored cover letter\
-will appear here.',
+    proposal: 'Your proposal, DM,\nand matched links\nwill appear here.',
+    dm: 'Your cold DM\nwill appear here.',
+    email: 'Your subject line\nand email body\nwill appear here.',
+    followup: 'Your follow-up\nwill appear here.',
+    coverletter: 'Your tailored cover letter\nwill appear here.',
   };
   const kickers = {
     followup: 'Awaiting Conversation',
@@ -4424,10 +6101,10 @@ will appear here.',
   const kicker = kickers[mode] || 'Awaiting Intel';
   return (
     <div className="ff-empty-state">
-      <div className="ff-mono ff-pulse mb-4" style={{ fontSize: 11, color: 'var(--text-3)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+      <div className="ff-mono ff-pulse mb-4" style={{ fontSize: 12, color: 'var(--text-3)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
         {kicker}
       </div>
-      <p className="ff-display ff-text-1" style={{ fontSize: 22, lineHeight: 1.3, fontWeight: 500, letterSpacing: '-0.018em', whiteSpace: 'pre-line' }}>
+      <p className="ff-display ff-text-1" style={{ fontSize: 22, lineHeight: 1.3, fontWeight: 500, letterSpacing: '-0.038em', whiteSpace: 'pre-line' }}>
         {messages[mode]}
       </p>
     </div>
