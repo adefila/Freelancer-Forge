@@ -117,7 +117,7 @@ const PAGE_TYPES = {
       'Overview hook: Does the first 2 lines stop the read?',
       'Specialization: Are you positioned as a specialist?',
       'Proof formatting: Are results, hours, JSS used as social proof?',
-      'Portfolio relevance: Do pieces match the buyer they're targeting?',
+      'Portfolio relevance: Do pieces match the buyer they\'re targeting?',
       'Skills and tags: Are they tactical for search?',
     ],
     rewriteSections: ['Title', 'Overview (first 2 lines)', 'Full overview', 'Specialization paragraph', 'Process section', 'Skills list (8-12)'],
@@ -2857,7 +2857,7 @@ Return ONLY JSON. No em dashes.`;
 
     if (mode === 'coverletter') {
       const cvBlock = cvFile
-        ? '[The applicant's CV is attached. Read it carefully and pull specific outcomes, roles, time frames, and named tools to weave into the letter.]'
+        ? '[The applicant\'s CV is attached. Read it carefully and pull specific outcomes, roles, time frames, and named tools to weave into the letter.]'
         : '[No CV attached. Use only the positioning and proof fields below to write the letter.]';
 
       const jobBlock = jobDescription.trim()
