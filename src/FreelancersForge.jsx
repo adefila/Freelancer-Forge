@@ -156,6 +156,7 @@ const CLOSER_MODES = {
   dm: { label: 'Cold DM', icon: MessageSquare, desc: 'Short, pattern-breaking direct message', cta: 'Generate DM' },
   email: { label: 'Cold Email', icon: Mail, desc: 'Subject line and email body', cta: 'Generate Email' },
   followup: { label: 'Follow-up', icon: Reply, desc: 'Reply or re-engage based on a conversation', cta: 'Draft Follow-up' },
+  reply: { label: 'Client Reply', icon: Send, desc: 'Polish your reply to a live client conversation', cta: 'Polish My Reply' },
   coverletter: { label: 'Cover Letter', icon: PenLine, desc: 'Tailored cover letter for a specific job', cta: 'Generate Cover Letter' },
 };
 
@@ -4026,7 +4027,60 @@ function CloseTab() {
   const buildPrompt = () => {
     const toneInstruction = tone === 'Auto' ? 'Adapt naturally.' : `${TONE_DIRECTIVES[tone]} Apply consistently.`;
 
-    if (mode === 'followup') {
+    if (mode === 'reply') {
+      return `You are a communication strategist who helps freelancers sound professional, clear, and confident in live client conversations. Your job is to take the freelancer's draft reply and make it sharper — not more formal, sharper. Clear thinking, precise language, no filler.
+
+A great client reply does three things:
+1. Acknowledges what the client said (shows you actually read it)
+2. Answers directly — no hedging, no over-explaining
+3. Moves the conversation forward with a clear next step or clear position
+
+${imageData ? 'ATTACHED: Screenshot of the conversation.\n' : ''}
+
+THE CONVERSATION SO FAR:
+${clientMessage.trim() ? `CLIENT:\n"""\n${clientMessage.trim()}\n"""\n` : ''}
+
+THE FREELANCER'S DRAFT REPLY:
+${myMessage.trim() ? `"""\n${myMessage.trim()}\n"""` : '[No draft — write a polished reply based on the client message above]'}
+
+${goal.trim() ? 'GOAL FOR THIS REPLY: ' + goal.trim() + '\n' : ''}
+
+HOW TO POLISH THIS REPLY:
+- Read what the client said. What are they actually asking, signalling, or worried about?
+- Does the draft reply address the real question — or does it go around it?
+- Cut everything that doesn't directly serve the response. No "Great question!", no "Thanks for reaching out", no "As I mentioned."
+- If the draft hedges or apologises unnecessarily, remove it. Replace with a direct, clear statement.
+- If anything is vague ("soon", "shortly", "as needed", "we can discuss"), replace it with something specific.
+- If there's a next step needed, make sure the reply ends with one concrete action.
+- Keep the freelancer's voice. Don't make it sound like a different person — make it sound like the best version of them.
+- Match the client's register: if they're casual, stay human; if they're formal, be precise and professional.
+
+GRAMMAR CHECK — before outputting:
+- Read every sentence. Fix any grammar, punctuation, or awkward phrasing.
+- No run-on sentences. No sentence fragments used for style. Subject and verb always present.
+- No em dashes. Use commas, colons, or periods instead.
+- No filler words: "just", "actually", "basically", "literally", "very", "really", "simply."
+- No weak openers: "So,", "Well,", "Look,", "Honestly,".
+
+VOICE: ${toneInstruction}
+${STRICT_RULES}
+
+Generate ONLY valid JSON:
+{
+  "clientRead": "2-3 sentences. What is the client actually communicating — stated and unstated? What is their tone, their priority, their concern?",
+  "issues": ["Issue found in the draft and why it weakens the reply", "Second issue if present", "Third issue if present"],
+  "polishedReply": "The finished, ready-to-send reply. Sounds like the freelancer at their best. Direct, clear, professional without being stiff. No em dashes. No filler. Ends with a concrete next step if one is needed.",
+  "whatChanged": "2-3 sentences. The key changes made and why each one makes the reply stronger.",
+  "clientPsychology": {
+    "buyerType": "6-10 words. What kind of person is this client based on how they communicate.",
+    "budgetRange": "Estimated range or 'Not enough signal' if the conversation doesn't indicate budget.",
+    "confidenceScore": 1-100,
+    "confidenceRationale": "1 sentence. How well-positioned is the freelancer in this conversation and why."
+  }
+}
+
+Return ONLY JSON.`;
+    }
       const clientBlock = clientMessage.trim() ? `THE CLIENT'S MESSAGE:\n"""\n${clientMessage.trim()}\n"""` : (imageData ? "[The client's message is in the attached image.]" : '[No client message provided.]');
       const myBlock = myMessage.trim() ? `MY LAST REPLY (what I sent before):\n"""\n${myMessage.trim()}\n"""` : '[I have not replied yet, this is the first follow-up.]';
 
@@ -4316,6 +4370,7 @@ No em dashes anywhere. Return ONLY JSON.`;
   };
 
   const handleGenerate = async () => {
+    if (mode === 'reply' && !clientMessage.trim() && !imageData) { setError("Paste the client's message so we know what to reply to."); return; }
     if (mode === 'followup' && !clientMessage.trim() && !myMessage.trim() && !imageData) { setError("Paste either the client's message or your last reply."); return; }
     if (mode === 'coverletter' && !jobDescription.trim() && !intel.trim() && !cvFile) {
       setError('Paste the job description or upload your CV.');
@@ -4469,7 +4524,63 @@ No em dashes anywhere. Return ONLY JSON.`;
           <h2 className="ff-section-label mb-5">The Input</h2>
 
           <div className="space-y-5">
-            {mode === 'followup' ? (
+            {mode === 'reply' ? (
+              <>
+                <div>
+                  <label className="ff-field-label" style={{ display: 'inline-flex', alignItems: 'center' }}>
+                    Client's message <span className="ff-text-accent" style={{ marginLeft: 4 }}>*</span>
+                    <Tooltip text="Paste what the client sent. The more context you give, the more precisely the reply can address what they actually need." />
+                  </label>
+                  <textarea
+                    className="ff-textarea"
+                    rows={5}
+                    placeholder="Paste what the client said..."
+                    value={clientMessage}
+                    onChange={e => setClientMessage(e.target.value)}
+                  />
+                  <p className="ff-field-hint mt-2">Used to understand their tone, intent, and what they're really asking.</p>
+                </div>
+
+                <div>
+                  <label className="ff-field-label" style={{ display: 'inline-flex', alignItems: 'center' }}>
+                    Your draft reply
+                    <span className="ff-field-hint" style={{ fontWeight: 400, marginLeft: 6 }}>· optional but recommended</span>
+                    <Tooltip text="Paste what you were going to send. Leave blank and we'll write a reply from scratch based on the client's message." />
+                  </label>
+                  <textarea
+                    className="ff-textarea"
+                    rows={5}
+                    placeholder="Paste your draft — we'll sharpen it. Or leave blank and we'll write one from scratch."
+                    value={myMessage}
+                    onChange={e => setMyMessage(e.target.value)}
+                  />
+                </div>
+
+                <div>
+                  <label className="ff-field-label" style={{ display: 'inline-flex', alignItems: 'center' }}>
+                    Or upload a screenshot <span className="ff-field-hint" style={{ fontWeight: 400 }}>· optional</span>
+                  </label>
+                  {!imageData && (
+                    <>
+                      <input ref={fileInputRef} type="file" accept="image/*" onChange={e => { handleFileSelect(e.target.files?.[0]); e.target.value = ''; }} style={{ display: 'none' }} />
+                      <button type="button" className="ff-attach-btn" onClick={() => fileInputRef.current?.click()}>
+                        <Paperclip size={13} /> Attach Screenshot
+                      </button>
+                    </>
+                  )}
+                  {imageData && <ImagePreview data={imageData} onRemove={() => setImageData(null)} />}
+                </div>
+
+                <div>
+                  <label className="ff-field-label" style={{ display: 'inline-flex', alignItems: 'center' }}>
+                    Goal for this reply
+                    <span className="ff-field-hint" style={{ fontWeight: 400, marginLeft: 6 }}>· optional</span>
+                    <Tooltip text="What do you want to happen after they read this? Move to a call, confirm a detail, set a boundary, close the project. Shapes the ending of the reply." />
+                  </label>
+                  <textarea className="ff-textarea" rows={2} placeholder='e.g. "Get sign-off on the brief" or "Address scope concerns without losing the deal"' value={goal} onChange={e => setGoal(e.target.value)} />
+                </div>
+              </>
+            ) : mode === 'followup' ? (
               <>
                 <div>
                   <label className="ff-field-label" style={{ display: 'inline-flex', alignItems: 'center' }}>
@@ -4657,6 +4768,7 @@ No em dashes anywhere. Return ONLY JSON.`;
           {result && resultMode === 'proposal' && <ProposalOutput result={result} pillClass={pillClass} portfolio={portfolio} copied={copied} copyText={copyText} selectAllText={selectAllText} />}
           {result && resultMode === 'dm' && <DMOutput result={result} copied={copied} copyText={copyText} selectAllText={selectAllText} />}
           {result && resultMode === 'email' && <EmailOutput result={result} copied={copied} copyText={copyText} selectAllText={selectAllText} />}
+          {result && resultMode === 'reply' && <ReplyOutput result={result} copied={copied} copyText={copyText} selectAllText={selectAllText} />}
           {result && resultMode === 'followup' && <FollowupOutput result={result} copied={copied} copyText={copyText} selectAllText={selectAllText} />}
           {result && resultMode === 'coverletter' && <CoverLetterOutput result={result} copied={copied} copyText={copyText} selectAllText={selectAllText} />}
         </div>
@@ -5762,6 +5874,65 @@ function EmailOutput({ result, copied, copyText, selectAllText }) {
         </div>
       </div>
       <PsychCard psych={result.clientPsychology} delay={150} />
+    </div>
+  );
+}
+
+function ReplyOutput({ result, copied, copyText, selectAllText }) {
+  return (
+    <div className="space-y-5">
+      {/* Client read */}
+      {result.clientRead && (
+        <div className="ff-fadeup ff-card">
+          <p className="ff-section-label mb-2">What they're really saying</p>
+          <p style={{ fontSize: 14, color: 'var(--text-1)', lineHeight: 1.6, letterSpacing: '-0.005em' }}>{result.clientRead}</p>
+        </div>
+      )}
+
+      {/* Issues found */}
+      {result.issues?.length > 0 && (
+        <div className="ff-fadeup ff-card" style={{ animationDelay: '30ms' }}>
+          <p className="ff-section-label mb-3">What was weak in the draft</p>
+          <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {result.issues.filter(Boolean).map((issue, i) => (
+              <li key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                <span style={{ width: 18, height: 18, borderRadius: '50%', background: 'var(--danger-bg)', border: '1px solid rgba(248,113,113,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
+                  <span style={{ fontSize: 9, fontWeight: 800, color: 'var(--danger)' }}>{i + 1}</span>
+                </span>
+                <span style={{ fontSize: 13.5, lineHeight: 1.55, color: 'var(--text-2)', letterSpacing: '-0.005em' }}>{issue}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* Polished reply */}
+      {result.polishedReply && (
+        <div className="ff-fadeup" style={{ animationDelay: '60ms' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+            <h3 className="ff-subheading">Polished reply</h3>
+            <button className="ff-icon-btn" onClick={() => copyText('reply', result.polishedReply)}>
+              {copied.reply ? <Check size={12} /> : <Copy size={12} />}
+              {copied.reply ? 'Copied' : 'Copy'}
+            </button>
+          </div>
+          <div className="ff-card" style={{ borderLeft: '3px solid var(--accent)' }}>
+            <p className="ff-output-text" onClick={selectAllText} style={{ cursor: 'text', fontSize: 15, lineHeight: 1.7, letterSpacing: '-0.005em' }}>
+              {result.polishedReply}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* What changed */}
+      {result.whatChanged && (
+        <div className="ff-fadeup ff-card" style={{ animationDelay: '90ms', background: 'var(--accent-bg-soft)', border: '1px solid var(--accent-border-soft)' }}>
+          <p className="ff-section-label mb-2" style={{ color: 'var(--accent)' }}>What changed and why</p>
+          <p style={{ fontSize: 13.5, color: 'var(--text-1)', lineHeight: 1.6, letterSpacing: '-0.005em' }}>{result.whatChanged}</p>
+        </div>
+      )}
+
+      <PsychCard psych={result.clientPsychology} delay={120} />
     </div>
   );
 }
