@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { buildPrompt, STRICT_RULES, CV_STRICT_RULES } from './prompts.js';
 import {
   ArrowRight, Copy, Check, Loader2, Sparkles, Paperclip, X, ImageIcon,
   Sun, Moon, Plus, ExternalLink, Link as LinkIcon, ChevronDown,
@@ -156,6 +157,7 @@ const CLOSER_MODES = {
   dm: { label: 'Cold DM', icon: MessageSquare, desc: 'Short, pattern-breaking direct message', cta: 'Generate DM' },
   email: { label: 'Cold Email', icon: Mail, desc: 'Subject line and email body', cta: 'Generate Email' },
   followup: { label: 'Follow-up', icon: Reply, desc: 'Reply or re-engage based on a conversation', cta: 'Draft Follow-up' },
+  reply: { label: 'Client Reply', icon: Send, desc: 'Polish your reply to a live client conversation', cta: 'Polish My Reply' },
   coverletter: { label: 'Cover Letter', icon: PenLine, desc: 'Tailored cover letter for a specific job', cta: 'Generate Cover Letter' },
 };
 
@@ -188,79 +190,6 @@ const TONE_DIRECTIVES = {
   Authoritative: "Write in an AUTHORITATIVE voice: speak as the expert. State things as fact. No 'I think' or 'maybe.' Quiet confidence.",
   Playful: "Write in a PLAYFUL voice: energetic, surprising, breaks expectations. Still professional but anything but boring.",
 };
-
-const STRICT_RULES = `
-=== MASTER WRITING RULES — EVERY OUTPUT VIOLATING THESE GETS REWRITTEN ===
-
-THE ONE RULE THAT GOVERNS EVERYTHING:
-The client doesn't care about you. They care about their problem.
-Every sentence must earn its place by being about them — their situation, their fear, their goal — not about credentials, services, or experience.
-Ask before every sentence: "Does this help the client feel understood, or does it just make the freelancer look good?"
-If it's the latter, cut it or reframe it.
-
-WHAT "UNDERSTANDING THE PROBLEM" LOOKS LIKE IN PRACTICE:
-Weak: "I specialise in conversion rate optimisation."
-Strong: "Your checkout page is losing people at the payment step. That's not a design problem — it's a trust problem. I've fixed this exact drop-off for three SaaS companies by [specific method], and conversion went up between 18% and 44%."
-
-The difference: the strong version names the specific problem, diagnoses why it exists, and proves the fix with evidence. The weak version is a service description.
-
-GRAMMAR AND MECHANICS — zero tolerance:
-- No em dashes (—) or en dashes (–) anywhere. Use a period, comma, colon, or parentheses.
-- No ellipsis (...) used for style.
-- No sentence fragments. Subject + verb, always.
-- Never start two consecutive sentences with the same word.
-- Active voice. "I reduced churn by 30%" not "Churn was reduced by 30%."
-- Contractions are preferred in proposals, DMs, emails, follow-ups.
-- Read every sentence out loud. If it sounds like a brochure, rewrite it.
-
-FORBIDDEN — never use these words or phrases:
-leverage, utilize, synergy, streamline, cutting-edge, innovative, world-class, best-in-class,
-top-notch, game-changer, unlock, empower, optimize, maximize, robust, seamless, transform,
-revolutionize, supercharge, level up, holistic, ecosystem, scalable, dynamic, results-driven,
-deep dive, foster, cultivate, harness, elevate, passionate about, I came across your post,
-I hope this finds you well, I wanted to reach out, excited to, thrilled to, I'd love to,
-touch base, circle back, move the needle, bandwidth, pain points, value proposition,
-solution, offering, deliverables, ensure, assist, facilitate, spearhead, at the end of the day,
-going forward, in today's landscape, needless to say, look no further.
-
-PROOF RULE — no vague claim survives:
-Every benefit, result, or capability claim must include at least one of:
-a real number, a percentage, a named client type, a dollar amount, a time frame, a named tool.
-No exceptions. If you can't quantify it, make it concrete in another way.
-
-VOICE:
-- Sounds like a practitioner, not a marketer.
-- Warm but not eager. Direct but not cold. Confident but not arrogant.
-- The reader should feel like they're talking to someone who has solved their exact problem before.
-- Average sentence: 10-13 words. Longer sentences for context. Shorter ones for impact.
-`;
-
-const CV_STRICT_RULES = `
-=== CV-SPECIFIC RULES — ADDITIONAL, NON-NEGOTIABLE ===
-
-FORBIDDEN PHRASES:
-"results-driven", "team player", "passionate about", "proven track record", "strong communication skills",
-"detail-oriented", "self-motivated", "go-getter", "out-of-the-box thinker", "wear many hats",
-"spearheaded", "drove results", "highly motivated", "strategic thinker", "cross-functional teams",
-"responsible for", "duties included", "tasked with", "helped to", "worked on", "assisted in",
-"References available on request", "Objective", "Summary of qualifications".
-
-BULLET POINT LAW:
-Every bullet must contain at least ONE of: a number, a percentage, a dollar amount, a time frame,
-a specific tool or system name, or a named outcome. No exceptions. Delete or rewrite any bullet that fails.
-
-GRAMMAR:
-- No first-person pronouns (I, my, me, we). Subject always implied.
-- Every bullet starts with a strong verb. Past tense for past roles. Present for current.
-- Strong verbs: Shipped, Reduced, Closed, Built, Migrated, Negotiated, Cut, Scaled,
-  Launched, Authored, Architected, Recovered, Delivered, Eliminated, Generated,
-  Secured, Restructured, Automated, Deployed, Directed, Overhauled, Accelerated.
-- Never use: Responsible for, Helped, Worked on, Assisted, Managed (without specifics).
-
-FORMAT:
-- One page. Exception: 10+ years relevant experience.
-- ATS-friendly: standard headers, single column, no tables, no graphics.
-`;
 
 const stripEmDashes = (s) => {
   if (typeof s !== 'string') return s;
@@ -2525,9 +2454,6 @@ const CSS = `
   box-shadow: 0 0 8px rgba(59,130,246,0.65);
 }
 
-
-}
-
 `;
 
 const PRELOADER_SLIDES = [
@@ -3002,32 +2928,40 @@ function AskAnythingTab() {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           model: 'claude-sonnet-4-5', max_tokens: 800,
-          system: `You are Forge AI — a straight-talking advisor for freelancers and independent consultants. You've seen every mistake freelancers make: underpricing, chasing bad clients, writing proposals about themselves instead of the client's problem, giving up too early on follow-ups, and positioning themselves as a commodity when they're not.
+          system: `You are Forge AI — a senior freelance strategist who has been in the trenches. You have won and lost deals. You know what it feels like to stare at an empty pipeline and what it takes to build one that does not depend on luck.
 
-You give advice the way a trusted senior freelancer would at a coffee meeting — direct, specific, and immediately actionable. Not abstract frameworks. Not "it depends" without a real answer. Not the safe, hedge-everything answer.
+When someone sends you a job post, a message, a screenshot, a contract, or a question — you read it the way a detective reads evidence. You look for what is not said. You diagnose before you prescribe.
+
+WHEN THERE IS AN ATTACHMENT OR PASTED TEXT:
+Read every word. Every number. Every signal.
+Note the tone: burned, hopeful, rushed, cautious?
+Note what they list first — their biggest pain, always.
+Note what they over-explain — past failure or insecurity.
+Note budget vs scope tension.
+Then answer based on what you actually see, not what you assumed.
 
 HOW YOU ANSWER:
-- Lead with the answer, not the context. If someone asks what to charge, give a number first.
-- Be specific. If you're recommending a tactic, give the exact words or approach.
-- Say when something is a bad idea. Freelancers need honest feedback, not validation.
-- If you need more information to give a useful answer, say exactly what you need and why.
-- Short paragraphs. Direct sentences. No bullet points unless the answer is genuinely a list.
+- Lead with the specific insight. No preamble, no "great question".
+- If someone asks what to charge: give a number first, then explain.
+- If someone shares a job post: name the real situation before advising.
+- If someone shares a contract or message: say what you see in it, then advise.
+- Give the exact words or script when recommending how to say something.
+- Say when something is a bad idea. Freelancers need honesty, not validation.
+- Short paragraphs. Direct sentences. No bullet points unless it is genuinely a list.
 
-WHAT YOU KNOW DEEPLY:
-- Freelance pricing by niche, experience level, and market
-- What actually works on Upwork, LinkedIn, Contra, Toptal, and direct outreach
-- How to write proposals, DMs, and follow-ups that get replies
-- Client psychology: how they evaluate freelancers, what makes them hesitate, what closes them
-- Scope creep, difficult conversations, rate increases, contract terms
-- How to get off the feast-or-famine cycle
-- What separates freelancers earning $50/hr from those earning $200/hr (it's rarely skill)
+WHAT YOU KNOW COLD:
+- Freelance pricing by niche, experience level, and platform
+- What actually works on Upwork, LinkedIn, direct outreach, Contra, Toptal
+- How to write proposals, DMs, follow-ups that get replies
+- Client psychology: what makes them hesitate, what closes them, what burns them
+- Scope creep, rate increase conversations, contract red flags
+- What separates freelancers earning $50/hr from those earning $200/hr (rarely skill)
 
 WHAT YOU NEVER DO:
-- Use buzzwords or corporate language
-- Hedge everything to avoid being wrong
-- Give generic advice that applies to everyone and helps no one
-- Tell someone what they want to hear if it's not what they need to hear
-- Use em dashes`,
+- Give advice so generic it could apply to anyone
+- Hedge to avoid being wrong
+- Tell someone what they want to hear if it is not true
+- Use em dashes, buzzwords, or corporate language`,
           messages: apiMessages,
         }),
       });
@@ -4023,290 +3957,15 @@ function CloseTab() {
 
   const removePortfolioItem = (id) => setPortfolio(p => p.filter(x => x.id !== id));
 
-  const buildPrompt = () => {
-    const toneInstruction = tone === 'Auto' ? 'Adapt naturally.' : `${TONE_DIRECTIVES[tone]} Apply consistently.`;
-
-    if (mode === 'followup') {
-      const clientBlock = clientMessage.trim() ? `THE CLIENT'S MESSAGE:\n"""\n${clientMessage.trim()}\n"""` : (imageData ? "[The client's message is in the attached image.]" : '[No client message provided.]');
-      const myBlock = myMessage.trim() ? `MY LAST REPLY (what I sent before):\n"""\n${myMessage.trim()}\n"""` : '[I have not replied yet, this is the first follow-up.]';
-
-      return `You are a freelancer who wins clients back without pressure. You understand that when a conversation goes quiet, it's usually not because they lost interest — it's because something got in the way: competing priorities, internal approval, a tighter budget, fear of making the wrong call. Your follow-ups acknowledge that reality and make it easy to re-engage.
-
-The best follow-up doesn't push for a decision. It adds something small and useful, names what you're available for, and makes replying feel like the natural next step — not a commitment.
-
-${imageData ? 'ATTACHED: Image that may contain the conversation.\n' : ''}
-
-${clientBlock}
-
-${myBlock}
-
-GOAL: ${goal.trim() || 'Re-open the conversation and move toward a clear next step without creating pressure.'}
-
-HOW TO READ THIS CONVERSATION:
-- What is this person actually dealing with right now? What would be on their plate this week?
-- Where did the energy shift? Price, timing, scope uncertainty, internal blocker, or just life?
-- What would make replying feel easy and worthwhile for them — not for you?
-- Are they a fast-decision maker or a slow, cautious one? Match your energy to theirs.
-
-FOLLOW-UP RULES:
-- Do not open with "Just following up", "Checking in", "I wanted to circle back", or "Hope all is well."
-- The first line must reference something specific: their project, their situation, or something they said. Proves you've been thinking about them, not just your pipeline.
-- Add a sliver of value — a relevant observation, a short example, an insight that maps to their problem. Not a sales point. Something genuinely useful to them.
-- Name a clear, low-effort next step. Not "Let me know your thoughts." Something like "If it helps, I can put together a short scope outline — takes me 20 minutes and gives you something concrete to review."
-- If the conversation has stalled for a while, include a graceful exit: "If the timing's shifted, no problem at all — just let me know and we can revisit whenever it makes sense." This gets more replies than pressure.
-- 2-4 short paragraphs. Read it back — if it sounds like you're chasing, rewrite it.
-
-VOICE: ${toneInstruction}
-${STRICT_RULES}
-
-Generate ONLY valid JSON:
-{
-  "clientRead": "2-3 sentences. Who is this buyer, what are they likely going through right now, and what does their communication style tell you about how to approach them.",
-  "situation": "2 sentences. What's the actual state of this conversation, and what is the single most likely reason it stalled. Name it plainly.",
-  "followup": "The follow-up, ready to send. \\n between paragraphs. 2-4 paragraphs. Starts with something specific. Adds value. Ends with a clear, low-friction next step or a graceful exit. No em dashes.",
-  "clientPsychology": {
-    "buyerType": "6-10 words. The specific archetype based on their communication style and behaviour.",
-    "budgetRange": "Estimated range based on signals in the conversation. Name the signal you read.",
-    "confidenceScore": 1-100,
-    "confidenceRationale": "1 sentence. What's working in your favour here, and what's the main risk to the deal."
-  }
-}
-
-Return ONLY JSON.`;
-    }
-
-    if (mode === 'coverletter') {
-      const cvBlock = cvFile
-        ? '[The applicant\'s CV is attached. Read it carefully and pull specific outcomes, roles, time frames, and named tools to weave into the letter.]'
-        : '[No CV attached. Use only the positioning and proof fields below to write the letter.]';
-
-      const jobBlock = jobDescription.trim()
-        ? `JOB DESCRIPTION / POSTING:\n"""\n${jobDescription.trim()}\n"""`
-        : `JOB CONTEXT (no full posting given):\n"""\n${intel.trim() || '[Nothing provided.]'}\n"""`;
-
-      return `You are a cover letter writer who gets people interviews because you write from the employer's perspective, not the applicant's. You know that hiring managers are not looking for the most qualified person — they're looking for the person least likely to be a bad hire. Your letters reduce that fear before they showcase credentials.
-
-Every employer reading a cover letter is thinking: "Will this person actually solve the problem I'm dealing with? Or will I spend 3 months managing a mistake?"
-
-${cvBlock}
-
-${jobBlock}
-
-${offer.trim() ? 'APPLICANT\'S POSITIONING:\n"""\n' + offer.trim() + '\n"""\n' : ''}${proof.trim() ? 'APPLICANT\'S BEST PROOF POINT:\n"""\n' + proof.trim() + '\n"""\n' : ''}
-
-BEFORE YOU WRITE ANYTHING — identify:
-1. The one problem this employer is trying to solve (not the job description's language — the real operational problem)
-2. The risk they're managing: what goes wrong if they hire the wrong person
-3. The one piece of the applicant's background that most directly addresses both of those
-4. Something specific about this company, team, or role that shows the applicant genuinely understands what they're walking into
-
-COVER LETTER STRUCTURE:
-- Paragraph 1 (hook): Reference something specific about the company, the role, or the problem they're solving. Not "I'm writing to apply." Not excitement. Show you understand their world. 2-3 sentences.
-- Paragraph 2 (proof): One result. Specific. Named outcome, real number, time frame, or named tool. Connect it directly to what they need. One excellent example is worth more than three vague ones.
-- Paragraph 3 (why you, specifically): Not just skills — a perspective, a method, or a pattern of work that is genuinely different. What do they get from this person that they don't get from the next qualified candidate?
-- Paragraph 4 (close): One sentence. Proposes a next step. Confident, not deferential. "Happy to walk through how I approached that project on a call this week."
-- 200-260 words. Every word earns its place.
-
-FORBIDDEN PHRASES:
-"I am writing to apply", "I am excited to", "I'm a great fit", "I bring a unique blend", "passionate about",
-"proven track record", "team player", "thank you for your consideration", "attached is my resume",
-"I look forward to hearing from you", "I would love the opportunity", "I believe I would be a strong candidate",
-"strong communication skills", "detail-oriented", "I noticed you are looking for", "dynamic", "innovative."
-
-VOICE: ${toneInstruction}
-${STRICT_RULES}
-
-Generate ONLY valid JSON:
-{
-  "extraction": {
-    "targetRole": "4-8 words. The exact role.",
-    "company": "Company name from the posting, or 'the company' if not visible.",
-    "topNeed": "2-3 sentences. The real operational problem this employer is solving — in their language, not HR language. What breaks if they don't fill this role well.",
-    "fitAngle": "2 sentences. The applicant's strongest, most specific angle — the one thing that makes them the lower-risk, higher-upside choice."
-  },
-  "subject": "Email subject line under 60 characters. Specific. Not 'Application for [X] role'.",
-  "coverLetter": "The finished letter. \\n between paragraphs. 200-260 words. Ready to send. Sounds like a real person who understands the work. No em dashes.",
-  "clientPsychology": {
-    "buyerType": "6-10 words. The type of hiring manager based on the posting tone and what they're optimising for.",
-    "budgetRange": "Estimated salary or contract range based on role level, company size, and market signals.",
-    "confidenceScore": 1-100,
-    "confidenceRationale": "1 sentence. The strongest fit signal from the applicant's background, and the biggest gap to address."
-  }
-}
-
-Return ONLY JSON.`;
-    }
-
-    if (mode === 'dm') {
-      return `You are a freelancer who gets replies to cold DMs because you write about the recipient, not yourself. You've studied what makes people respond: it's not flattery, it's not credentials, it's the feeling that the person on the other end actually looked at you specifically.
-
-The DM that gets deleted is the one that could have been sent to anyone. The DM that gets replied to is the one that could only have been sent to them.
-
-${imageData ? 'ATTACHED: Image with context about the lead.\n' : ''}
-
-THE THREE-LINE FRAMEWORK — follow this exactly:
-Line 1: A specific observation. Something you noticed about their business, content, product, recent post, or situation that most people would scroll past. NOT "I came across your profile" or "I noticed you're hiring." Something real that shows you actually looked.
-Line 2: One piece of relevant evidence from your own work — a number, a named outcome, a specific client type. Connects directly to what Line 1 revealed about their situation. Makes the relevance immediate.
-Line 3: One question. Open enough that there's no wrong answer. Specific enough that it takes 10 seconds to respond to. The kind of question a peer would ask, not a vendor.
-
-WHAT MAKES LINE 1 WORK:
-- It references something specific (a product, a recent launch, a piece of content, a challenge visible in their work)
-- It shows you understand their world, not just their job title
-- It makes them think "this person actually looked at what I'm building"
-
-WHAT KILLS A DM:
-- Generic opener that could apply to any profile
-- Listing your services before they've shown interest
-- Asking for a call in the first message
-- More than 5 lines
-
-ABOUT THE LEAD:
-${intel.trim() || (imageData ? '[See attached.]' : '[No context provided — infer the most likely niche and situation]')}
-
-VOICE: ${toneInstruction}
-${STRICT_RULES}
-
-Generate ONLY valid JSON:
-{
-  "clientType": "4-8 words. Who is this person and what do they care about.",
-  "hook": "5-12 words. The specific thing you noticed about them that opens the door.",
-  "coldDM": "3 lines. \\n between each. Line 1: specific observation. Line 2: relevant proof. Line 3: one good question. No em dashes. Ready to send.",
-  "clientPsychology": {
-    "buyerType": "6-10 words. The specific archetype. What they're optimising for and what makes them reply.",
-    "budgetRange": "Estimated range based on company stage, signals in their profile or post, or niche context.",
-    "confidenceScore": 1-100,
-    "confidenceRationale": "1 sentence. What gives this DM its best chance of a reply, and what could make it miss."
-  }
-}
-
-Return ONLY JSON.`;
-    }
-
-    if (mode === 'email') {
-      return `You are a freelancer who writes cold emails that get opened and replied to. The emails that fail do so because they make the recipient feel like they're inside someone else's sales funnel. Yours feel like a message from a peer who noticed something real and has something genuinely worth saying.
-
-The subject line gets it opened. The first sentence keeps them reading. The rest of the email has to earn a reply by being useful or relevant — not impressive.
-
-${imageData ? 'ATTACHED: Image with context about the lead.\n' : ''}
-
-HOW TO APPROACH THIS:
-Before writing a word, ask: what is this person actually dealing with? What's the problem in their world that would make receiving this email feel like good timing rather than noise? That's your opening.
-
-EMAIL STRUCTURE:
-- Subject line: Under 50 characters. Reads like it was written to one person. No tricks, no "Quick question", no ALL CAPS. Something they'd only get if someone actually looked at their business.
-- Opening sentence: Not "My name is" or "I'm reaching out because." Start with something about them — their product, their content, their market position, or a specific situation you noticed.
-- Para 1 (observation): What you noticed about their situation. 1-3 sentences. Specific enough that it couldn't have been sent to anyone else.
-- Para 2 (relevance): One outcome you've produced for someone in a comparable situation. Number, named client type, or specific before/after. Not a list of skills — one thing done well.
-- Para 3 (the connection): Why that outcome is relevant to what you noticed in Para 1. The bridge. 1-2 sentences.
-- Para 4 (ask): One small, easy step. Not a call before you've established relevance. Could be: a short question, a relevant resource, an offer to share something they'd actually find useful. Makes saying yes feel low-commitment.
-- Sign-off: "Best, [Name]" or just the name. Nothing warmer.
-
-ABOUT THE LEAD:
-${intel.trim() || (imageData ? '[See attached.]' : '[No context — infer the most likely professional situation]')}
-
-VOICE: ${toneInstruction}
-${STRICT_RULES}
-
-Generate ONLY valid JSON:
-{
-  "clientType": "4-8 words. Who this person is and what they care about.",
-  "subject": "Under 50 characters. Feels personal. No emoji. No 'Quick question'.",
-  "body": "Full email. \\n between paragraphs. 4 short paragraphs. Reads like a message from a peer, not a pitch. Sign off 'Best, [Your name]'. No em dashes.",
-  "clientPsychology": {
-    "buyerType": "6-10 words. The specific archetype and what they respond to.",
-    "budgetRange": "Estimated range from company size, role, stage, and context signals.",
-    "confidenceScore": 1-100,
-    "confidenceRationale": "1 sentence. What makes this email worth opening, and what could make it miss."
-  }
-}
-
-Return ONLY JSON.`;
-    }
-
-    const portfolioBlock = portfolio.length > 0
-      ? `\nPORTFOLIO:\n${portfolio.map((p, i) => `[${i+1}] URL: ${p.url}${p.label ? ` | LABEL: ${p.label}` : ''}${p.tag ? ` | TAG: ${p.tag}` : ''}`).join('\n')}`
-      : '';
-
-    return `You are a freelance closer with a 70%+ proposal win rate. You win not because you're the best writer — you win because you make the client feel like you already understand their problem better than they do. When a client reads your proposal, they think: "This person gets it. Everyone else just sent me a template."
-
-The fundamental mistake 95% of freelancers make: they write about themselves. Skills, experience, portfolio. The client doesn't care yet. They care about their problem. Your job is to prove you understand that problem so precisely that hiring you feels like the obvious, low-risk choice.
-
-${imageData ? 'ATTACHED: Job post or brief image. Read every word carefully before writing.\n' : ''}
-
-BEFORE WRITING A SINGLE WORD — diagnose this situation:
-1. What is happening in this client's world right now? What broke, what's stuck, what's at risk?
-2. What have they probably already tried that didn't work?
-3. What does a successful outcome look like in 30, 60, 90 days?
-4. What is the real cost of this problem going unsolved — in money, time, or opportunity?
-5. What are they most afraid of: getting a bad result, wasting money, missing a deadline, or hiring someone they have to manage?
-
-THE WINNING PROPOSAL STRUCTURE:
-
-HOOK — 2-3 sentences. This is the most important part.
-Do not start with "I". Do not start with "Hi". Do not mention your name or experience.
-Start with their situation. Name the specific problem they are living with. Be so precise that they think "how did this person know that?" Then in one sentence, show you know the path from where they are to where they want to be.
-Example of a weak hook: "I'm a React developer with 5 years of experience and I'd love to work on this project."
-Example of a strong hook: "Your onboarding flow is leaking users between signup and first value — that gap is costing you 40-60% of your trials before they ever see why your product is worth paying for. I've fixed this exact problem for three SaaS companies in the last year."
-
-FIT — 3 bullets. Each one is a specific result that maps directly to their specific need.
-Not: "I have experience with e-commerce."
-Yes: "Rebuilt checkout for a Shopify brand doing $2M/yr — cart abandonment dropped from 74% to 51% in 6 weeks."
-Every bullet answers: "Have you done this exact thing before, for someone like me, and did it work?"
-
-PROCESS — 3 steps maximum. Under 10 words each.
-This removes the client's fear of the unknown. Shows you've done this before. Shows they won't have to manage you.
-
-CTA — 1 sentence. Not "I look forward to hearing from you."
-Make the next step feel small, specific, and easy. Like: "Send me the Figma file and I'll have an audit back to you by Thursday." or "15 minutes this week — I'll show you exactly how I'd approach this."
-
-COLD DM — 3 lines, tightly written.
-Line 1: Reference something specific about them that proves you actually looked — not their job post, something about their business, product, or content.
-Line 2: One result from your work that is directly relevant to their situation. Precise, not impressive-sounding.
-Line 3: One question that opens a conversation. Easy to answer in 10 seconds.
-
-${STRICT_RULES}
-
-INPUT:
-${intel.trim() || (imageData ? '[See attached.]' : '[No input provided — write for the most likely scenario given the niche]')}
-${portfolioBlock}
-
-VOICE: ${toneInstruction}
-
-Generate ONLY valid JSON:
-{
-  "extraction": {
-    "clientType": "4-8 words. Who is this person and what do they actually do.",
-    "projectType": "4-7 words. The real thing they need solved, not just the task.",
-    "tone": "3-6 words. How they communicate — formal, casual, urgent, technical.",
-    "coreProblem": "3-4 sentences. What is broken or stuck in their world right now. What has probably already gone wrong. What the cost of inaction is. Be specific — no generic descriptions.",
-    "urgency": "Low|Medium|High",
-    "budgetSignal": "Low|Medium|High",
-    "hiddenIntent": "2-3 sentences. What are they really evaluating beyond the task — trust, speed, certainty of outcome, not being burned again? Name the exact signals from the brief that tell you this."
-  },
-  "attachments": [{ "description": "2 sentences. Why this specific work is relevant to their exact situation and what it proves.", "links": ["matching portfolio URL if available"] }],
-  "proposal": {
-    "hook": "2-3 sentences. Names their specific problem so precisely they feel understood. Does NOT start with I, Hi, or their name. No em dashes. Ends with a signal that you know how to fix it.",
-    "fit": [
-      "Specific result with a number, named client type, or measurable outcome — connected directly to what this client needs.",
-      "Second result from a different angle — speed, reliability, or a different type of proof.",
-      "Third result addressing their specific fear — risk reduction, quality, communication, or process."
-    ],
-    "process": ["Step 1: under 10 words.", "Step 2: under 10 words.", "Step 3: under 10 words."],
-    "cta": "1 sentence. Specific, low-effort next step. Makes replying feel obvious. Not a request for permission."
-  },
-  "coldDM": "3 lines. \\n between each. Reads like a message from a peer who noticed something real. No selling. No em dashes."
-}
-
-No em dashes anywhere. Return ONLY JSON.`;
-  };
 
   const handleGenerate = async () => {
+    if (mode === 'reply' && !clientMessage.trim() && !imageData) { setError("Paste the client's message so we know what to reply to."); return; }
     if (mode === 'followup' && !clientMessage.trim() && !myMessage.trim() && !imageData) { setError("Paste either the client's message or your last reply."); return; }
     if (mode === 'coverletter' && !jobDescription.trim() && !intel.trim() && !cvFile) {
       setError('Paste the job description or upload your CV.');
       return;
     }
-    if (mode !== 'followup' && mode !== 'coverletter' && !intel.trim() && !imageData) { setError('Add intel.'); return; }
+    if (mode !==  'followup' && mode !== 'coverletter' && !intel.trim() && !imageData) { setError('Add intel.'); return; }
     setError(''); setLoading(true); setResult(null);
 
     try {
@@ -4325,7 +3984,7 @@ No em dashes anywhere. Return ONLY JSON.`;
         }
       }
       if (imageData) content.push({ type: 'image', source: { type: 'base64', media_type: imageData.mediaType, data: imageData.data } });
-      content.push({ type: 'text', text: buildPrompt() });
+      content.push({ type: 'text', text: buildPrompt(mode, intel, imageData, tone, portfolio, clientMessage, myMessage, goal, jobDescription, offer, proof, cvFile) });
 
       const response = await fetch("/api/claude", {
         method: "POST",
@@ -4454,7 +4113,63 @@ No em dashes anywhere. Return ONLY JSON.`;
           <h2 className="ff-section-label mb-5">The Input</h2>
 
           <div className="space-y-5">
-            {mode === 'followup' ? (
+            {mode === 'reply' ? (
+              <>
+                <div>
+                  <label className="ff-field-label" style={{ display: 'inline-flex', alignItems: 'center' }}>
+                    Client's message <span className="ff-text-accent" style={{ marginLeft: 4 }}>*</span>
+                    <Tooltip text="Paste what the client sent. The more context you give, the more precisely the reply can address what they actually need." />
+                  </label>
+                  <textarea
+                    className="ff-textarea"
+                    rows={5}
+                    placeholder="Paste what the client said..."
+                    value={clientMessage}
+                    onChange={e => setClientMessage(e.target.value)}
+                  />
+                  <p className="ff-field-hint mt-2">Used to understand their tone, intent, and what they're really asking.</p>
+                </div>
+
+                <div>
+                  <label className="ff-field-label" style={{ display: 'inline-flex', alignItems: 'center' }}>
+                    Your draft reply
+                    <span className="ff-field-hint" style={{ fontWeight: 400, marginLeft: 6 }}>· optional but recommended</span>
+                    <Tooltip text="Paste what you were going to send. Leave blank and we'll write a reply from scratch based on the client's message." />
+                  </label>
+                  <textarea
+                    className="ff-textarea"
+                    rows={5}
+                    placeholder="Paste your draft — we'll sharpen it. Or leave blank and we'll write one from scratch."
+                    value={myMessage}
+                    onChange={e => setMyMessage(e.target.value)}
+                  />
+                </div>
+
+                <div>
+                  <label className="ff-field-label" style={{ display: 'inline-flex', alignItems: 'center' }}>
+                    Or upload a screenshot <span className="ff-field-hint" style={{ fontWeight: 400 }}>· optional</span>
+                  </label>
+                  {!imageData && (
+                    <>
+                      <input ref={fileInputRef} type="file" accept="image/*" onChange={e => { handleFileSelect(e.target.files?.[0]); e.target.value = ''; }} style={{ display: 'none' }} />
+                      <button type="button" className="ff-attach-btn" onClick={() => fileInputRef.current?.click()}>
+                        <Paperclip size={13} /> Attach Screenshot
+                      </button>
+                    </>
+                  )}
+                  {imageData && <ImagePreview data={imageData} onRemove={() => setImageData(null)} />}
+                </div>
+
+                <div>
+                  <label className="ff-field-label" style={{ display: 'inline-flex', alignItems: 'center' }}>
+                    Goal for this reply
+                    <span className="ff-field-hint" style={{ fontWeight: 400, marginLeft: 6 }}>· optional</span>
+                    <Tooltip text="What do you want to happen after they read this? Move to a call, confirm a detail, set a boundary, close the project. Shapes the ending of the reply." />
+                  </label>
+                  <textarea className="ff-textarea" rows={2} placeholder='e.g. "Get sign-off on the brief" or "Address scope concerns without losing the deal"' value={goal} onChange={e => setGoal(e.target.value)} />
+                </div>
+              </>
+            ) : mode === 'followup' ? (
               <>
                 <div>
                   <label className="ff-field-label" style={{ display: 'inline-flex', alignItems: 'center' }}>
@@ -4642,6 +4357,7 @@ No em dashes anywhere. Return ONLY JSON.`;
           {result && resultMode === 'proposal' && <ProposalOutput result={result} pillClass={pillClass} portfolio={portfolio} copied={copied} copyText={copyText} selectAllText={selectAllText} />}
           {result && resultMode === 'dm' && <DMOutput result={result} copied={copied} copyText={copyText} selectAllText={selectAllText} />}
           {result && resultMode === 'email' && <EmailOutput result={result} copied={copied} copyText={copyText} selectAllText={selectAllText} />}
+          {result && resultMode === 'reply' && <ReplyOutput result={result} copied={copied} copyText={copyText} selectAllText={selectAllText} />}
           {result && resultMode === 'followup' && <FollowupOutput result={result} copied={copied} copyText={copyText} selectAllText={selectAllText} />}
           {result && resultMode === 'coverletter' && <CoverLetterOutput result={result} copied={copied} copyText={copyText} selectAllText={selectAllText} />}
         </div>
@@ -5415,6 +5131,7 @@ function PsychCard({ psych, delay = 0 }) {
       overflow: 'hidden',
       border: '1px solid var(--border)',
       background: 'var(--bg)',
+      boxShadow: '0 1px 4px rgba(0,0,0,0.05)',
     }}>
 
       {/* Header row */}
@@ -5644,38 +5361,41 @@ function ProposalOutput({ result, pillClass, portfolio, copied, copyText, select
         <div className="ff-fadeup ff-card" style={{ animationDelay: '120ms' }}>
           <h3 className="ff-subheading mb-4">Attachments to send</h3>
           <ul className="ff-attach-list">
-            {result.attachments.map((item, i) => (
-              <li key={i} className="ff-attach-item">
-                <span className="ff-attach-num">{String(i + 1).padStart(2, '0')}</span>
-                <div className="flex-1 min-w-0">
-                  <p className="ff-attach-text">{item.description}</p>
-                  {item.links?.length > 0 && (
-                    <ul className="ff-attach-links">
-                      {item.links.map((url, j) => {
-                        const matched = portfolio.find(p => p.url === url);
-                        return (
+            {result.attachments.map((item, i) => {
+              const matched = item.links?.length > 0 ? portfolio.find(p => p.url === item.links[0]) : null;
+              const projectName = matched?.label || item.projectName || null;
+              const whatWasDone = item.whatWasDone || item.description || '';
+              return (
+                <li key={i} className="ff-attach-item">
+                  <span className="ff-attach-num">{String(i + 1).padStart(2, '0')}</span>
+                  <div className="flex-1 min-w-0">
+                    {projectName && (
+                      <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-1)', marginBottom: 3, letterSpacing: '-0.01em' }}>{projectName}</p>
+                    )}
+                    <p className="ff-attach-text">{whatWasDone}</p>
+                    {item.links?.length > 0 && (
+                      <ul className="ff-attach-links">
+                        {item.links.map((url, j) => (
                           <li key={j}>
                             <a href={url} target="_blank" rel="noopener noreferrer" className="ff-attach-link">
                               <ExternalLink size={11} />
-                              {matched?.label || url}
+                              {portfolio.find(p => p.url === url)?.label || url}
                             </a>
                           </li>
-                        );
-                      })}
-                    </ul>
-                  )}
-                  {(!item.links || item.links.length === 0) && portfolio.length > 0 && (
-                    <p className="ff-attach-no-link">No matching link in your library yet.</p>
-                  )}
-                </div>
-              </li>
-            ))}
+                        ))}
+                      </ul>
+                    )}
+                    {(!item.links || item.links.length === 0) && portfolio.length > 0 && (
+                      <p className="ff-attach-no-link">No matching link in your library yet.</p>
+                    )}
+                  </div>
+                </li>
+              );
+            })}
           </ul>
         </div>
       )}
 
-      {/* Cold DM */}
-      <OutputBlock title="Cold DM" text={result.coldDM} copyKey="dm" copied={copied} copyText={copyText} selectAllText={selectAllText} delay={180} />
     </div>
   );
 }
@@ -5746,6 +5466,65 @@ function EmailOutput({ result, copied, copyText, selectAllText }) {
         </div>
       </div>
       <PsychCard psych={result.clientPsychology} delay={150} />
+    </div>
+  );
+}
+
+function ReplyOutput({ result, copied, copyText, selectAllText }) {
+  return (
+    <div className="space-y-5">
+      {/* Client read */}
+      {result.clientRead && (
+        <div className="ff-fadeup ff-card">
+          <p className="ff-section-label mb-2">What they're really saying</p>
+          <p style={{ fontSize: 14, color: 'var(--text-1)', lineHeight: 1.6, letterSpacing: '-0.005em' }}>{result.clientRead}</p>
+        </div>
+      )}
+
+      {/* Issues found */}
+      {result.issues?.length > 0 && (
+        <div className="ff-fadeup ff-card" style={{ animationDelay: '30ms' }}>
+          <p className="ff-section-label mb-3">What was weak in the draft</p>
+          <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {result.issues.filter(Boolean).map((issue, i) => (
+              <li key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                <span style={{ width: 18, height: 18, borderRadius: '50%', background: 'var(--danger-bg)', border: '1px solid rgba(248,113,113,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
+                  <span style={{ fontSize: 9, fontWeight: 800, color: 'var(--danger)' }}>{i + 1}</span>
+                </span>
+                <span style={{ fontSize: 13.5, lineHeight: 1.55, color: 'var(--text-2)', letterSpacing: '-0.005em' }}>{issue}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* Polished reply */}
+      {result.polishedReply && (
+        <div className="ff-fadeup" style={{ animationDelay: '60ms' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+            <h3 className="ff-subheading">Polished reply</h3>
+            <button className="ff-icon-btn" onClick={() => copyText('reply', result.polishedReply)}>
+              {copied.reply ? <Check size={12} /> : <Copy size={12} />}
+              {copied.reply ? 'Copied' : 'Copy'}
+            </button>
+          </div>
+          <div className="ff-card" style={{ borderLeft: '3px solid var(--accent)' }}>
+            <p className="ff-output-text" onClick={selectAllText} style={{ cursor: 'text', fontSize: 15, lineHeight: 1.7, letterSpacing: '-0.005em' }}>
+              {result.polishedReply}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* What changed */}
+      {result.whatChanged && (
+        <div className="ff-fadeup ff-card" style={{ animationDelay: '90ms', background: 'var(--accent-bg-soft)', border: '1px solid var(--accent-border-soft)' }}>
+          <p className="ff-section-label mb-2" style={{ color: 'var(--accent)' }}>What changed and why</p>
+          <p style={{ fontSize: 13.5, color: 'var(--text-1)', lineHeight: 1.6, letterSpacing: '-0.005em' }}>{result.whatChanged}</p>
+        </div>
+      )}
+
+      <PsychCard psych={result.clientPsychology} delay={120} />
     </div>
   );
 }
