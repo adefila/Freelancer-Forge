@@ -38,7 +38,7 @@ const TONE_DIRECTIVES = {
 };
 
 export function buildPrompt(mode, intel, imageData, tone, portfolio, clientMessage, myMessage, goal, jobDescription, offer, proof, cvFile) {
-  const toneInstruction = tone === 'Auto' ? 'Adapt naturally.' : `${TONE_DIRECTIVES[tone]} Apply consistently.`;
+  const toneInstruction = tone === 'Auto' ? 'Adapt naturally.' : TONE_DIRECTIVES[tone] + " Apply consistently.";
 
   if (mode === 'reply') {
     return `You are a communication strategist who helps freelancers sound professional, clear, and confident in live client conversations. Your job is to take the freelancer's draft reply and make it sharper  -  not more formal, sharper. Clear thinking, precise language, no filler.
@@ -76,24 +76,24 @@ GRAMMAR CHECK  -  before outputting:
 - No weak openers: "So,", "Well,", "Look,", "Honestly,".
 
 VOICE AND TONE:
-${toneInstruction ? `Selected tone: ${toneInstruction}` : 'Match the tone to the client. If they wrote casually, write casually. If they wrote with urgency, be sharp and direct. If they wrote carefully and formally, match that register. Your tone should feel like you are already talking to them, not presenting to a stranger.'}
+${toneInstruction ? 'Selected tone: ' + toneInstruction : 'Match the tone to the client. If they wrote casually, write casually. If they wrote with urgency, be sharp and direct. If they wrote carefully and formally, match that register. Your tone should feel like you are already talking to them, not presenting to a stranger.'}
 
 CRITICAL: The hook, fit bullets, and CTA must all feel like they came from the same person who read THEIR specific brief. Not a template. Not a default. Something they could only have received from you.
 ${STRICT_RULES}
 
 Generate ONLY valid JSON:
-${'{'}
+{
 "clientRead": "2-3 sentences. What is the client actually communicating  -  stated and unstated? What is their tone, their priority, their concern?",
 "issues": ["Issue found in the draft and why it weakens the reply", "Second issue if present", "Third issue if present"],
 "polishedReply": "The finished, ready-to-send reply. Sounds like the freelancer at their best. Direct, clear, professional without being stiff. No em dashes. No filler. Ends with a concrete next step if one is needed.",
 "whatChanged": "2-3 sentences. The key changes made and why each one makes the reply stronger.",
-"clientPsychology": ${'{'}
+"clientPsychology": {
   "buyerType": "6-10 words. What kind of person is this client based on how they communicate.",
   "budgetRange": "Estimated range or 'Not enough signal' if the conversation doesn't indicate budget.",
   "confidenceScore": 1-100,
   "confidenceRationale": "1 sentence. How well-positioned is the freelancer in this conversation and why."
-${'}'} 
-${'}'} 
+} 
+} 
 
 Return ONLY JSON.`;
   }
@@ -127,23 +127,23 @@ FOLLOW-UP RULES:
 - 2-4 short paragraphs. Read it back  -  if it sounds like you're chasing, rewrite it.
 
 VOICE AND TONE:
-${toneInstruction ? `Selected tone: ${toneInstruction}` : 'Match the tone to the client. If they wrote casually, write casually. If they wrote with urgency, be sharp and direct. If they wrote carefully and formally, match that register. Your tone should feel like you are already talking to them, not presenting to a stranger.'}
+${toneInstruction ? 'Selected tone: ' + toneInstruction : 'Match the tone to the client. If they wrote casually, write casually. If they wrote with urgency, be sharp and direct. If they wrote carefully and formally, match that register. Your tone should feel like you are already talking to them, not presenting to a stranger.'}
 
 CRITICAL: The hook, fit bullets, and CTA must all feel like they came from the same person who read THEIR specific brief. Not a template. Not a default. Something they could only have received from you.
 ${STRICT_RULES}
 
 Generate ONLY valid JSON:
-${'{'}
+{
 "clientRead": "2-3 sentences. Who is this buyer, what are they likely going through right now, and what does their communication style tell you about how to approach them.",
 "situation": "2 sentences. What's the actual state of this conversation, and what is the single most likely reason it stalled. Name it plainly.",
 "followup": "The follow-up, ready to send. \\n between paragraphs. 2-4 paragraphs. Starts with something specific. Adds value. Ends with a clear, low-friction next step or a graceful exit. No em dashes.",
-"clientPsychology": ${'{'}
+"clientPsychology": {
   "buyerType": "6-10 words. The specific archetype based on their communication style and behaviour.",
   "budgetRange": "Estimated range based on signals in the conversation. Name the signal you read.",
   "confidenceScore": 1-100,
   "confidenceRationale": "1 sentence. What's working in your favour here, and what's the main risk to the deal."
-${'}'} 
-${'}'} 
+} 
+} 
 
 Return ONLY JSON.`;
   }
@@ -187,28 +187,28 @@ FORBIDDEN PHRASES:
 "strong communication skills", "detail-oriented", "I noticed you are looking for", "dynamic", "innovative."
 
 VOICE AND TONE:
-${toneInstruction ? `Selected tone: ${toneInstruction}` : 'Match the tone to the client. If they wrote casually, write casually. If they wrote with urgency, be sharp and direct. If they wrote carefully and formally, match that register. Your tone should feel like you are already talking to them, not presenting to a stranger.'}
+${toneInstruction ? 'Selected tone: ' + toneInstruction : 'Match the tone to the client. If they wrote casually, write casually. If they wrote with urgency, be sharp and direct. If they wrote carefully and formally, match that register. Your tone should feel like you are already talking to them, not presenting to a stranger.'}
 
 CRITICAL: The hook, fit bullets, and CTA must all feel like they came from the same person who read THEIR specific brief. Not a template. Not a default. Something they could only have received from you.
 ${STRICT_RULES}
 
 Generate ONLY valid JSON:
-${'{'}
-"extraction": ${'{'}
+{
+"extraction": {
   "targetRole": "4-8 words. The exact role.",
   "company": "Company name from the posting, or 'the company' if not visible.",
   "topNeed": "2-3 sentences. The real operational problem this employer is solving  -  in their language, not HR language. What breaks if they don't fill this role well.",
   "fitAngle": "2 sentences. The applicant's strongest, most specific angle  -  the one thing that makes them the lower-risk, higher-upside choice."
-${'}'},
+},
 "subject": "Email subject line under 60 characters. Specific. Not 'Application for [X] role'.",
 "coverLetter": "The finished letter. \\n between paragraphs. 200-260 words. Ready to send. Sounds like a real person who understands the work. No em dashes.",
-"clientPsychology": ${'{'}
+"clientPsychology": {
   "buyerType": "6-10 words. The type of hiring manager based on the posting tone and what they're optimising for.",
   "budgetRange": "Estimated salary or contract range based on role level, company size, and market signals.",
   "confidenceScore": 1-100,
   "confidenceRationale": "1 sentence. The strongest fit signal from the applicant's background, and the biggest gap to address."
-${'}'} 
-${'}'} 
+} 
+} 
 
 Return ONLY JSON.`;
   }
@@ -240,23 +240,23 @@ ABOUT THE LEAD:
 ${intel.trim() || (imageData ? '[See attached.]' : '[No context provided  -  infer the most likely niche and situation]')}
 
 VOICE AND TONE:
-${toneInstruction ? `Selected tone: ${toneInstruction}` : 'Match the tone to the client. If they wrote casually, write casually. If they wrote with urgency, be sharp and direct. If they wrote carefully and formally, match that register. Your tone should feel like you are already talking to them, not presenting to a stranger.'}
+${toneInstruction ? 'Selected tone: ' + toneInstruction : 'Match the tone to the client. If they wrote casually, write casually. If they wrote with urgency, be sharp and direct. If they wrote carefully and formally, match that register. Your tone should feel like you are already talking to them, not presenting to a stranger.'}
 
 CRITICAL: The hook, fit bullets, and CTA must all feel like they came from the same person who read THEIR specific brief. Not a template. Not a default. Something they could only have received from you.
 ${STRICT_RULES}
 
 Generate ONLY valid JSON:
-${'{'}
+{
 "clientType": "4-8 words. Who is this person and what do they care about.",
 "hook": "5-12 words. The specific thing you noticed about them that opens the door.",
 "coldDM": "3 lines. \\n between each. Line 1: specific observation. Line 2: relevant proof. Line 3: one good question. No em dashes. Ready to send.",
-"clientPsychology": ${'{'}
+"clientPsychology": {
   "buyerType": "6-10 words. The specific archetype. What they're optimising for and what makes them reply.",
   "budgetRange": "Estimated range based on company stage, signals in their profile or post, or niche context.",
   "confidenceScore": 1-100,
   "confidenceRationale": "1 sentence. What gives this DM its best chance of a reply, and what could make it miss."
-${'}'} 
-${'}'} 
+} 
+} 
 
 Return ONLY JSON.`;
   }
@@ -284,29 +284,29 @@ ABOUT THE LEAD:
 ${intel.trim() || (imageData ? '[See attached.]' : '[No context  -  infer the most likely professional situation]')}
 
 VOICE AND TONE:
-${toneInstruction ? `Selected tone: ${toneInstruction}` : 'Match the tone to the client. If they wrote casually, write casually. If they wrote with urgency, be sharp and direct. If they wrote carefully and formally, match that register. Your tone should feel like you are already talking to them, not presenting to a stranger.'}
+${toneInstruction ? 'Selected tone: ' + toneInstruction : 'Match the tone to the client. If they wrote casually, write casually. If they wrote with urgency, be sharp and direct. If they wrote carefully and formally, match that register. Your tone should feel like you are already talking to them, not presenting to a stranger.'}
 
 CRITICAL: The hook, fit bullets, and CTA must all feel like they came from the same person who read THEIR specific brief. Not a template. Not a default. Something they could only have received from you.
 ${STRICT_RULES}
 
 Generate ONLY valid JSON:
-${'{'}
+{
 "clientType": "4-8 words. Who this person is and what they care about.",
 "subject": "Under 50 characters. Feels personal. No emoji. No 'Quick question'.",
 "body": "Full email. \\n between paragraphs. 4 short paragraphs. Reads like a message from a peer, not a pitch. Sign off 'Best, [Your name]'. No em dashes.",
-"clientPsychology": ${'{'}
+"clientPsychology": {
   "buyerType": "6-10 words. The specific archetype and what they respond to.",
   "budgetRange": "Estimated range from company size, role, stage, and context signals.",
   "confidenceScore": 1-100,
   "confidenceRationale": "1 sentence. What makes this email worth opening, and what could make it miss."
-${'}'} 
-${'}'} 
+} 
+} 
 
 Return ONLY JSON.`;
   }
 
   const portfolioBlock = portfolio.length > 0
-    ? `\nPORTFOLIO:\n${portfolio.map((p, i) => `[${i+1}] URL: ${p.url}${p.label ? ` | LABEL: ${p.label}` : ''}${p.tag ? ` | TAG: ${p.tag}` : ''}`).join('\n')}`
+    ? `\nPORTFOLIO:\n${portfolio.map((p, i) => '[' + (i+1) + '] URL: ' + p.url + (p.label ? ' | LABEL: ' + p.label : '') + (p.tag ? ' | TAG: ' + p.tag : '')).join('\n')}`
     : '';
 
   return `You are a proposal strategist who reads job posts the way a detective reads a crime scene. You are looking for what the client is NOT saying. The posted task is never the real problem. Your job: find the real problem, diagnose it precisely, and write a proposal so accurate that the client thinks "this person already understands my situation better than I do."
@@ -358,8 +358,8 @@ ${portfolioBlock}
 VOICE: ${toneInstruction}
 
 Generate ONLY valid JSON:
-${'{'}
-"extraction": ${'{'}
+{
+"extraction": {
   "clientType": "4-8 words. Who is this person and what do they actually do.",
   "projectType": "4-7 words. The real thing they need solved, not just the task.",
   "tone": "3-6 words. How they communicate  -  formal, casual, urgent, technical.",
@@ -367,9 +367,9 @@ ${'{'}
   "urgency": "Low|Medium|High",
   "budgetSignal": "Low|Medium|High",
   "hiddenIntent": "2-3 sentences. What are they really evaluating beyond the task  -  trust, speed, certainty of outcome, not being burned again? Name the exact signals from the brief that tell you this."
-${'}'},
+},
 "attachments": [{ "projectName": "Short name of the project or client type (e.g. SaaS onboarding redesign, Shopify brand checkout).", "whatWasDone": "1 sentence. What was actually built or done and the measurable result.", "links": ["matching portfolio URL if available"] }],
-"proposal": ${'{'}
+"proposal": {
   "hook": "2-3 sentences. Names their specific problem so precisely they feel understood. Does NOT start with I, Hi, or their name. No em dashes. Ends with a signal that you know how to fix it.",
   "fit": [
     "Specific result with a number, named client type, or measurable outcome  -  connected directly to what this client needs.",
@@ -378,16 +378,15 @@ ${'}'},
   ],
   "process": ["Step 1: under 10 words.", "Step 2: under 10 words.", "Step 3: under 10 words."],
   "cta": "1 sentence. Specific, low-effort next step. Makes replying feel obvious. Not a request for permission."
-${'}'},
+},
 "coldDM": "3 lines. \\n between each. Reads like a message from a peer who noticed something real. No selling. No em dashes.",
-"clientPsychology": ${'{'}
+"clientPsychology": {
   "buyerType": "6-10 words. The specific buyer archetype  -  e.g. 'Deadline-driven founder burned by last developer' or 'Cautious SMB owner testing before committing'.",
   "budgetRange": "Estimated budget range based on signals: company size, platform, scope detail, urgency. Name the signal you used.",
   "confidenceScore": 1-100,
   "confidenceRationale": "1-2 sentences. What gives this proposal its best shot at winning, and the single biggest risk to the deal."
-${'}'} 
-${'}'} 
+} 
+} 
 
 No em dashes anywhere. Return ONLY JSON.`;
 }
-
