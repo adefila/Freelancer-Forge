@@ -75,7 +75,10 @@ GRAMMAR CHECK  -  before outputting:
 - No filler words: "just", "actually", "basically", "literally", "very", "really", "simply."
 - No weak openers: "So,", "Well,", "Look,", "Honestly,".
 
-VOICE: ${toneInstruction}
+VOICE AND TONE:
+${toneInstruction ? `Selected tone: ${toneInstruction}` : 'Match the tone to the client. If they wrote casually, write casually. If they wrote with urgency, be sharp and direct. If they wrote carefully and formally, match that register. Your tone should feel like you are already talking to them, not presenting to a stranger.'}
+
+CRITICAL: The hook, fit bullets, and CTA must all feel like they came from the same person who read THEIR specific brief. Not a template. Not a default. Something they could only have received from you.
 ${STRICT_RULES}
 
 Generate ONLY valid JSON:
@@ -123,7 +126,10 @@ FOLLOW-UP RULES:
 - If the conversation has stalled for a while, include a graceful exit: "If the timing's shifted, no problem at all  -  just let me know and we can revisit whenever it makes sense." This gets more replies than pressure.
 - 2-4 short paragraphs. Read it back  -  if it sounds like you're chasing, rewrite it.
 
-VOICE: ${toneInstruction}
+VOICE AND TONE:
+${toneInstruction ? `Selected tone: ${toneInstruction}` : 'Match the tone to the client. If they wrote casually, write casually. If they wrote with urgency, be sharp and direct. If they wrote carefully and formally, match that register. Your tone should feel like you are already talking to them, not presenting to a stranger.'}
+
+CRITICAL: The hook, fit bullets, and CTA must all feel like they came from the same person who read THEIR specific brief. Not a template. Not a default. Something they could only have received from you.
 ${STRICT_RULES}
 
 Generate ONLY valid JSON:
@@ -180,7 +186,10 @@ FORBIDDEN PHRASES:
 "I look forward to hearing from you", "I would love the opportunity", "I believe I would be a strong candidate",
 "strong communication skills", "detail-oriented", "I noticed you are looking for", "dynamic", "innovative."
 
-VOICE: ${toneInstruction}
+VOICE AND TONE:
+${toneInstruction ? `Selected tone: ${toneInstruction}` : 'Match the tone to the client. If they wrote casually, write casually. If they wrote with urgency, be sharp and direct. If they wrote carefully and formally, match that register. Your tone should feel like you are already talking to them, not presenting to a stranger.'}
+
+CRITICAL: The hook, fit bullets, and CTA must all feel like they came from the same person who read THEIR specific brief. Not a template. Not a default. Something they could only have received from you.
 ${STRICT_RULES}
 
 Generate ONLY valid JSON:
@@ -230,7 +239,10 @@ WHAT KILLS A DM:
 ABOUT THE LEAD:
 ${intel.trim() || (imageData ? '[See attached.]' : '[No context provided  -  infer the most likely niche and situation]')}
 
-VOICE: ${toneInstruction}
+VOICE AND TONE:
+${toneInstruction ? `Selected tone: ${toneInstruction}` : 'Match the tone to the client. If they wrote casually, write casually. If they wrote with urgency, be sharp and direct. If they wrote carefully and formally, match that register. Your tone should feel like you are already talking to them, not presenting to a stranger.'}
+
+CRITICAL: The hook, fit bullets, and CTA must all feel like they came from the same person who read THEIR specific brief. Not a template. Not a default. Something they could only have received from you.
 ${STRICT_RULES}
 
 Generate ONLY valid JSON:
@@ -271,7 +283,10 @@ EMAIL STRUCTURE:
 ABOUT THE LEAD:
 ${intel.trim() || (imageData ? '[See attached.]' : '[No context  -  infer the most likely professional situation]')}
 
-VOICE: ${toneInstruction}
+VOICE AND TONE:
+${toneInstruction ? `Selected tone: ${toneInstruction}` : 'Match the tone to the client. If they wrote casually, write casually. If they wrote with urgency, be sharp and direct. If they wrote carefully and formally, match that register. Your tone should feel like you are already talking to them, not presenting to a stranger.'}
+
+CRITICAL: The hook, fit bullets, and CTA must all feel like they came from the same person who read THEIR specific brief. Not a template. Not a default. Something they could only have received from you.
 ${STRICT_RULES}
 
 Generate ONLY valid JSON:
@@ -353,7 +368,7 @@ ${'{'}
   "budgetSignal": "Low|Medium|High",
   "hiddenIntent": "2-3 sentences. What are they really evaluating beyond the task  -  trust, speed, certainty of outcome, not being burned again? Name the exact signals from the brief that tell you this."
 ${'}'},
-"attachments": [{ "description": "2 sentences. Why this specific work is relevant to their exact situation and what it proves.", "links": ["matching portfolio URL if available"] }],
+"attachments": [{ "projectName": "Short name of the project or client type (e.g. SaaS onboarding redesign, Shopify brand checkout).", "whatWasDone": "1 sentence. What was actually built or done and the measurable result.", "links": ["matching portfolio URL if available"] }],
 "proposal": ${'{'}
   "hook": "2-3 sentences. Names their specific problem so precisely they feel understood. Does NOT start with I, Hi, or their name. No em dashes. Ends with a signal that you know how to fix it.",
   "fit": [
