@@ -4354,7 +4354,7 @@ function CloseTab() {
           <h2 className="ff-section-label mb-5">The Output</h2>
           {!result && !loading && <CloserEmpty mode={mode} />}
           {loading && <OptimizeLoading message={`Drafting your ${CLOSER_MODES[mode].label.toLowerCase()}...`} />}
-          {result && resultMode === 'proposal' && <ProposalOutput result={result} pillClass={pillClass} portfolio={portfolio} copied={copied} copyText={copyText} selectAllText={selectAllText} />}
+          {result && resultMode === 'proposal' && <ProposalOutput result={result} pillClass={pillClass} copied={copied} copyText={copyText} selectAllText={selectAllText} />}
           {result && resultMode === 'dm' && <DMOutput result={result} copied={copied} copyText={copyText} selectAllText={selectAllText} />}
           {result && resultMode === 'email' && <EmailOutput result={result} copied={copied} copyText={copyText} selectAllText={selectAllText} />}
           {result && resultMode === 'reply' && <ReplyOutput result={result} copied={copied} copyText={copyText} selectAllText={selectAllText} />}
@@ -5253,26 +5253,29 @@ function PsychCard({ psych, delay = 0 }) {
   );
 }
 
-function ProposalOutput({ result, pillClass, portfolio, copied, copyText, selectAllText }) {
-  // Build plain-text version for copying
-  const proposalText = (() => {
-    const p = result.proposal;
-    if (!p) return '';
-    if (typeof p === 'string') return p;
-    const lines = [];
-    if (p.hook) lines.push(p.hook);
-    if (p.fit?.length) { lines.push(''); p.fit.forEach(b => lines.push(`• ${b}`)); }
-    if (p.process?.length) { lines.push(''); p.process.forEach((s, i) => lines.push(`${i + 1}. ${s}`)); }
-    if (p.cta) { lines.push(''); lines.push(p.cta); }
-    return lines.join('\n');
-  })();
-
+function ProposalOutput({ result, pillClass, copied, copyText, selectAllText }) {
   const proposal = result.proposal;
   const isStructured = proposal && typeof proposal === 'object';
 
+  const proposalText = (() => {
+    if (!proposal) return '';
+    if (typeof proposal === 'string') return proposal;
+    const parts = [];
+    if (proposal.hook) parts.push(proposal.hook);
+    if (proposal.proof) parts.push(proposal.proof);
+    if (proposal.whyMe) parts.push(proposal.whyMe);
+    if (proposal.process) parts.push(Array.isArray(proposal.process) ? proposal.process.join(' ') : proposal.process);
+    if (proposal.cta) parts.push(proposal.cta);
+    return parts.join('\n\n');
+  })();
+
+  const sectionStyle = { padding: '20px 22px', borderBottom: '1px solid var(--border)' };
+  const labelStyle = { display: 'block', marginBottom: 10 };
+  const paraStyle = { fontSize: 15, lineHeight: 1.72, color: 'var(--text-1)', letterSpacing: '-0.007em', margin: 0, whiteSpace: 'pre-line' };
+
   return (
     <div className="space-y-5">
-      {/* Breakdown */}
+
       <div className="ff-fadeup ff-card">
         <h3 className="ff-subheading mb-4">Client diagnosis</h3>
         <div className="ff-detail-grid">
@@ -5281,13 +5284,12 @@ function ProposalOutput({ result, pillClass, portfolio, copied, copyText, select
           <Cell label="Urgency"><span className={pillClass(result.extraction?.urgency)}>{result.extraction?.urgency}</span></Cell>
           <Cell label="Budget signal"><span className={pillClass(result.extraction?.budgetSignal)}>{result.extraction?.budgetSignal}</span></Cell>
           <Cell label="The real problem" value={result.extraction?.coreProblem} wide />
-          <Cell label="What they're really evaluating" value={result.extraction?.hiddenIntent} wide />
+          <Cell label="What they are really evaluating" value={result.extraction?.whatTheyAreActuallyEvaluating || result.extraction?.hiddenIntent} wide />
         </div>
       </div>
 
       <PsychCard psych={result.clientPsychology} delay={30} />
 
-      {/* Structured Proposal */}
       {proposal && (
         <div className="ff-fadeup" style={{ animationDelay: '60ms' }}>
           <div className="flex items-center justify-between mb-3">
@@ -5300,51 +5302,34 @@ function ProposalOutput({ result, pillClass, portfolio, copied, copyText, select
 
           {isStructured ? (
             <div className="ff-card" style={{ padding: 0, overflow: 'hidden' }}>
-              {/* Hook */}
               {proposal.hook && (
-                <div style={{ padding: '20px 22px', borderBottom: '1px solid var(--border)', background: 'var(--bg)' }}>
-                  <span className="ff-section-label" style={{ display: 'block', marginBottom: 10, color: 'var(--accent)' }}>Opening — makes them feel understood</span>
-                  <p style={{ fontSize: 15.5, lineHeight: 1.6, color: 'var(--text-1)', fontWeight: 500, letterSpacing: '-0.008em', margin: 0 }}>{proposal.hook}</p>
+                <div style={{ ...sectionStyle, background: 'var(--bg)' }}>
+                  <span className="ff-section-label" style={{ ...labelStyle, color: 'var(--accent)' }}>Opening</span>
+                  <p style={{ ...paraStyle, fontWeight: 500, fontSize: 15.5 }}>{proposal.hook}</p>
                 </div>
               )}
-
-              {/* Why me */}
-              {proposal.fit?.length > 0 && (
-                <div style={{ padding: '20px 22px', borderBottom: '1px solid var(--border)' }}>
-                  <span className="ff-section-label" style={{ display: 'block', marginBottom: 12 }}>Proof I can solve this</span>
-                  <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 10 }}>
-                    {proposal.fit.map((b, i) => (
-                      <li key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-                        <span style={{ width: 20, height: 20, borderRadius: 6, background: 'var(--accent-bg-soft)', border: '1px solid var(--accent-border-soft)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
-                          <span style={{ fontSize: 10, fontWeight: 800, color: 'var(--accent)' }}>{i + 1}</span>
-                        </span>
-                        <span style={{ fontSize: 14, lineHeight: 1.6, color: 'var(--text-1)', letterSpacing: '-0.005em' }}>{b}</span>
-                      </li>
-                    ))}
-                  </ul>
+              {proposal.proof && (
+                <div style={sectionStyle}>
+                  <span className="ff-section-label" style={labelStyle}>Why I can solve this</span>
+                  <p style={paraStyle}>{proposal.proof}</p>
                 </div>
               )}
-
-              {/* Process */}
-              {proposal.process?.length > 0 && (
-                <div style={{ padding: '20px 22px', borderBottom: '1px solid var(--border)' }}>
-                  <span className="ff-section-label" style={{ display: 'block', marginBottom: 12 }}>How we work together</span>
-                  <ol style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 10 }}>
-                    {proposal.process.map((s, i) => (
-                      <li key={i} style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
-                        <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--accent)', fontFamily: 'var(--font-mono)', flexShrink: 0, width: 22, paddingTop: 2, letterSpacing: '0.02em' }}>{String(i + 1).padStart(2, '0')}</span>
-                        <span style={{ fontSize: 14, lineHeight: 1.55, color: 'var(--text-1)', letterSpacing: '-0.005em' }}>{s}</span>
-                      </li>
-                    ))}
-                  </ol>
+              {proposal.whyMe && (
+                <div style={sectionStyle}>
+                  <span className="ff-section-label" style={labelStyle}>Why me specifically</span>
+                  <p style={paraStyle}>{proposal.whyMe}</p>
                 </div>
               )}
-
-              {/* CTA */}
+              {proposal.process && (
+                <div style={sectionStyle}>
+                  <span className="ff-section-label" style={labelStyle}>How we work together</span>
+                  <p style={paraStyle}>{Array.isArray(proposal.process) ? proposal.process.join(' ') : proposal.process}</p>
+                </div>
+              )}
               {proposal.cta && (
                 <div style={{ padding: '18px 22px', background: 'var(--accent-bg-soft)', borderTop: '1px solid var(--accent-border-soft)' }}>
-                  <span className="ff-section-label" style={{ display: 'block', marginBottom: 8, color: 'var(--accent)' }}>The ask — easy to say yes to</span>
-                  <p style={{ fontSize: 15, lineHeight: 1.55, color: 'var(--text-1)', fontWeight: 600, letterSpacing: '-0.008em', margin: 0 }}>{proposal.cta}</p>
+                  <span className="ff-section-label" style={{ ...labelStyle, color: 'var(--accent)' }}>The ask</span>
+                  <p style={{ ...paraStyle, fontWeight: 600 }}>{proposal.cta}</p>
                 </div>
               )}
             </div>
@@ -5356,50 +5341,9 @@ function ProposalOutput({ result, pillClass, portfolio, copied, copyText, select
         </div>
       )}
 
-      {/* Suggested Attachments */}
-      {result.attachments?.length > 0 && (
-        <div className="ff-fadeup ff-card" style={{ animationDelay: '120ms' }}>
-          <h3 className="ff-subheading mb-4">Attachments to send</h3>
-          <ul className="ff-attach-list">
-            {result.attachments.map((item, i) => {
-              const matched = item.links?.length > 0 ? portfolio.find(p => p.url === item.links[0]) : null;
-              const projectName = matched?.label || item.projectName || null;
-              const whatWasDone = item.whatWasDone || item.description || '';
-              return (
-                <li key={i} className="ff-attach-item">
-                  <span className="ff-attach-num">{String(i + 1).padStart(2, '0')}</span>
-                  <div className="flex-1 min-w-0">
-                    {projectName && (
-                      <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-1)', marginBottom: 3, letterSpacing: '-0.01em' }}>{projectName}</p>
-                    )}
-                    <p className="ff-attach-text">{whatWasDone}</p>
-                    {item.links?.length > 0 && (
-                      <ul className="ff-attach-links">
-                        {item.links.map((url, j) => (
-                          <li key={j}>
-                            <a href={url} target="_blank" rel="noopener noreferrer" className="ff-attach-link">
-                              <ExternalLink size={11} />
-                              {portfolio.find(p => p.url === url)?.label || url}
-                            </a>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                    {(!item.links || item.links.length === 0) && portfolio.length > 0 && (
-                      <p className="ff-attach-no-link">No matching link in your library yet.</p>
-                    )}
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-      )}
-
     </div>
   );
 }
-
 function DMOutput({ result, copied, copyText, selectAllText }) {
   return (
     <div className="space-y-5">
