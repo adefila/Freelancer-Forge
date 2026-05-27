@@ -301,102 +301,94 @@ Generate ONLY valid JSON:
 
   // Default: proposal mode
   const portfolioBlock = portfolio.length > 0
-    ? 'PORTFOLIO (match relevant pieces to this job):\n' + portfolio.map((p, i) => '[' + (i+1) + '] URL: ' + p.url + (p.label ? ' | PROJECT: ' + p.label : '') + (p.tag ? ' | TYPE: ' + p.tag : '')).join('\n')
+    ? 'PORTFOLIO (match the most relevant 1-2 pieces to this job):\n' + portfolio.map((p, i) => '[' + (i+1) + '] URL: ' + p.url + (p.label ? ' | PROJECT: ' + p.label : '') + (p.tag ? ' | TYPE: ' + p.tag : '')).join('\n')
     : '';
 
-  return `You are writing a freelance proposal. Not a pitch. Not a cover letter. A direct, human message from someone who read the brief carefully and knows they can help.
+  return `You are writing a freelance proposal. The client is busy. They will skim it in 15 seconds. If it does not land in the first two sentences, they are gone.
 
-The client has probably already read 20 proposals that start with "I am a passionate developer with 5 years experience." Yours will not do that. Yours will make them feel, in the first sentence, that you understood what they actually wrote.
+LENGTH RULES - NON-NEGOTIABLE:
+- Hook: 2-3 sentences max. Not one word more.
+- Proof: 2-3 sentences max. One specific result. That is all.
+- Why me: 1-2 sentences. One sharp differentiator.
+- Process: 2 sentences. How you start and what they get at the end. Nothing in between.
+- CTA: 1 sentence. The smallest possible yes.
 
-BEFORE WRITING - EXTRACT EVERYTHING FROM THE JOB POST:
-Read every word. Do not skim.
-- What is mentioned first? That is their biggest concern.
-- What is repeated or emphasised? That is what they are afraid will go wrong.
-- Frustration signals: "again", "still", "keep", "previous freelancer", "finally", "reliable", "actually communicates", "meets deadlines", "no ghosting"
-- Urgency signals: "ASAP", "urgent", "deadline", "immediately", "as soon as possible"
-- Burned signals: "need someone reliable", "communicate well", "must be responsive" - these are scars, not preferences
-- Scope vs budget tension: large scope + low or missing budget = someone burned them before
-- Every specific tool, platform, format, or requirement - note it and reference it back
-- Their tone: rushed and terse, warm and open, formal and careful, casual founder energy
-- What they did NOT say that you would expect - this often reveals what they have given up expecting
+Every section should be short enough to read in one breath.
+If a sentence does not add something the client cannot infer themselves, cut it.
 
-DIAGNOSE THE REAL SITUATION:
-Before writing a word, answer these internally:
-1. What is actually broken in their world right now - not the task, the situation behind it?
-2. What fear is driving this post?
-3. What would make them skip your proposal in 3 seconds?
-4. What would make them stop and read yours properly?
+READ THE POST FIRST. EXTRACT EVERYTHING:
+- What is listed first? Highest priority.
+- What is repeated or over-explained? Their fear.
+- Frustration signals: "again", "still", "previous freelancer", "reliable", "actually", "finally", "ASAP"
+- Burned signals: "communicate well", "meet deadlines", "responsive", "no ghosting" - these are scars
+- Every specific tool, platform, or requirement named - reference it back
+- Scope vs budget tension - signals they have been burned before
+- Their tone: terse / warm / formal / casual - match it exactly
 
-TONE - THIS IS NON-NEGOTIABLE:
-${toneInstruction !== 'Adapt naturally.' ? 'SELECTED TONE: ' + toneInstruction + '\nThis is not a suggestion. It shapes every single sentence. The vocabulary, the sentence length, the energy, the level of warmth or directness. If the tone is Bold - make claims and defend them. If it is Casual - write like you are texting a colleague. If it is Authoritative - state things as facts. Do not drift from this tone halfway through.' : 'AUTO TONE: Read how they wrote the post. Match their energy exactly, then turn the confidence up slightly. Casual post - write casually. Urgent terse post - no pleasantries, straight to it. Warm detailed post - be warm and thorough. You are a mirror that writes back sharper.'}
+TONE - FOLLOW THIS STRICTLY:
+${toneInstruction !== 'Adapt naturally.' ? 'TONE: ' + toneInstruction + ' Every sentence. Word choice, sentence length, energy. Do not drift.' : 'Match their tone exactly. Terse post - be terse. Casual - be casual. Urgent - skip warmth, go straight to the point. Write back in their energy, slightly more confident.'}
 
-NOW WRITE FOUR SECTIONS:
+SECTION 1 - HOOK (2-3 sentences):
+Name their situation precisely. Not your credentials - their problem.
+Do not start with "I", "Hi", or their name.
+Last sentence: signal you know how to fix it.
+SHORT. PUNCHY. SPECIFIC TO THIS POST.
 
-SECTION 1 - OPENING (1 paragraph, 2-4 sentences):
-Name their situation. Not your experience - their situation. So specific that they think "this person actually read what I wrote, not just the title."
-Do NOT open with: "I", "Hi", their name, "I came across", "I would love to", "I am excited"
-End this paragraph with a sentence that signals you know the way out.
-If their post had urgency - the opening should feel immediate. If it was casual - open casually. Follow the tone.
+SECTION 2 - PROOF (2-3 sentences):
+One story. One result. Directly mapped to their situation.
+If portfolio is provided - pick the most relevant piece and reference it by name as evidence.
+Format: what you did, for what type of client, what happened. One number or concrete outcome.
+Do not pad. Do not add a second result. One is more convincing than three weak ones.
 
-SECTION 2 - PROOF (1 flowing paragraph, 3-5 sentences):
-This is a story, not a list. It says: here is what I did, for someone in a situation like yours, and here is what happened.
-If portfolio links are provided - identify the most relevant 1 or 2 pieces and weave them in naturally. Do not list them. Reference them as evidence of a result.
-Format: "I [did X] for [type of client/situation similar to theirs]. [What happened - specific result with number if possible]. [How that maps directly to what they need right now.]"
-If no portfolio - write proof from plausible implied experience based on the job type. Make it credible and specific.
-At least one concrete number, timeframe, or named outcome. No vague claims.
+SECTION 3 - WHY ME (1-2 sentences):
+One thing that separates you from the other applicants for THIS job specifically.
+Not "detail-oriented." Not "passionate." Something earned by what you read in the post.
+One sentence can be enough if it is the right sentence.
 
-SECTION 3 - WHY ME (1 paragraph, 2-3 sentences):
-Not "I am detail-oriented." Not "I am passionate." Something real and specific that connects to THIS job.
-What do you do differently from the other applicants? What do you understand about this type of problem that others miss? What constraint do you work well under that this job requires?
-This must be earned by what you read in the post - not generic. If they mentioned a specific challenge, address it directly here.
-
-SECTION 4 - HOW WE WORK TOGETHER (2-3 sentences as a natural paragraph, NO numbered steps, NO bullet points):
-Write this the way you would say it to someone face to face. How would you actually approach this project? What happens first, what happens next?
-Keep it short. Keep it human. It should feel like "here is how I would handle this" not "Phase 1: Discovery. Phase 2: Execution."
-Make it specific to what this job actually involves.
+SECTION 4 - PROCESS (2 sentences):
+Sentence 1: how you start.
+Sentence 2: what they get at the end, or what the handoff looks like.
+No more. Written as a human would say it. Not a project plan.
 
 SECTION 5 - CTA (1 sentence):
-The one thing they need to do next. Make it the easiest possible yes.
-If they mentioned a file, a deadline, a specific detail - reference it.
-If they seem busy - make it tiny. "Send me the brief and I can turn this around by [their deadline]."
-If they are being careful - give them something low stakes. "Happy to answer any questions before you decide."
-Never: "I look forward to hearing from you." Never: "Feel free to reach out." Never: "Let me know if interested."
+Lowest-friction next step. Reference their deadline or file if they mentioned one.
+Make it easy to say yes to in under 3 seconds.
 
-${imageData ? 'IMAGE ATTACHED: Read every visible word. Every number. Every requirement. Every signal. Reference what you see specifically - do not write as if you did not look.' : ''}
+${imageData ? 'IMAGE ATTACHED: Read every word. Every detail. Reference specifics directly.' : ''}
 
 INPUT:
-${intel.trim() || (imageData ? '[See attached]' : '[No input - write for the most likely scenario given the niche]')}
+${intel.trim() || (imageData ? '[See attached]' : '[No input - write for the most likely scenario]')}
 ${portfolioBlock}
 
 ${STRICT_RULES}
 
-Return ONLY valid JSON. No text before or after. No markdown:
+Return ONLY valid JSON:
 {
   "extraction": {
-    "clientType": "5-8 words. Who this person actually is.",
-    "projectType": "4-7 words. The real deliverable they need.",
-    "coreProblem": "3-5 sentences. What is actually broken, what is at stake, what they have probably tried, what failure looks like for them.",
-    "keyRequirements": ["Every specific requirement from the post. Quote closely. Do not drop any."],
-    "frustrationSignals": ["Any word or phrase signalling stress, past failure, or burned trust. Direct quotes where possible."],
+    "clientType": "5-8 words.",
+    "projectType": "4-7 words.",
+    "coreProblem": "2-3 sentences. What is broken and what is at stake.",
+    "keyRequirements": ["Every requirement stated. Quote closely. Miss none."],
+    "frustrationSignals": ["Direct quotes of any stress or burn signals."],
     "urgency": "Low|Medium|High",
     "budgetSignal": "Low|Medium|High",
-    "toneOfPost": "4-7 words.",
-    "whatTheyAreActuallyEvaluating": "2-3 sentences. What proof or quality are they really looking for beyond the stated task."
+    "toneOfPost": "4-6 words.",
+    "whatTheyAreActuallyEvaluating": "1-2 sentences."
   },
   "proposal": {
-    "hook": "Opening paragraph. 2-4 sentences. Names their exact situation. Does not start with I, Hi, or their name.",
-    "proof": "Proof paragraph. 3-5 sentences as a flowing story. References relevant portfolio piece by label if provided. At least one number or concrete outcome.",
-    "whyMe": "Why me paragraph. 2-3 sentences. Specific to this job. Earned by what was in the post.",
-    "process": "How we work together. 2-3 sentences written as natural conversation. No numbered steps. No bullets. Specific to this project.",
-    "cta": "1 sentence. Specific, easy, tailored to this client."
+    "hook": "2-3 sentences. Their situation, not your credentials. Does not start with I, Hi, or their name.",
+    "proof": "2-3 sentences. One result, one client type, one number. References portfolio piece by label if provided.",
+    "whyMe": "1-2 sentences. One sharp differentiator specific to this job.",
+    "process": "2 sentences. How you start and what they get. Natural, not a project plan.",
+    "cta": "1 sentence. Easy yes. Specific to this client."
   },
   "clientPsychology": {
     "buyerType": "6-10 words.",
-    "budgetRange": "Realistic range based on scope and signals.",
+    "budgetRange": "Realistic range based on signals.",
     "confidenceScore": 78,
-    "confidenceRationale": "1 sentence. Strongest fit signal and the one gap."
+    "confidenceRationale": "1 sentence. Strongest fit and the one gap."
   }
 }
 
-No em dashes anywhere. Return ONLY the JSON.`;
+No em dashes. Return ONLY the JSON.`;
 }
