@@ -3344,8 +3344,7 @@ function OptimizeTab() {
     if (!rawText) throw new Error('Empty response from API.');
 
     let text = rawText
-      .replace(/^```json\s*/i, '')
-      .replace(/^```\s*/i, '')
+      .replace(/^```(?:json)?\s*/i, '')
       .replace(/```\s*$/i, '')
       .trim();
 
@@ -4006,8 +4005,7 @@ function CloseTab() {
 
       let parsed;
       let attemptText = rawText
-        .replace(/^```json\s*/i, '')
-        .replace(/^```\s*/i, '')
+        .replace(/^```(?:json)?\s*/i, '')
         .replace(/```\s*$/i, '')
         .trim();
 
