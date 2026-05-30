@@ -92,36 +92,40 @@ export function buildPrompt(mode, intel, imageData, tone, portfolio, clientMessa
   const toneInstruction = tone === 'Auto' ? 'Adapt naturally.' : TONE_DIRECTIVES[tone] + " Apply consistently.";
 
   if (mode === 'reply') {
-    return `You are a communication strategist who helps freelancers sound professional, clear, and confident in live client conversations. Your job is to take the freelancer's draft reply and make it sharper - not more formal, sharper. Clear thinking, precise language, no filler.
+    return `You are helping a freelancer reply to a live client message. Your job: make the reply sharper, clearer, and more confident - without making it longer.
 
-A great client reply does three things:
-1. Acknowledges what the client said (shows you actually read it)
-2. Answers directly - no hedging, no over-explaining
-3. Moves things forward - next step is clear
+A reply that works does three things:
+1. Shows you actually read what they sent
+2. Answers the real question directly - no hedging, no over-explaining
+3. Makes the next step obvious
 
-RULES:
-- No em dashes. No filler phrases. No "I hope this helps."
-- Sound like a confident professional, not someone seeking approval.
-- Keep it short. If the client asked a question, answer it. Then stop.
-- Do not add information the client did not ask for.
+What kills a client reply:
+- Starting with "Hope this finds you well" or any filler
+- Over-apologising or sounding like you need approval
+- Answering a question they did not ask
+- Being vague when they want a decision or a date
+- Sounding corporate when they wrote casually
 
-VOICE: ${toneInstruction}
+TONE: ${toneInstruction}
 
 CLIENT MESSAGE:
 ${clientMessage || '[No client message provided]'}
 
 FREELANCER DRAFT REPLY:
-${myMessage || '[No draft provided - write a strong reply to the client message above]'}
+${myMessage || '[No draft - write a strong reply from scratch based on the client message above]'}
+
+${goal ? 'GOAL FOR THIS REPLY: ' + goal : ''}
 
 Generate ONLY valid JSON:
 {
-  "analysis": "2-3 sentences. What is the client actually asking or signalling? What tone are they using?",
-  "issues": "1-2 sentences. What is weak or unclear in the draft reply?",
-  "polishedReply": "The full rewritten reply. Sharp, clear, confident. No em dashes.",
+  "clientRead": "2 sentences. What is the client actually asking or signalling? What is their tone or mood?",
+  "issues": ["1 specific thing that is weak or missing in the draft reply. If no draft, write what to watch out for."],
+  "polishedReply": "The full reply. Short, direct, confident. Matches their tone. No em dashes. No filler openers.",
+  "whatChanged": "1-2 sentences. What you changed and the reason why.",
   "clientPsychology": {
-    "buyerType": "6-10 words. What kind of client are they based on this message.",
+    "buyerType": "5-8 words describing what kind of client this is.",
     "confidenceScore": 85,
-    "confidenceRationale": "1 sentence. What this message signals about the relationship."
+    "confidenceRationale": "1 sentence. What this message signals about where the relationship stands."
   }
 }`;
   }
@@ -304,13 +308,20 @@ Generate ONLY valid JSON:
     ? 'PORTFOLIO:\n' + portfolio.map((p, i) => '[' + (i+1) + '] ' + (p.label || p.url) + (p.tag ? ' [' + p.tag + ']' : '') + ' - ' + p.url).join('\n')
     : '';
 
-  return `You are writing a freelance proposal that will be read in under 15 seconds. Most proposals get skipped because they sound identical. Yours will not.
+  return `You are a founder, HR manager, and senior client who has read hundreds of proposals. You know exactly what gets clicked and what gets archived. You are now writing the proposal that you - in that role - would actually stop and read.
 
-The difference between a skipped proposal and a clicked one:
+You have read a lot of proposals. Here is what you know about them:
+90% open with the freelancer's credentials. You skip those.
+90% say "I am passionate" or "I would love to help." You skip those too.
+The ones you click share one quality: in the first sentence, they name your actual situation back at you with enough precision that you think "this person read what I wrote, not just the title."
+
+The difference:
 SKIPPED: "I am a passionate developer with 5 years experience. I have worked on many projects similar to yours and I am confident I can deliver high-quality results."
-CLICKED: "Your onboarding is losing people between step 2 and step 3 - that is almost always a friction problem, not a feature problem. I fixed the same drop-off for a SaaS tool last quarter and activation went up 40%."
+CLICKED: "Your onboarding is dropping people between step 2 and step 3 - that is almost always a friction problem, not a feature problem. I fixed this exact thing for a SaaS tool last quarter and activation went up 40%."
 
-One reads like everyone else. One reads like someone who already understands the problem.
+One proves nothing. One earns the next sentence.
+
+Now write the one that gets clicked.
 
 STEP 1 - DIAGNOSE THE POST. Do this before writing a single word.
 
