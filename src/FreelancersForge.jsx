@@ -3343,30 +3343,36 @@ function OptimizeTab() {
   const parseJsonResponse = (rawText) => {
     if (!rawText) throw new Error('Empty response from API.');
 
+    // Strip all variations of markdown code fences anywhere in the text
     let text = rawText
-      .replace(/^```(?:json)?\s*/i, '')
-      .replace(/```\s*$/i, '')
+      .replace(/```(?:json)?\s*/gi, '')
+      .replace(/```/g, '')
       .trim();
 
+    // Attempt 1: direct parse
     try { return JSON.parse(text); } catch {}
 
+    // Attempt 2: extract from first { to last }
     const firstBrace = text.indexOf('{');
     const lastBrace = text.lastIndexOf('}');
     if (firstBrace !== -1 && lastBrace > firstBrace) {
       const candidate = text.substring(firstBrace, lastBrace + 1);
       try { return JSON.parse(candidate); } catch {}
+      // Attempt 3: strip trailing commas and retry
+      const cleaned = candidate.replace(/,(\s*[}\]])/g, '$1');
+      try { return JSON.parse(cleaned); } catch {}
     }
 
-    if (firstBrace !== -1) {
-      let attempt = text.substring(firstBrace);
-      const lastClose = attempt.lastIndexOf('}');
-      if (lastClose !== -1) attempt = attempt.substring(0, lastClose + 1);
-      attempt = attempt.replace(/,(\s*[}\]])/g, '$1');
-      try { return JSON.parse(attempt); } catch {}
+    // Attempt 4: find JSON object with regex
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      try { return JSON.parse(jsonMatch[0]); } catch {}
+      const cleaned = jsonMatch[0].replace(/,(\s*[}\]])/g, '$1');
+      try { return JSON.parse(cleaned); } catch {}
     }
 
-    const preview = rawText.slice(0, 120).replace(/\s+/g, ' ');
-    throw new Error(`Could not parse response. The model returned non-JSON output. Preview: "${preview}..."`);
+    const preview = rawText.slice(0, 150).replace(/\s+/g, ' ');
+    throw new Error(`Could not parse response. Preview: "${preview}..."`);
   };
 
   const handleAudit = async () => {
@@ -4004,26 +4010,25 @@ function CloseTab() {
       const rawText = data.content.filter(b => b.type === 'text').map(b => b.text).join('').trim();
 
       let parsed;
-      let attemptText = rawText
-        .replace(/^```(?:json)?\s*/i, '')
-        .replace(/```\s*$/i, '')
-        .trim();
+      const attemptText = rawText.replace(/```(?:json)?\s*/gi, '').replace(/```/g, '').trim();
 
-      try {
-        parsed = JSON.parse(attemptText);
-      } catch {
-        const firstBrace = attemptText.indexOf('{');
-        const lastBrace = attemptText.lastIndexOf('}');
-        if (firstBrace !== -1 && lastBrace > firstBrace) {
-          let candidate = attemptText.substring(firstBrace, lastBrace + 1);
-          candidate = candidate.replace(/,(\s*[}\]])/g, '$1');
-          try { parsed = JSON.parse(candidate); } catch (e) {
-            throw new Error(`Could not parse response. Preview: "${rawText.slice(0, 100)}..."`);
-          }
-        } else {
-          throw new Error(`Could not parse response. Preview: "${rawText.slice(0, 100)}..."`);
-        }
+      const tryParse = (str) => {
+        try { return JSON.parse(str); } catch {}
+        const clean = str.replace(/,(\s*[}\]])/g, '$1');
+        try { return JSON.parse(clean); } catch {}
+        return null;
+      };
+
+      parsed = tryParse(attemptText);
+      if (!parsed) {
+        const fb = attemptText.indexOf('{'), lb = attemptText.lastIndexOf('}');
+        if (fb !== -1 && lb > fb) parsed = tryParse(attemptText.substring(fb, lb + 1));
       }
+      if (!parsed) {
+        const m = attemptText.match(/\{[\s\S]*\}/);
+        if (m) parsed = tryParse(m[0]);
+      }
+      if (!parsed) throw new Error(`Could not parse response. Preview: "${rawText.slice(0, 150)}..."`);
 
       Object.keys(parsed).forEach(k => { if (typeof parsed[k] === 'string') parsed[k] = stripEmDashes(parsed[k]); });
       if (parsed.extraction) Object.keys(parsed.extraction).forEach(k => { if (typeof parsed.extraction[k] === 'string') parsed.extraction[k] = stripEmDashes(parsed.extraction[k]); });
