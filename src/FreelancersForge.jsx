@@ -3965,7 +3965,7 @@ function CloseTab() {
       setError('Paste the job description or upload your CV.');
       return;
     }
-    if (mode !==  'followup' && mode !== 'coverletter' && !intel.trim() && !imageData) { setError('Add intel.'); return; }
+    if (mode !== 'followup' && mode !== 'coverletter' && mode !== 'reply' && !intel.trim() && !imageData) { setError('Add intel.'); return; }
     setError(''); setLoading(true); setResult(null);
 
     try {
