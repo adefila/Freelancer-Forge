@@ -402,5 +402,13 @@ Return ONLY valid JSON. No markdown. No text before or after:
   }
 }
 
+ANTI-FORMULA RULES - these kill proposals faster than bad writing:
+- Never use "which means" more than once in the entire proposal
+- Never start two consecutive sentences with "I"
+- Never use the same sentence structure twice in a row
+- Never use "I have worked with", "I have experience in", "I have built" as an opener - get to the result first
+- Read the full proposal back before outputting. If any two sections sound like they follow the same pattern, rewrite one.
+- Every proposal must feel like it could only have been written for this specific job post. If a sentence could appear in a proposal for a different job, cut it or make it specific.
+
 No em dashes. Return ONLY the JSON object.`;
 }
