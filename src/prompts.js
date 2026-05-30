@@ -304,79 +304,103 @@ Generate ONLY valid JSON:
     ? 'PORTFOLIO:\n' + portfolio.map((p, i) => '[' + (i+1) + '] ' + (p.label || p.url) + (p.tag ? ' [' + p.tag + ']' : '') + ' - ' + p.url).join('\n')
     : '';
 
-  return `Write a freelance proposal. Short. Human. Skimmable in 10 seconds.
+  return `You are writing a freelance proposal that will be read in under 15 seconds. Most proposals get skipped because they sound identical. Yours will not.
 
-STRICT LENGTH:
-- Hook: 2 sentences only
-- Proof: 2 sentences only  
-- Why me: 1 sentence only
-- Process: 1 sentence only
-- CTA: 1 sentence only
+The difference between a skipped proposal and a clicked one:
+SKIPPED: "I am a passionate developer with 5 years experience. I have worked on many projects similar to yours and I am confident I can deliver high-quality results."
+CLICKED: "Your onboarding is losing people between step 2 and step 3 - that is almost always a friction problem, not a feature problem. I fixed the same drop-off for a SaaS tool last quarter and activation went up 40%."
 
-Total proposal: under 120 words. Every word must earn its place. If it can be cut, cut it.
+One reads like everyone else. One reads like someone who already understands the problem.
 
-BEFORE WRITING - read the post and extract:
-- Their biggest pain (what they listed first)
-- Their fear (what they repeated or over-explained)
-- Any frustration signals: "previous freelancer", "reliable", "finally", "ASAP", "still", "again"
-- Every specific tool or requirement mentioned - use them by name
-- Their tone - match it exactly in every sentence
+STEP 1 - DIAGNOSE THE POST. Do this before writing a single word.
 
-TONE - ABSOLUTE RULE:
-${toneInstruction !== 'Adapt naturally.' ? toneInstruction + ' Every sentence follows this. No exceptions.' : 'Mirror their post. Terse post = terse reply. Casual = casual. Urgent = no warmup, straight to it.'}
+Read every word in the job post. Extract:
+- What did they write FIRST? That is their biggest pain.
+- What did they write TWICE or emphasise? That is what they are afraid will go wrong.
+- Burned signals: "previous freelancer", "reliable", "actually communicates", "meets deadlines", "no ghosting", "responsive" - these are not preferences, they are scars from past hires
+- Urgency signals: "ASAP", "urgent", "deadline", "immediately"
+- Every specific tool, platform, or format they named - you will use these exact words back
+- Budget vs scope: huge scope + vague or low budget = burned before, be confident not desperate
+- Their tone: formal? casual? rushed? careful? - you will match this precisely
 
-HOOK (2 sentences):
-Sentence 1: name their exact situation - specific enough they think "this person read my post."
-Sentence 2: signal you have solved this before. Do not start with I, Hi, or their name.
+Then answer internally:
+- What is ACTUALLY broken in their world right now, beyond the task description?
+- What would make them immediately close your proposal?
+- What would make them stop and think "finally, someone who gets it"?
 
-PROOF (2 sentences):
-Sentence 1: one result you got, for a similar client, with one real number or named outcome. If portfolio provided, reference the most relevant piece by name.
-Sentence 2: connect that result directly to what they need right now.
+STEP 2 - WRITE. SHORT. SHARP. SPECIFIC TO THIS POST ONLY.
+
+TONE IS LAW:
+${toneInstruction !== 'Adapt naturally.' ? toneInstruction + '\nApply this to every single sentence. Word choice, rhythm, energy. A bold tone does not soften. A casual tone does not get formal. Do not drift.' : 'Read their post and match their energy exactly - then write back at a higher level of confidence. If they wrote urgently, skip all warmup. If they were casual, be casual. If they were careful and detailed, be thorough but tight. The tone should feel like a natural reply to how they wrote, not a template.'}
+
+HOOK (2 sentences, no more):
+Name their specific situation with enough precision that they think "this person read my actual post, not just the title."
+Do not start with: I, Hi, their name, "I came across", "I noticed", "I would love to"
+End on a sentence that signals you have been here before and you know the way through.
+
+WEAK HOOK: "I am very interested in your project and believe I have the skills to help."
+STRONG HOOK: "Three Webflow pages with a hard launch date and a design system that still needs finalising - the pressure is usually not the build, it is getting sign-off on decisions fast enough to ship on time."
+
+PROOF (2 sentences, no more):
+One result. One client type similar to theirs. One concrete number or named outcome.
+If portfolio is provided - pick the single most relevant piece and reference it naturally by name as evidence, not as a link dump.
+Connect the result directly to what they are trying to do.
+
+WEAK PROOF: "I have worked with many clients on similar projects and delivered great results."
+STRONG PROOF: "The last Webflow build I did for a B2B SaaS team went from approved designs to live in 11 days - they had the same constraint you have, an external launch tied to a campaign. You can see that project in [portfolio piece name]."
 
 WHY ME (1 sentence):
-One thing that separates you from every other applicant for THIS job. Not generic. Earned by what they wrote.
+One thing true about you that is specifically relevant to THIS job that the other 30 applicants will not say.
+It must be earned by something you read in the post - a specific requirement, a fear they signalled, a tool they named.
+
+WEAK: "I am detail-oriented and always meet deadlines."
+STRONG: "I have built in [specific tool they mentioned] for [specific type of client] which means I already know which constraints will slow you down and how to route around them."
 
 PROCESS (1 sentence):
-How you would actually start and what they get. Say it the way you would say it out loud.
+How you would start and what the first deliverable looks like. Written the way you would say it out loud to a colleague. Not a project plan.
+
+WEAK: "My process involves an initial discovery phase followed by iterative development cycles."
+STRONG: "I would start with your [specific thing they mentioned] this week and have a working draft back to you by [specific milestone or their deadline]."
 
 CTA (1 sentence):
-The easiest possible yes. Reference their deadline or file if mentioned. Never "looking forward to hearing from you."
+The lowest-friction possible yes. If they mentioned a file or deadline, reference it.
+Never: "I look forward to hearing from you." Never: "Feel free to reach out." Never: "Let me know if you are interested."
 
-${imageData ? 'IMAGE ATTACHED: Read every word and number. Reference specifics directly.' : ''}
+${imageData ? 'IMAGE ATTACHED: Read every single word and number in this image. Reference specific details from it in the proposal - not generically, by name.' : ''}
 
 INPUT:
-${intel.trim() || (imageData ? '[See attached]' : '[No input - write for the most likely scenario]')}
+${intel.trim() || (imageData ? '[See attached]' : '[No input - write for the most likely scenario given the niche]')}
 ${portfolioBlock}
 
 ${STRICT_RULES}
 
-Return ONLY valid JSON:
+Return ONLY valid JSON. No markdown. No text before or after:
 {
   "extraction": {
     "clientType": "4-6 words.",
     "projectType": "3-5 words.",
-    "coreProblem": "2 sentences max.",
-    "keyRequirements": ["Every requirement. Quote closely. Miss none."],
-    "frustrationSignals": ["Direct quotes of stress or burn signals."],
+    "coreProblem": "2-3 sentences. The real situation, not just the task.",
+    "keyRequirements": ["Every requirement stated. Quote closely. Do not drop any."],
+    "frustrationSignals": ["Direct quotes or close paraphrases of any burn or stress signals."],
     "urgency": "Low|Medium|High",
     "budgetSignal": "Low|Medium|High",
-    "toneOfPost": "3-5 words.",
-    "whatTheyAreActuallyEvaluating": "1 sentence."
+    "toneOfPost": "3-5 words describing how they wrote.",
+    "whatTheyAreActuallyEvaluating": "1-2 sentences. What proof or signal are they really looking for."
   },
   "proposal": {
-    "hook": "2 sentences. Their situation. No I/Hi/name opener.",
-    "proof": "2 sentences. One result with a number. Portfolio reference if available.",
-    "whyMe": "1 sentence. One sharp differentiator for this job.",
-    "process": "1 sentence. How you start and what they get.",
-    "cta": "1 sentence. Easiest possible yes."
+    "hook": "2 sentences. Their exact situation. Does not start with I, Hi, or their name.",
+    "proof": "2 sentences. One result, one number or outcome, relevant portfolio reference if available.",
+    "whyMe": "1 sentence. One specific differentiator earned by what they wrote.",
+    "process": "1 sentence. How you start, what they get first. Said like a human.",
+    "cta": "1 sentence. Easiest yes possible. Specific to this client."
   },
   "clientPsychology": {
     "buyerType": "5-8 words.",
-    "budgetRange": "Realistic range.",
+    "budgetRange": "Realistic range based on signals.",
     "confidenceScore": 78,
-    "confidenceRationale": "1 sentence."
+    "confidenceRationale": "1 sentence. Strongest fit and the one gap."
   }
 }
 
-No em dashes. Return ONLY JSON.`;
+No em dashes. Return ONLY the JSON object.`;
 }
