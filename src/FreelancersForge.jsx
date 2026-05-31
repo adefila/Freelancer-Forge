@@ -3345,8 +3345,8 @@ function OptimizeTab() {
 
     // Strip all variations of markdown code fences anywhere in the text
     let text = rawText
-      .replace(/```(?:json)?\s*/gi, '')
-      .replace(/```/g, '')
+      .replace(/\s*```(?:json)?\s*/gi, '')
+      .replace(/\s*```\s*/g, '')
       .trim();
 
     // Attempt 1: direct parse
@@ -4010,7 +4010,7 @@ function CloseTab() {
       const rawText = data.content.filter(b => b.type === 'text').map(b => b.text).join('').trim();
 
       let parsed;
-      const attemptText = rawText.replace(/```(?:json)?\s*/gi, '').replace(/```/g, '').trim();
+      const attemptText = rawText.replace(/\s*```(?:json)?\s*/gi, '').replace(/\s*```\s*/g, '').trim();
 
       const tryParse = (str) => {
         try { return JSON.parse(str); } catch {}
