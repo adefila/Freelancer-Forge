@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { buildPrompt, STRICT_RULES, CV_STRICT_RULES } from './prompts.js';
 import {
   ArrowRight, Copy, Check, Loader2, Sparkles, Paperclip, X, ImageIcon,
-  Sun, Moon, Plus, ExternalLink, Link as LinkIcon, ChevronDown,
+  Sun, Moon, Plus, ExternalLink, Link as LinkIcon, ChevronDown, Receipt,
   Mail, MessageSquare, FileText, Reply, Type, Image as ImgIcon,
   Target, Award, Briefcase, User, Layers, Wand2, Monitor,
   TrendingUp, Trash2, HelpCircle, PenLine, Bot, Send, RotateCcw,
@@ -2568,6 +2568,442 @@ function getSystemTheme() {
   try { return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'; } catch { return 'light'; }
 }
 
+/* ====================================================================== */
+/* INVOICE STORAGE                                                        */
+/* ====================================================================== */
+
+const INVOICE_STORAGE_KEY = 'ff_invoices_v1';
+const INVOICE_RETENTION_DAYS = 15;
+
+function loadInvoices() {
+  try {
+    const raw = localStorage.getItem(INVOICE_STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    const cutoff = Date.now() - INVOICE_RETENTION_DAYS * 24 * 60 * 60 * 1000;
+    return parsed.filter(inv => inv && inv.createdAt && inv.createdAt > cutoff);
+  } catch { return []; }
+}
+
+function saveInvoices(invoices) {
+  try { localStorage.setItem(INVOICE_STORAGE_KEY, JSON.stringify(invoices)); } catch {}
+}
+
+function generateInvoiceNumber(invoices) {
+  const max = invoices.reduce((m, inv) => {
+    const n = parseInt((inv.number || '').replace(/\D/g, '')) || 0;
+    return Math.max(m, n);
+  }, 0);
+  return 'INV-' + String(max + 1).padStart(4, '0');
+}
+
+/* ====================================================================== */
+/* INVOICE TAB                                                            */
+/* ====================================================================== */
+
+function InvoiceTab() {
+  const [invoices, setInvoices] = useState(() => loadInvoices());
+  const [view, setView] = useState('list'); // 'list' | 'create' | 'preview'
+  const [current, setCurrent] = useState(null);
+  const [saved, setSaved] = useState(false);
+
+  const blankInvoice = () => ({
+    id: Date.now(),
+    createdAt: Date.now(),
+    number: generateInvoiceNumber(invoices),
+    date: new Date().toISOString().slice(0, 10),
+    dueDate: new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10),
+    from: { name: '', email: '', address: '' },
+    to: { name: '', email: '', address: '' },
+    items: [{ id: 1, description: '', qty: 1, rate: '' }],
+    notes: '',
+    currency: 'USD',
+  });
+
+  function openNew() {
+    setCurrent(blankInvoice());
+    setView('create');
+    setSaved(false);
+  }
+
+  function openInvoice(inv) {
+    setCurrent({ ...inv });
+    setView('preview');
+  }
+
+  function deleteInvoice(id) {
+    const updated = invoices.filter(i => i.id !== id);
+    setInvoices(updated);
+    saveInvoices(updated);
+  }
+
+  function saveInvoice() {
+    const exists = invoices.find(i => i.id === current.id);
+    let updated;
+    if (exists) {
+      updated = invoices.map(i => i.id === current.id ? current : i);
+    } else {
+      updated = [current, ...invoices];
+    }
+    setInvoices(updated);
+    saveInvoices(updated);
+    setSaved(true);
+    setView('preview');
+  }
+
+  function updateItem(id, field, val) {
+    setCurrent(c => ({ ...c, items: c.items.map(it => it.id === id ? { ...it, [field]: val } : it) }));
+  }
+
+  function addItem() {
+    setCurrent(c => ({ ...c, items: [...c.items, { id: Date.now(), description: '', qty: 1, rate: '' }] }));
+  }
+
+  function removeItem(id) {
+    setCurrent(c => ({ ...c, items: c.items.filter(it => it.id !== id) }));
+  }
+
+  function subtotal(inv) {
+    return (inv?.items || []).reduce((s, it) => s + (parseFloat(it.qty) || 0) * (parseFloat(it.rate) || 0), 0);
+  }
+
+  function fmt(n, currency = 'USD') {
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(n);
+  }
+
+  function downloadPDF(inv) {
+    const sub = subtotal(inv);
+    const currencySymbol = inv.currency === 'EUR' ? '€' : inv.currency === 'GBP' ? '£' : '$';
+
+    const html = `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>Invoice ${inv.number}</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #111; background: #fff; padding: 60px; font-size: 14px; line-height: 1.5; }
+  .top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 56px; }
+  .brand { font-size: 22px; font-weight: 700; letter-spacing: -0.03em; color: #111; }
+  .inv-meta { text-align: right; }
+  .inv-num { font-size: 28px; font-weight: 700; letter-spacing: -0.03em; color: #111; }
+  .inv-date { font-size: 13px; color: #666; margin-top: 6px; }
+  .parties { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-bottom: 48px; padding-bottom: 40px; border-bottom: 1px solid #e5e5e5; }
+  .party-label { font-size: 11px; font-weight: 600; color: #999; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 10px; }
+  .party-name { font-size: 16px; font-weight: 600; color: #111; margin-bottom: 4px; }
+  .party-detail { font-size: 13px; color: #666; line-height: 1.6; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 32px; }
+  th { font-size: 11px; font-weight: 600; color: #999; letter-spacing: 0.08em; text-transform: uppercase; padding: 0 0 14px; text-align: left; border-bottom: 1px solid #e5e5e5; }
+  th:last-child, td:last-child { text-align: right; }
+  th:nth-child(2), th:nth-child(3) { text-align: right; }
+  td { padding: 16px 0; font-size: 14px; color: #333; border-bottom: 1px solid #f0f0f0; vertical-align: top; }
+  td:nth-child(2), td:nth-child(3) { text-align: right; color: #555; }
+  .totals { margin-left: auto; width: 240px; }
+  .total-row { display: flex; justify-content: space-between; padding: 8px 0; font-size: 14px; color: #555; border-bottom: 1px solid #f5f5f5; }
+  .total-final { display: flex; justify-content: space-between; padding: 16px 0 0; font-size: 18px; font-weight: 700; color: #111; letter-spacing: -0.02em; }
+  .notes { margin-top: 48px; padding-top: 32px; border-top: 1px solid #e5e5e5; }
+  .notes-label { font-size: 11px; font-weight: 600; color: #999; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 10px; }
+  .notes-text { font-size: 13px; color: #666; line-height: 1.7; }
+  .due-badge { display: inline-block; background: #f5f5f5; border-radius: 6px; padding: 4px 12px; font-size: 12px; color: #555; margin-top: 8px; }
+</style>
+</head>
+<body>
+<div class="top">
+  <div class="brand">${inv.from.name || 'Your Name'}</div>
+  <div class="inv-meta">
+    <div class="inv-num">${inv.number}</div>
+    <div class="inv-date">Issued ${inv.date}${inv.dueDate ? ' &middot; Due ' + inv.dueDate : ''}</div>
+  </div>
+</div>
+<div class="parties">
+  <div>
+    <div class="party-label">From</div>
+    <div class="party-name">${inv.from.name || ''}</div>
+    <div class="party-detail">${inv.from.email || ''}</div>
+    <div class="party-detail" style="white-space:pre-line">${inv.from.address || ''}</div>
+  </div>
+  <div>
+    <div class="party-label">Bill To</div>
+    <div class="party-name">${inv.to.name || ''}</div>
+    <div class="party-detail">${inv.to.email || ''}</div>
+    <div class="party-detail" style="white-space:pre-line">${inv.to.address || ''}</div>
+  </div>
+</div>
+<table>
+  <thead><tr><th style="width:50%">Description</th><th>Qty</th><th>Rate</th><th>Amount</th></tr></thead>
+  <tbody>
+    ${inv.items.map(it => {
+      const amt = (parseFloat(it.qty)||0)*(parseFloat(it.rate)||0);
+      return `<tr><td>${it.description || ''}</td><td>${it.qty}</td><td>${currencySymbol}${parseFloat(it.rate||0).toFixed(2)}</td><td>${currencySymbol}${amt.toFixed(2)}</td></tr>`;
+    }).join('')}
+  </tbody>
+</table>
+<div class="totals">
+  <div class="total-final"><span>Total</span><span>${currencySymbol}${sub.toFixed(2)}</span></div>
+</div>
+${inv.notes ? `<div class="notes"><div class="notes-label">Notes</div><div class="notes-text">${inv.notes}</div></div>` : ''}
+</body>
+</html>`;
+
+    const blob = new Blob([html], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const win = window.open(url, '_blank');
+    if (win) {
+      win.onload = () => {
+        setTimeout(() => { win.print(); }, 500);
+      };
+    }
+  }
+
+  // ── List view ──────────────────────────────────────────────────────────
+  if (view === 'list') return (
+    <div style={{ maxWidth: 760, margin: '0 auto', padding: '32px 0' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 28 }}>
+        <div>
+          <h2 style={{ fontSize: 20, fontWeight: 700, letterSpacing: '-0.02em', color: 'var(--text-1)' }}>Invoices</h2>
+          <p style={{ fontSize: 13, color: 'var(--text-3)', marginTop: 3 }}>Saved for 15 days &middot; {invoices.length} invoice{invoices.length !== 1 ? 's' : ''}</p>
+        </div>
+        <button className="ff-btn ff-btn-primary" onClick={openNew} style={{ gap: 8, paddingLeft: 16, paddingRight: 16 }}>
+          <Plus size={14} /> New Invoice
+        </button>
+      </div>
+
+      {invoices.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: '80px 0', color: 'var(--text-3)' }}>
+          <Receipt size={32} style={{ margin: '0 auto 16px', opacity: 0.3 }} />
+          <p style={{ fontSize: 15, fontWeight: 500, color: 'var(--text-2)', marginBottom: 6 }}>No invoices yet</p>
+          <p style={{ fontSize: 13 }}>Create your first invoice to get started</p>
+        </div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {invoices.map(inv => {
+            const sub = subtotal(inv);
+            const age = Math.floor((Date.now() - inv.createdAt) / 86400000);
+            const expires = INVOICE_RETENTION_DAYS - age;
+            return (
+              <div key={inv.id} className="ff-card" style={{ padding: '16px 20px', display: 'flex', alignItems: 'center', gap: 16, cursor: 'pointer' }} onClick={() => openInvoice(inv)}>
+                <div style={{ width: 40, height: 40, borderRadius: 10, background: 'var(--accent-bg-soft)', border: '1px solid var(--accent-border-soft)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <Receipt size={16} style={{ color: 'var(--accent)' }} />
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-1)', letterSpacing: '-0.01em' }}>{inv.number}</span>
+                    {inv.to.name && <span style={{ fontSize: 12, color: 'var(--text-3)' }}>&middot; {inv.to.name}</span>}
+                  </div>
+                  <div style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 2 }}>
+                    {inv.date} &middot; expires in {expires}d
+                  </div>
+                </div>
+                <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                  <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-1)', letterSpacing: '-0.02em' }}>{fmt(sub, inv.currency)}</div>
+                </div>
+                <button className="ff-icon-btn" style={{ flexShrink: 0 }} onClick={e => { e.stopPropagation(); deleteInvoice(inv.id); }}>
+                  <X size={13} />
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+
+  // ── Create / Edit view ─────────────────────────────────────────────────
+  if (view === 'create') return (
+    <div style={{ maxWidth: 760, margin: '0 auto', padding: '32px 0' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 28 }}>
+        <button className="ff-icon-btn" onClick={() => setView('list')}><ArrowRight size={14} style={{ transform: 'rotate(180deg)' }} /></button>
+        <h2 style={{ fontSize: 18, fontWeight: 700, letterSpacing: '-0.02em', color: 'var(--text-1)' }}>New Invoice</h2>
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+
+        {/* Meta row */}
+        <div className="ff-card" style={{ padding: '20px 22px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 120px', gap: 14 }}>
+            <div>
+              <label className="ff-label">Invoice #</label>
+              <input className="ff-input" value={current.number} onChange={e => setCurrent(c => ({ ...c, number: e.target.value }))} />
+            </div>
+            <div>
+              <label className="ff-label">Issue Date</label>
+              <input className="ff-input" type="date" value={current.date} onChange={e => setCurrent(c => ({ ...c, date: e.target.value }))} />
+            </div>
+            <div>
+              <label className="ff-label">Due Date</label>
+              <input className="ff-input" type="date" value={current.dueDate} onChange={e => setCurrent(c => ({ ...c, dueDate: e.target.value }))} />
+            </div>
+            <div>
+              <label className="ff-label">Currency</label>
+              <select className="ff-input" value={current.currency} onChange={e => setCurrent(c => ({ ...c, currency: e.target.value }))} style={{ cursor: 'pointer' }}>
+                <option>USD</option><option>EUR</option><option>GBP</option><option>CAD</option><option>AUD</option><option>NGN</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* From / To */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+          {[['from', 'From (You)'], ['to', 'Bill To']].map(([key, label]) => (
+            <div key={key} className="ff-card" style={{ padding: '20px 22px' }}>
+              <p style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-3)', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 14 }}>{label}</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <input className="ff-input" placeholder="Name or Company" value={current[key].name} onChange={e => setCurrent(c => ({ ...c, [key]: { ...c[key], name: e.target.value } }))} />
+                <input className="ff-input" placeholder="Email" value={current[key].email} onChange={e => setCurrent(c => ({ ...c, [key]: { ...c[key], email: e.target.value } }))} />
+                <textarea className="ff-textarea" placeholder="Address" rows={2} value={current[key].address} onChange={e => setCurrent(c => ({ ...c, [key]: { ...c[key], address: e.target.value } }))} style={{ minHeight: 60, resize: 'none' }} />
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Line items */}
+        <div className="ff-card" style={{ padding: '20px 22px' }}>
+          <p style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-3)', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 16 }}>Line Items</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 80px 120px 100px 32px', gap: 8, paddingBottom: 8, borderBottom: '1px solid var(--border)' }}>
+              {['Description', 'Qty', 'Rate', 'Amount', ''].map((h, i) => (
+                <span key={i} style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-3)', letterSpacing: '0.06em', textTransform: 'uppercase', textAlign: i >= 2 ? 'right' : 'left' }}>{h}</span>
+              ))}
+            </div>
+            {current.items.map(it => {
+              const amt = (parseFloat(it.qty)||0)*(parseFloat(it.rate)||0);
+              return (
+                <div key={it.id} style={{ display: 'grid', gridTemplateColumns: '1fr 80px 120px 100px 32px', gap: 8, alignItems: 'center' }}>
+                  <input className="ff-input" placeholder="e.g. Website design" value={it.description} onChange={e => updateItem(it.id, 'description', e.target.value)} style={{ fontSize: 13 }} />
+                  <input className="ff-input" type="number" min="1" value={it.qty} onChange={e => updateItem(it.id, 'qty', e.target.value)} style={{ fontSize: 13, textAlign: 'right' }} />
+                  <input className="ff-input" type="number" min="0" placeholder="0.00" value={it.rate} onChange={e => updateItem(it.id, 'rate', e.target.value)} style={{ fontSize: 13, textAlign: 'right' }} />
+                  <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-1)', textAlign: 'right', letterSpacing: '-0.01em' }}>{fmt(amt, current.currency)}</span>
+                  <button className="ff-icon-btn" onClick={() => removeItem(it.id)} disabled={current.items.length === 1} style={{ opacity: current.items.length === 1 ? 0.3 : 1 }}><X size={12} /></button>
+                </div>
+              );
+            })}
+            <button className="ff-icon-btn" onClick={addItem} style={{ alignSelf: 'flex-start', marginTop: 4, gap: 6, fontSize: 12, color: 'var(--accent)', padding: '6px 0' }}>
+              <Plus size={13} /> Add item
+            </button>
+          </div>
+          <div style={{ borderTop: '1px solid var(--border)', marginTop: 16, paddingTop: 16, display: 'flex', justifyContent: 'flex-end' }}>
+            <div style={{ minWidth: 200 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0' }}>
+                <span style={{ fontSize: 12, color: 'var(--text-3)', fontWeight: 500 }}>Subtotal</span>
+                <span style={{ fontSize: 12, color: 'var(--text-2)' }}>{fmt(subtotal(current), current.currency)}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0 0', borderTop: '1px solid var(--border)' }}>
+                <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-1)', letterSpacing: '-0.02em' }}>Total</span>
+                <span style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-1)', letterSpacing: '-0.02em' }}>{fmt(subtotal(current), current.currency)}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Notes */}
+        <div className="ff-card" style={{ padding: '20px 22px' }}>
+          <label className="ff-label">Notes <span style={{ fontWeight: 400, color: 'var(--text-3)' }}>&middot; optional</span></label>
+          <textarea className="ff-textarea" placeholder="Payment terms, bank details, thank you note..." rows={3} value={current.notes} onChange={e => setCurrent(c => ({ ...c, notes: e.target.value }))} style={{ minHeight: 72, resize: 'vertical' }} />
+        </div>
+
+        {/* Actions */}
+        <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+          <button className="ff-btn" onClick={() => setView('list')} style={{ background: 'var(--bg-2)', color: 'var(--text-2)', border: '1px solid var(--border)' }}>Cancel</button>
+          <button className="ff-btn" onClick={() => { saveInvoice(); downloadPDF(current); }} style={{ background: 'var(--bg-2)', color: 'var(--text-2)', border: '1px solid var(--border)', gap: 7 }}>
+            <ArrowRight size={13} /> Save & Download
+          </button>
+          <button className="ff-btn ff-btn-primary" onClick={saveInvoice} style={{ gap: 7 }}>
+            <Check size={13} /> Save Invoice
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
+  // ── Preview view ───────────────────────────────────────────────────────
+  if (view === 'preview') return (
+    <div style={{ maxWidth: 760, margin: '0 auto', padding: '32px 0' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 28 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <button className="ff-icon-btn" onClick={() => setView('list')}><ArrowRight size={14} style={{ transform: 'rotate(180deg)' }} /></button>
+          <div>
+            <h2 style={{ fontSize: 18, fontWeight: 700, letterSpacing: '-0.02em', color: 'var(--text-1)' }}>{current.number}</h2>
+            <p style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 1 }}>
+              {current.to.name && `${current.to.name} · `}Due {current.dueDate}
+            </p>
+          </div>
+        </div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button className="ff-btn" onClick={() => setView('create')} style={{ background: 'var(--bg-2)', color: 'var(--text-2)', border: '1px solid var(--border)', fontSize: 13 }}>Edit</button>
+          <button className="ff-btn ff-btn-primary" onClick={() => downloadPDF(current)} style={{ gap: 7, fontSize: 13 }}>
+            <ArrowRight size={13} /> Download PDF
+          </button>
+        </div>
+      </div>
+
+      {/* Invoice preview card */}
+      <div className="ff-card" style={{ padding: '48px 52px', fontFamily: 'var(--font-text)' }}>
+        {/* Header */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 48 }}>
+          <div style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.03em', color: 'var(--text-1)' }}>{current.from.name || 'Your Name'}</div>
+          <div style={{ textAlign: 'right' }}>
+            <div style={{ fontSize: 26, fontWeight: 800, letterSpacing: '-0.03em', color: 'var(--text-1)' }}>{current.number}</div>
+            <div style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 5 }}>Issued {current.date} &middot; Due {current.dueDate}</div>
+          </div>
+        </div>
+
+        {/* Parties */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 32, marginBottom: 40, paddingBottom: 36, borderBottom: '1px solid var(--border)' }}>
+          {[['From', current.from], ['Bill To', current.to]].map(([label, party]) => (
+            <div key={label}>
+              <p style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-3)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 10 }}>{label}</p>
+              <p style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-1)', marginBottom: 3, letterSpacing: '-0.01em' }}>{party.name || '—'}</p>
+              {party.email && <p style={{ fontSize: 13, color: 'var(--text-3)' }}>{party.email}</p>}
+              {party.address && <p style={{ fontSize: 13, color: 'var(--text-3)', whiteSpace: 'pre-line', marginTop: 2 }}>{party.address}</p>}
+            </div>
+          ))}
+        </div>
+
+        {/* Items table */}
+        <div style={{ marginBottom: 32 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 80px 120px 100px', gap: 12, paddingBottom: 10, borderBottom: '1px solid var(--border)', marginBottom: 4 }}>
+            {['Description', 'Qty', 'Rate', 'Amount'].map((h, i) => (
+              <span key={h} style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-3)', letterSpacing: '0.1em', textTransform: 'uppercase', textAlign: i >= 2 ? 'right' : 'left' }}>{h}</span>
+            ))}
+          </div>
+          {current.items.map(it => {
+            const amt = (parseFloat(it.qty)||0)*(parseFloat(it.rate)||0);
+            return (
+              <div key={it.id} style={{ display: 'grid', gridTemplateColumns: '1fr 80px 120px 100px', gap: 12, padding: '13px 0', borderBottom: '1px solid var(--border)', alignItems: 'start' }}>
+                <span style={{ fontSize: 14, color: 'var(--text-1)' }}>{it.description || '—'}</span>
+                <span style={{ fontSize: 13, color: 'var(--text-2)', textAlign: 'right' }}>{it.qty}</span>
+                <span style={{ fontSize: 13, color: 'var(--text-2)', textAlign: 'right' }}>{fmt(it.rate || 0, current.currency)}</span>
+                <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-1)', textAlign: 'right' }}>{fmt(amt, current.currency)}</span>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Total */}
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: current.notes ? 36 : 0 }}>
+          <div style={{ minWidth: 220, borderTop: '2px solid var(--text-1)', paddingTop: 14 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontSize: 14, fontWeight: 500, color: 'var(--text-2)' }}>Total Due</span>
+              <span style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-1)', letterSpacing: '-0.03em' }}>{fmt(subtotal(current), current.currency)}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Notes */}
+        {current.notes && (
+          <div style={{ borderTop: '1px solid var(--border)', paddingTop: 28 }}>
+            <p style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-3)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 10 }}>Notes</p>
+            <p style={{ fontSize: 13, color: 'var(--text-2)', lineHeight: 1.7, whiteSpace: 'pre-line' }}>{current.notes}</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
+  return null;
+}
+
+
 export default function FreelancersForge() {
   const [themeMode, setThemeMode] = useState('system'); // 'light' | 'dark' | 'system'
   const [systemTheme, setSystemTheme] = useState(getSystemTheme);
@@ -2721,6 +3157,14 @@ export default function FreelancersForge() {
             <Bot size={15} />
             Ask Anything
           </button>
+          <button
+            type="button"
+            className={`ff-tab ${tab === 'invoice' ? 'ff-tab-active' : ''}`}
+            onClick={() => setTab('invoice')}
+          >
+            <Receipt size={15} />
+            Invoice
+          </button>
 
         </div>
 
@@ -2728,6 +3172,7 @@ export default function FreelancersForge() {
         {tab === 'close' && <CloseTab />}
         {tab === 'pipeline' && <PipelineTab />}
         {tab === 'ask' && <AskAnythingTab />}
+        {tab === 'invoice' && <InvoiceTab />}
 
       </div>
     </div>
