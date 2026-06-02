@@ -1,4 +1,4 @@
-\import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { buildPrompt, STRICT_RULES, CV_STRICT_RULES } from './prompts.js';
 import {
   ArrowRight, Copy, Check, Loader2, Sparkles, Paperclip, X, ImageIcon,
