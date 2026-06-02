@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+\import React, { useState, useRef, useEffect } from 'react';
 import { buildPrompt, STRICT_RULES, CV_STRICT_RULES } from './prompts.js';
 import {
   ArrowRight, Copy, Check, Loader2, Sparkles, Paperclip, X, ImageIcon,
@@ -2720,13 +2720,13 @@ tr:last-child td{border-bottom:none}
 
   /* ── LIST ── */
   if (view === 'list') return (
-    <div style={{ maxWidth: 680, margin: '0 auto', padding: '40px 0' }}>
+    <div style={{ padding: '32px 0' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 28 }}>
         <div>
           <h2 style={{ fontSize: 20, fontWeight: 700, letterSpacing: '-0.025em', color: 'var(--text-1)' }}>Invoices</h2>
           <p style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 3 }}>Stored locally · expires after 15 days</p>
         </div>
-        <button className="ff-btn ff-btn-primary" onClick={openNew} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, paddingLeft: 16, paddingRight: 16, height: 36, fontSize: 13 }}>
+        <button onClick={openNew} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, paddingLeft: 16, paddingRight: 16, height: 36, fontSize: 13, fontWeight: 600, background: 'var(--accent)', color: '#fff', border: 'none', borderRadius: 9, cursor: 'pointer', flexShrink: 0, whiteSpace: 'nowrap' }}>
           <Plus size={13} />New Invoice
         </button>
       </div>
@@ -2783,7 +2783,7 @@ tr:last-child td{border-bottom:none}
 
   /* ── CREATE / EDIT ── */
   if (view === 'create') return (
-    <div style={{ maxWidth: 680, margin: '0 auto', padding: '40px 0' }}>
+    <div style={{ padding: '32px 0' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 28 }}>
         <button className="ff-icon-btn" onClick={() => setView('list')} style={{ width: 32, height: 32, borderRadius: 8, flexShrink: 0 }}>
           <ArrowRight size={13} style={{ transform: 'rotate(180deg)' }} />
@@ -2891,7 +2891,7 @@ tr:last-child td{border-bottom:none}
   if (view === 'preview') {
     const sub = subtotal(current);
     return (
-      <div style={{ maxWidth: 680, margin: '0 auto', padding: '40px 0' }}>
+      <div style={{ padding: '32px 0' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 28 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <button className="ff-icon-btn" onClick={() => setView('list')} style={{ width: 32, height: 32, borderRadius: 8, flexShrink: 0 }}>
