@@ -2603,16 +2603,15 @@ function generateInvoiceNumber(invoices) {
 
 function InvoiceTab() {
   const [invoices, setInvoices] = useState(() => loadInvoices());
-  const [view, setView] = useState('list'); // 'list' | 'create' | 'preview'
+  const [view, setView] = useState('list');
   const [current, setCurrent] = useState(null);
-  const [saved, setSaved] = useState(false);
 
   const blankInvoice = () => ({
     id: Date.now(),
     createdAt: Date.now(),
     number: generateInvoiceNumber(invoices),
     date: new Date().toISOString().slice(0, 10),
-    dueDate: new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10),
+    dueDate: new Date(Date.now() + 14 * 86400000).toISOString().slice(0, 10),
     from: { name: '', email: '', address: '' },
     to: { name: '', email: '', address: '' },
     items: [{ id: 1, description: '', qty: 1, rate: '' }],
@@ -2620,186 +2619,158 @@ function InvoiceTab() {
     currency: 'USD',
   });
 
-  function openNew() {
-    setCurrent(blankInvoice());
-    setView('create');
-    setSaved(false);
-  }
-
-  function openInvoice(inv) {
-    setCurrent({ ...inv });
-    setView('preview');
-  }
+  function openNew() { setCurrent(blankInvoice()); setView('create'); }
+  function openEdit(inv) { setCurrent({ ...inv }); setView('create'); }
+  function openPreview(inv) { setCurrent({ ...inv }); setView('preview'); }
 
   function deleteInvoice(id) {
     const updated = invoices.filter(i => i.id !== id);
-    setInvoices(updated);
-    saveInvoices(updated);
+    setInvoices(updated); saveInvoices(updated);
   }
 
   function saveInvoice() {
     const exists = invoices.find(i => i.id === current.id);
-    let updated;
-    if (exists) {
-      updated = invoices.map(i => i.id === current.id ? current : i);
-    } else {
-      updated = [current, ...invoices];
-    }
-    setInvoices(updated);
-    saveInvoices(updated);
-    setSaved(true);
+    const updated = exists
+      ? invoices.map(i => i.id === current.id ? current : i)
+      : [current, ...invoices];
+    setInvoices(updated); saveInvoices(updated);
     setView('preview');
   }
 
   function updateItem(id, field, val) {
     setCurrent(c => ({ ...c, items: c.items.map(it => it.id === id ? { ...it, [field]: val } : it) }));
   }
-
   function addItem() {
     setCurrent(c => ({ ...c, items: [...c.items, { id: Date.now(), description: '', qty: 1, rate: '' }] }));
   }
-
   function removeItem(id) {
     setCurrent(c => ({ ...c, items: c.items.filter(it => it.id !== id) }));
   }
 
-  function subtotal(inv) {
-    return (inv?.items || []).reduce((s, it) => s + (parseFloat(it.qty) || 0) * (parseFloat(it.rate) || 0), 0);
-  }
+  const subtotal = (inv) => (inv?.items || []).reduce((s, it) =>
+    s + (parseFloat(it.qty) || 0) * (parseFloat(it.rate) || 0), 0);
 
-  function fmt(n, currency = 'USD') {
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(n);
-  }
+  const fmt = (n, cur = 'USD') => new Intl.NumberFormat('en-US', { style: 'currency', currency: cur }).format(n);
+
+  const symb = (cur) => ({ EUR: '€', GBP: '£', NGN: '₦', CAD: 'CA$', AUD: 'A$' }[cur] || '$');
 
   function downloadPDF(inv) {
     const sub = subtotal(inv);
-    const currencySymbol = inv.currency === 'EUR' ? '€' : inv.currency === 'GBP' ? '£' : '$';
-
-    const html = `<!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf-8"/>
-<title>Invoice ${inv.number}</title>
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"/><title>${inv.number}</title>
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #111; background: #fff; padding: 60px; font-size: 14px; line-height: 1.5; }
-  .top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 56px; }
-  .brand { font-size: 22px; font-weight: 700; letter-spacing: -0.03em; color: #111; }
-  .inv-meta { text-align: right; }
-  .inv-num { font-size: 28px; font-weight: 700; letter-spacing: -0.03em; color: #111; }
-  .inv-date { font-size: 13px; color: #666; margin-top: 6px; }
-  .parties { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-bottom: 48px; padding-bottom: 40px; border-bottom: 1px solid #e5e5e5; }
-  .party-label { font-size: 11px; font-weight: 600; color: #999; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 10px; }
-  .party-name { font-size: 16px; font-weight: 600; color: #111; margin-bottom: 4px; }
-  .party-detail { font-size: 13px; color: #666; line-height: 1.6; }
-  table { width: 100%; border-collapse: collapse; margin-bottom: 32px; }
-  th { font-size: 11px; font-weight: 600; color: #999; letter-spacing: 0.08em; text-transform: uppercase; padding: 0 0 14px; text-align: left; border-bottom: 1px solid #e5e5e5; }
-  th:last-child, td:last-child { text-align: right; }
-  th:nth-child(2), th:nth-child(3) { text-align: right; }
-  td { padding: 16px 0; font-size: 14px; color: #333; border-bottom: 1px solid #f0f0f0; vertical-align: top; }
-  td:nth-child(2), td:nth-child(3) { text-align: right; color: #555; }
-  .totals { margin-left: auto; width: 240px; }
-  .total-row { display: flex; justify-content: space-between; padding: 8px 0; font-size: 14px; color: #555; border-bottom: 1px solid #f5f5f5; }
-  .total-final { display: flex; justify-content: space-between; padding: 16px 0 0; font-size: 18px; font-weight: 700; color: #111; letter-spacing: -0.02em; }
-  .notes { margin-top: 48px; padding-top: 32px; border-top: 1px solid #e5e5e5; }
-  .notes-label { font-size: 11px; font-weight: 600; color: #999; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 10px; }
-  .notes-text { font-size: 13px; color: #666; line-height: 1.7; }
-  .due-badge { display: inline-block; background: #f5f5f5; border-radius: 6px; padding: 4px 12px; font-size: 12px; color: #555; margin-top: 8px; }
-</style>
-</head>
-<body>
-<div class="top">
-  <div class="brand">${inv.from.name || 'Your Name'}</div>
-  <div class="inv-meta">
-    <div class="inv-num">${inv.number}</div>
-    <div class="inv-date">Issued ${inv.date}${inv.dueDate ? ' &middot; Due ' + inv.dueDate : ''}</div>
-  </div>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#111;background:#fff;padding:56px 64px;font-size:13px;line-height:1.5}
+.header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:52px}
+.from-name{font-size:20px;font-weight:700;letter-spacing:-0.02em}
+.inv-number{font-size:28px;font-weight:800;letter-spacing:-0.04em;color:#111}
+.inv-meta{font-size:12px;color:#888;margin-top:6px}
+.divider{height:1px;background:#e8e8e8;margin:32px 0}
+.parties{display:grid;grid-template-columns:1fr 1fr;gap:48px;margin-bottom:44px}
+.party-label{font-size:10px;font-weight:700;color:#999;letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px}
+.party-name{font-size:15px;font-weight:600;margin-bottom:3px}
+.party-sub{font-size:12px;color:#666;line-height:1.6}
+table{width:100%;border-collapse:collapse;margin-bottom:24px}
+thead th{font-size:10px;font-weight:700;color:#999;letter-spacing:.08em;text-transform:uppercase;padding:0 0 10px;border-bottom:1px solid #e8e8e8;text-align:left}
+thead th:nth-child(2),thead th:nth-child(3),thead th:nth-child(4){text-align:right}
+tbody td{padding:13px 0;font-size:13px;border-bottom:1px solid #f2f2f2;vertical-align:top}
+tbody td:nth-child(2),tbody td:nth-child(3),tbody td:nth-child(4){text-align:right;color:#555}
+.total-wrap{display:flex;justify-content:flex-end;margin-top:8px}
+.total-box{min-width:220px}
+.total-row{display:flex;justify-content:space-between;padding:10px 0;font-size:13px;color:#666;border-bottom:1px solid #f2f2f2}
+.total-final{display:flex;justify-content:space-between;padding:14px 0 0;font-size:18px;font-weight:800;letter-spacing:-0.02em}
+.notes-label{font-size:10px;font-weight:700;color:#999;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;margin-top:36px}
+.notes-body{font-size:12px;color:#666;line-height:1.8}
+@media print{body{padding:40px 48px}}
+</style></head><body>
+<div class="header">
+  <div><div class="from-name">${inv.from.name || 'Your Name'}</div><div class="party-sub" style="margin-top:4px">${inv.from.email || ''}</div><div class="party-sub" style="white-space:pre-line">${inv.from.address || ''}</div></div>
+  <div style="text-align:right"><div class="inv-number">INVOICE</div><div style="font-size:15px;font-weight:600;margin-top:2px">${inv.number}</div><div class="inv-meta">Issued ${inv.date}${inv.dueDate ? '&nbsp;&nbsp;Due ' + inv.dueDate : ''}</div></div>
 </div>
+<div class="divider"></div>
 <div class="parties">
-  <div>
-    <div class="party-label">From</div>
-    <div class="party-name">${inv.from.name || ''}</div>
-    <div class="party-detail">${inv.from.email || ''}</div>
-    <div class="party-detail" style="white-space:pre-line">${inv.from.address || ''}</div>
-  </div>
-  <div>
-    <div class="party-label">Bill To</div>
-    <div class="party-name">${inv.to.name || ''}</div>
-    <div class="party-detail">${inv.to.email || ''}</div>
-    <div class="party-detail" style="white-space:pre-line">${inv.to.address || ''}</div>
-  </div>
+  <div><div class="party-label">From</div><div class="party-name">${inv.from.name || ''}</div><div class="party-sub">${inv.from.email || ''}</div><div class="party-sub" style="white-space:pre-line">${inv.from.address || ''}</div></div>
+  <div><div class="party-label">Bill To</div><div class="party-name">${inv.to.name || ''}</div><div class="party-sub">${inv.to.email || ''}</div><div class="party-sub" style="white-space:pre-line">${inv.to.address || ''}</div></div>
 </div>
-<table>
-  <thead><tr><th style="width:50%">Description</th><th>Qty</th><th>Rate</th><th>Amount</th></tr></thead>
-  <tbody>
-    ${inv.items.map(it => {
-      const amt = (parseFloat(it.qty)||0)*(parseFloat(it.rate)||0);
-      return `<tr><td>${it.description || ''}</td><td>${it.qty}</td><td>${currencySymbol}${parseFloat(it.rate||0).toFixed(2)}</td><td>${currencySymbol}${amt.toFixed(2)}</td></tr>`;
-    }).join('')}
-  </tbody>
-</table>
-<div class="totals">
-  <div class="total-final"><span>Total</span><span>${currencySymbol}${sub.toFixed(2)}</span></div>
-</div>
-${inv.notes ? `<div class="notes"><div class="notes-label">Notes</div><div class="notes-text">${inv.notes}</div></div>` : ''}
-</body>
-</html>`;
-
-    const blob = new Blob([html], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
-    const win = window.open(url, '_blank');
-    if (win) {
-      win.onload = () => {
-        setTimeout(() => { win.print(); }, 500);
-      };
-    }
+<table><thead><tr><th style="width:52%">Description</th><th>Qty</th><th>Rate</th><th>Amount</th></tr></thead>
+<tbody>${inv.items.map(it => {
+  const a = (parseFloat(it.qty)||0)*(parseFloat(it.rate)||0);
+  return `<tr><td>${it.description||''}</td><td>${it.qty}</td><td>${symb(inv.currency)}${parseFloat(it.rate||0).toFixed(2)}</td><td>${symb(inv.currency)}${a.toFixed(2)}</td></tr>`;
+}).join('')}</tbody></table>
+<div class="total-wrap"><div class="total-box">
+  <div class="total-final"><span>Total Due</span><span>${fmt(sub, inv.currency)}</span></div>
+</div></div>
+${inv.notes ? `<div class="notes-label">Notes</div><div class="notes-body">${inv.notes}</div>` : ''}
+</body></html>`;
+    const w = window.open('', '_blank');
+    if (w) { w.document.write(html); w.document.close(); setTimeout(() => w.print(), 600); }
   }
 
-  // ── List view ──────────────────────────────────────────────────────────
+  /* ── Shared field styles ─────────────────────────────────── */
+  const field = { display: 'flex', flexDirection: 'column', gap: 5 };
+  const lbl = { fontSize: 11, fontWeight: 600, color: 'var(--text-3)', letterSpacing: '0.06em', textTransform: 'uppercase' };
+
+  /* ── LIST ────────────────────────────────────────────────── */
   if (view === 'list') return (
-    <div style={{ maxWidth: 760, margin: '0 auto', padding: '32px 0' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 28 }}>
+    <div style={{ maxWidth: 680, margin: '0 auto', padding: '40px 0' }}>
+
+      {/* Page header */}
+      <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 32 }}>
         <div>
-          <h2 style={{ fontSize: 20, fontWeight: 700, letterSpacing: '-0.02em', color: 'var(--text-1)' }}>Invoices</h2>
-          <p style={{ fontSize: 13, color: 'var(--text-3)', marginTop: 3 }}>Saved for 15 days &middot; {invoices.length} invoice{invoices.length !== 1 ? 's' : ''}</p>
+          <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.025em', color: 'var(--text-1)', lineHeight: 1.2 }}>Invoices</h2>
+          <p style={{ fontSize: 13, color: 'var(--text-3)', marginTop: 5 }}>Stored locally for 15 days</p>
         </div>
-        <button className="ff-btn ff-btn-primary" onClick={openNew} style={{ gap: 8, paddingLeft: 16, paddingRight: 16 }}>
-          <Plus size={14} /> New Invoice
+        <button className="ff-btn ff-btn-primary" onClick={openNew} style={{ display: 'flex', alignItems: 'center', gap: 7, paddingLeft: 18, paddingRight: 18 }}>
+          <Plus size={14} />New Invoice
         </button>
       </div>
 
       {invoices.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '80px 0', color: 'var(--text-3)' }}>
-          <Receipt size={32} style={{ margin: '0 auto 16px', opacity: 0.3 }} />
-          <p style={{ fontSize: 15, fontWeight: 500, color: 'var(--text-2)', marginBottom: 6 }}>No invoices yet</p>
-          <p style={{ fontSize: 13 }}>Create your first invoice to get started</p>
+        <div style={{ border: '1.5px dashed var(--border)', borderRadius: 16, padding: '64px 32px', textAlign: 'center' }}>
+          <div style={{ width: 48, height: 48, borderRadius: 14, background: 'var(--bg-2)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+            <Receipt size={20} style={{ color: 'var(--text-3)' }} />
+          </div>
+          <p style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-1)', marginBottom: 6 }}>No invoices yet</p>
+          <p style={{ fontSize: 13, color: 'var(--text-3)', marginBottom: 20 }}>Create your first invoice in under a minute</p>
+          <button className="ff-btn ff-btn-primary" onClick={openNew} style={{ display: 'inline-flex', alignItems: 'center', gap: 7 }}>
+            <Plus size={14} />New Invoice
+          </button>
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {invoices.map(inv => {
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          {invoices.map((inv, idx) => {
             const sub = subtotal(inv);
-            const age = Math.floor((Date.now() - inv.createdAt) / 86400000);
-            const expires = INVOICE_RETENTION_DAYS - age;
+            const expires = INVOICE_RETENTION_DAYS - Math.floor((Date.now() - inv.createdAt) / 86400000);
             return (
-              <div key={inv.id} className="ff-card" style={{ padding: '16px 20px', display: 'flex', alignItems: 'center', gap: 16, cursor: 'pointer' }} onClick={() => openInvoice(inv)}>
-                <div style={{ width: 40, height: 40, borderRadius: 10, background: 'var(--accent-bg-soft)', border: '1px solid var(--accent-border-soft)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <Receipt size={16} style={{ color: 'var(--accent)' }} />
+              <div key={inv.id} style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '16px 20px', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 12, cursor: 'pointer', transition: 'border-color .15s' }}
+                onClick={() => openPreview(inv)}
+                onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--accent)'}
+                onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border)'}
+              >
+                <div style={{ width: 36, height: 36, borderRadius: 9, background: 'var(--accent-bg-soft)', border: '1px solid var(--accent-border-soft)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <Receipt size={15} style={{ color: 'var(--accent)' }} />
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-1)', letterSpacing: '-0.01em' }}>{inv.number}</span>
-                    {inv.to.name && <span style={{ fontSize: 12, color: 'var(--text-3)' }}>&middot; {inv.to.name}</span>}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-1)', letterSpacing: '-0.01em' }}>{inv.number}</span>
+                    {inv.to.name && <span style={{ fontSize: 12, color: 'var(--text-3)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{inv.to.name}</span>}
                   </div>
-                  <div style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 2 }}>
-                    {inv.date} &middot; expires in {expires}d
+                  <div style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 3 }}>
+                    Due {inv.dueDate} · expires in {expires}d
                   </div>
                 </div>
-                <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                  <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-1)', letterSpacing: '-0.02em' }}>{fmt(sub, inv.currency)}</div>
+                <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-1)', letterSpacing: '-0.02em', flexShrink: 0 }}>
+                  {fmt(sub, inv.currency)}
                 </div>
-                <button className="ff-icon-btn" style={{ flexShrink: 0 }} onClick={e => { e.stopPropagation(); deleteInvoice(inv.id); }}>
-                  <X size={13} />
-                </button>
+                <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
+                  <button className="ff-icon-btn" title="Edit" onClick={e => { e.stopPropagation(); openEdit(inv); }}
+                    style={{ width: 30, height: 30, borderRadius: 7 }}>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                  </button>
+                  <button className="ff-icon-btn" title="Delete" onClick={e => { e.stopPropagation(); deleteInvoice(inv.id); }}
+                    style={{ width: 30, height: 30, borderRadius: 7 }}>
+                    <X size={13} />
+                  </button>
+                </div>
               </div>
             );
           })}
@@ -2808,194 +2779,249 @@ ${inv.notes ? `<div class="notes"><div class="notes-label">Notes</div><div class
     </div>
   );
 
-  // ── Create / Edit view ─────────────────────────────────────────────────
+  /* ── CREATE / EDIT ───────────────────────────────────────── */
   if (view === 'create') return (
-    <div style={{ maxWidth: 760, margin: '0 auto', padding: '32px 0' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 28 }}>
-        <button className="ff-icon-btn" onClick={() => setView('list')}><ArrowRight size={14} style={{ transform: 'rotate(180deg)' }} /></button>
-        <h2 style={{ fontSize: 18, fontWeight: 700, letterSpacing: '-0.02em', color: 'var(--text-1)' }}>New Invoice</h2>
+    <div style={{ maxWidth: 680, margin: '0 auto', padding: '40px 0' }}>
+
+      {/* Header */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 32 }}>
+        <button className="ff-icon-btn" onClick={() => setView('list')} style={{ width: 34, height: 34, borderRadius: 9, flexShrink: 0 }}>
+          <ArrowRight size={14} style={{ transform: 'rotate(180deg)' }} />
+        </button>
+        <div>
+          <h2 style={{ fontSize: 18, fontWeight: 700, letterSpacing: '-0.02em', color: 'var(--text-1)' }}>
+            {invoices.find(i => i.id === current.id) ? 'Edit Invoice' : 'New Invoice'}
+          </h2>
+          <p style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 2 }}>{current.number}</p>
+        </div>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
 
-        {/* Meta row */}
-        <div className="ff-card" style={{ padding: '20px 22px' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 120px', gap: 14 }}>
-            <div>
-              <label className="ff-label">Invoice #</label>
+        {/* Invoice details */}
+        <div style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 14, padding: '22px 24px' }}>
+          <p style={{ ...lbl, marginBottom: 16 }}>Invoice Details</p>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <div style={field}>
+              <label style={lbl}>Invoice #</label>
               <input className="ff-input" value={current.number} onChange={e => setCurrent(c => ({ ...c, number: e.target.value }))} />
             </div>
-            <div>
-              <label className="ff-label">Issue Date</label>
+            <div style={field}>
+              <label style={lbl}>Currency</label>
+              <select className="ff-input" value={current.currency} onChange={e => setCurrent(c => ({ ...c, currency: e.target.value }))} style={{ cursor: 'pointer' }}>
+                {['USD','EUR','GBP','CAD','AUD','NGN'].map(c => <option key={c}>{c}</option>)}
+              </select>
+            </div>
+            <div style={field}>
+              <label style={lbl}>Issue Date</label>
               <input className="ff-input" type="date" value={current.date} onChange={e => setCurrent(c => ({ ...c, date: e.target.value }))} />
             </div>
-            <div>
-              <label className="ff-label">Due Date</label>
+            <div style={field}>
+              <label style={lbl}>Due Date</label>
               <input className="ff-input" type="date" value={current.dueDate} onChange={e => setCurrent(c => ({ ...c, dueDate: e.target.value }))} />
-            </div>
-            <div>
-              <label className="ff-label">Currency</label>
-              <select className="ff-input" value={current.currency} onChange={e => setCurrent(c => ({ ...c, currency: e.target.value }))} style={{ cursor: 'pointer' }}>
-                <option>USD</option><option>EUR</option><option>GBP</option><option>CAD</option><option>AUD</option><option>NGN</option>
-              </select>
             </div>
           </div>
         </div>
 
         {/* From / To */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-          {[['from', 'From (You)'], ['to', 'Bill To']].map(([key, label]) => (
-            <div key={key} className="ff-card" style={{ padding: '20px 22px' }}>
-              <p style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-3)', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 14 }}>{label}</p>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+          {[['from', 'From — You'], ['to', 'Bill To — Client']].map(([key, title]) => (
+            <div key={key} style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 14, padding: '22px 24px' }}>
+              <p style={{ ...lbl, marginBottom: 16 }}>{title}</p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                <input className="ff-input" placeholder="Name or Company" value={current[key].name} onChange={e => setCurrent(c => ({ ...c, [key]: { ...c[key], name: e.target.value } }))} />
-                <input className="ff-input" placeholder="Email" value={current[key].email} onChange={e => setCurrent(c => ({ ...c, [key]: { ...c[key], email: e.target.value } }))} />
-                <textarea className="ff-textarea" placeholder="Address" rows={2} value={current[key].address} onChange={e => setCurrent(c => ({ ...c, [key]: { ...c[key], address: e.target.value } }))} style={{ minHeight: 60, resize: 'none' }} />
+                <input className="ff-input" placeholder="Full name or company" value={current[key].name}
+                  onChange={e => setCurrent(c => ({ ...c, [key]: { ...c[key], name: e.target.value } }))} />
+                <input className="ff-input" placeholder="Email address" value={current[key].email}
+                  onChange={e => setCurrent(c => ({ ...c, [key]: { ...c[key], email: e.target.value } }))} />
+                <textarea className="ff-textarea" placeholder="Address (optional)" rows={2} value={current[key].address}
+                  onChange={e => setCurrent(c => ({ ...c, [key]: { ...c[key], address: e.target.value } }))}
+                  style={{ minHeight: 56, resize: 'none', fontSize: 13 }} />
               </div>
             </div>
           ))}
         </div>
 
         {/* Line items */}
-        <div className="ff-card" style={{ padding: '20px 22px' }}>
-          <p style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-3)', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 16 }}>Line Items</p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 80px 120px 100px 32px', gap: 8, paddingBottom: 8, borderBottom: '1px solid var(--border)' }}>
-              {['Description', 'Qty', 'Rate', 'Amount', ''].map((h, i) => (
-                <span key={i} style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-3)', letterSpacing: '0.06em', textTransform: 'uppercase', textAlign: i >= 2 ? 'right' : 'left' }}>{h}</span>
-              ))}
-            </div>
-            {current.items.map(it => {
-              const amt = (parseFloat(it.qty)||0)*(parseFloat(it.rate)||0);
-              return (
-                <div key={it.id} style={{ display: 'grid', gridTemplateColumns: '1fr 80px 120px 100px 32px', gap: 8, alignItems: 'center' }}>
-                  <input className="ff-input" placeholder="e.g. Website design" value={it.description} onChange={e => updateItem(it.id, 'description', e.target.value)} style={{ fontSize: 13 }} />
-                  <input className="ff-input" type="number" min="1" value={it.qty} onChange={e => updateItem(it.id, 'qty', e.target.value)} style={{ fontSize: 13, textAlign: 'right' }} />
-                  <input className="ff-input" type="number" min="0" placeholder="0.00" value={it.rate} onChange={e => updateItem(it.id, 'rate', e.target.value)} style={{ fontSize: 13, textAlign: 'right' }} />
-                  <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-1)', textAlign: 'right', letterSpacing: '-0.01em' }}>{fmt(amt, current.currency)}</span>
-                  <button className="ff-icon-btn" onClick={() => removeItem(it.id)} disabled={current.items.length === 1} style={{ opacity: current.items.length === 1 ? 0.3 : 1 }}><X size={12} /></button>
-                </div>
-              );
-            })}
-            <button className="ff-icon-btn" onClick={addItem} style={{ alignSelf: 'flex-start', marginTop: 4, gap: 6, fontSize: 12, color: 'var(--accent)', padding: '6px 0' }}>
-              <Plus size={13} /> Add item
-            </button>
+        <div style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 14, padding: '22px 24px' }}>
+          <p style={{ ...lbl, marginBottom: 16 }}>Line Items</p>
+
+          {/* Table header */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 72px 110px 90px 30px', gap: 8, paddingBottom: 10, borderBottom: '1px solid var(--border)', marginBottom: 8 }}>
+            {['Description', 'Qty', 'Rate', 'Amount', ''].map((h, i) => (
+              <span key={i} style={{ ...lbl, fontSize: 10, textAlign: i >= 2 && i < 4 ? 'right' : 'left' }}>{h}</span>
+            ))}
           </div>
+
+          {current.items.map(it => {
+            const amt = (parseFloat(it.qty)||0)*(parseFloat(it.rate)||0);
+            return (
+              <div key={it.id} style={{ display: 'grid', gridTemplateColumns: '1fr 72px 110px 90px 30px', gap: 8, alignItems: 'center', marginBottom: 8 }}>
+                <input className="ff-input" placeholder="e.g. Website design" value={it.description}
+                  onChange={e => updateItem(it.id, 'description', e.target.value)} style={{ fontSize: 13 }} />
+                <input className="ff-input" type="number" min="1" value={it.qty}
+                  onChange={e => updateItem(it.id, 'qty', e.target.value)} style={{ fontSize: 13, textAlign: 'center' }} />
+                <input className="ff-input" type="number" min="0" step="0.01" placeholder="0.00" value={it.rate}
+                  onChange={e => updateItem(it.id, 'rate', e.target.value)} style={{ fontSize: 13, textAlign: 'right' }} />
+                <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-1)', textAlign: 'right', letterSpacing: '-0.01em', paddingRight: 2 }}>
+                  {fmt(amt, current.currency)}
+                </span>
+                <button className="ff-icon-btn" onClick={() => removeItem(it.id)}
+                  disabled={current.items.length === 1} style={{ opacity: current.items.length === 1 ? 0.25 : 1, width: 28, height: 28, borderRadius: 7 }}>
+                  <X size={11} />
+                </button>
+              </div>
+            );
+          })}
+
+          <button onClick={addItem} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 600, color: 'var(--accent)', background: 'none', border: 'none', cursor: 'pointer', padding: '8px 0 0', letterSpacing: '-0.01em' }}>
+            <Plus size={13} />Add line item
+          </button>
+
+          {/* Total */}
           <div style={{ borderTop: '1px solid var(--border)', marginTop: 16, paddingTop: 16, display: 'flex', justifyContent: 'flex-end' }}>
-            <div style={{ minWidth: 200 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0' }}>
-                <span style={{ fontSize: 12, color: 'var(--text-3)', fontWeight: 500 }}>Subtotal</span>
-                <span style={{ fontSize: 12, color: 'var(--text-2)' }}>{fmt(subtotal(current), current.currency)}</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0 0', borderTop: '1px solid var(--border)' }}>
-                <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-1)', letterSpacing: '-0.02em' }}>Total</span>
-                <span style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-1)', letterSpacing: '-0.02em' }}>{fmt(subtotal(current), current.currency)}</span>
-              </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+              <span style={{ fontSize: 13, color: 'var(--text-3)', fontWeight: 500 }}>Total</span>
+              <span style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-1)', letterSpacing: '-0.03em' }}>
+                {fmt(subtotal(current), current.currency)}
+              </span>
             </div>
           </div>
         </div>
 
         {/* Notes */}
-        <div className="ff-card" style={{ padding: '20px 22px' }}>
-          <label className="ff-label">Notes <span style={{ fontWeight: 400, color: 'var(--text-3)' }}>&middot; optional</span></label>
-          <textarea className="ff-textarea" placeholder="Payment terms, bank details, thank you note..." rows={3} value={current.notes} onChange={e => setCurrent(c => ({ ...c, notes: e.target.value }))} style={{ minHeight: 72, resize: 'vertical' }} />
+        <div style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 14, padding: '22px 24px' }}>
+          <div style={field}>
+            <label style={lbl}>Notes <span style={{ fontWeight: 400, textTransform: 'none', letterSpacing: 0, color: 'var(--text-3)' }}>— optional</span></label>
+            <textarea className="ff-textarea" placeholder="Payment terms, bank details, thank you message..." rows={3}
+              value={current.notes} onChange={e => setCurrent(c => ({ ...c, notes: e.target.value }))}
+              style={{ minHeight: 80, resize: 'vertical' }} />
+          </div>
         </div>
 
         {/* Actions */}
-        <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
-          <button className="ff-btn" onClick={() => setView('list')} style={{ background: 'var(--bg-2)', color: 'var(--text-2)', border: '1px solid var(--border)' }}>Cancel</button>
-          <button className="ff-btn" onClick={() => { saveInvoice(); downloadPDF(current); }} style={{ background: 'var(--bg-2)', color: 'var(--text-2)', border: '1px solid var(--border)', gap: 7 }}>
-            <ArrowRight size={13} /> Save & Download
+        <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', paddingTop: 4 }}>
+          <button onClick={() => setView('list')}
+            style={{ height: 38, padding: '0 16px', borderRadius: 9, border: '1px solid var(--border)', background: 'var(--bg-2)', color: 'var(--text-2)', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
+            Cancel
           </button>
-          <button className="ff-btn ff-btn-primary" onClick={saveInvoice} style={{ gap: 7 }}>
-            <Check size={13} /> Save Invoice
+          <button onClick={() => { saveInvoice(); downloadPDF(current); }}
+            style={{ height: 38, padding: '0 16px', borderRadius: 9, border: '1px solid var(--border)', background: 'var(--bg-2)', color: 'var(--text-2)', fontSize: 13, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
+            <ArrowRight size={13} />Save & Download
+          </button>
+          <button className="ff-btn ff-btn-primary" onClick={saveInvoice} style={{ height: 38, display: 'flex', alignItems: 'center', gap: 6 }}>
+            <Check size={13} />Save Invoice
           </button>
         </div>
+
       </div>
     </div>
   );
 
-  // ── Preview view ───────────────────────────────────────────────────────
+  /* ── PREVIEW ─────────────────────────────────────────────── */
   if (view === 'preview') return (
-    <div style={{ maxWidth: 760, margin: '0 auto', padding: '32px 0' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 28 }}>
+    <div style={{ maxWidth: 680, margin: '0 auto', padding: '40px 0' }}>
+
+      {/* Header */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 32 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <button className="ff-icon-btn" onClick={() => setView('list')}><ArrowRight size={14} style={{ transform: 'rotate(180deg)' }} /></button>
+          <button className="ff-icon-btn" onClick={() => setView('list')} style={{ width: 34, height: 34, borderRadius: 9, flexShrink: 0 }}>
+            <ArrowRight size={14} style={{ transform: 'rotate(180deg)' }} />
+          </button>
           <div>
             <h2 style={{ fontSize: 18, fontWeight: 700, letterSpacing: '-0.02em', color: 'var(--text-1)' }}>{current.number}</h2>
-            <p style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 1 }}>
+            <p style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 2 }}>
               {current.to.name && `${current.to.name} · `}Due {current.dueDate}
             </p>
           </div>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
-          <button className="ff-btn" onClick={() => setView('create')} style={{ background: 'var(--bg-2)', color: 'var(--text-2)', border: '1px solid var(--border)', fontSize: 13 }}>Edit</button>
-          <button className="ff-btn ff-btn-primary" onClick={() => downloadPDF(current)} style={{ gap: 7, fontSize: 13 }}>
-            <ArrowRight size={13} /> Download PDF
+          <button onClick={() => openEdit(current)}
+            style={{ height: 36, padding: '0 14px', borderRadius: 9, border: '1px solid var(--border)', background: 'var(--bg-2)', color: 'var(--text-2)', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
+            Edit
+          </button>
+          <button className="ff-btn ff-btn-primary" onClick={() => downloadPDF(current)}
+            style={{ height: 36, display: 'flex', alignItems: 'center', gap: 6, paddingLeft: 14, paddingRight: 14 }}>
+            <ArrowRight size={13} />Download PDF
           </button>
         </div>
       </div>
 
-      {/* Invoice preview card */}
-      <div className="ff-card" style={{ padding: '48px 52px', fontFamily: 'var(--font-text)' }}>
-        {/* Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 48 }}>
-          <div style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.03em', color: 'var(--text-1)' }}>{current.from.name || 'Your Name'}</div>
+      {/* Invoice card */}
+      <div style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 16, padding: '44px 48px' }}>
+
+        {/* Top: name + invoice number */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 40 }}>
+          <div>
+            <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-1)', letterSpacing: '-0.025em' }}>
+              {current.from.name || 'Your Name'}
+            </div>
+            {current.from.email && <div style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 4 }}>{current.from.email}</div>}
+          </div>
           <div style={{ textAlign: 'right' }}>
-            <div style={{ fontSize: 26, fontWeight: 800, letterSpacing: '-0.03em', color: 'var(--text-1)' }}>{current.number}</div>
-            <div style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 5 }}>Issued {current.date} &middot; Due {current.dueDate}</div>
+            <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-3)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 6 }}>Invoice</div>
+            <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-1)', letterSpacing: '-0.03em' }}>{current.number}</div>
+            <div style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 5 }}>
+              Issued {current.date} · Due {current.dueDate}
+            </div>
           </div>
         </div>
 
-        {/* Parties */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 32, marginBottom: 40, paddingBottom: 36, borderBottom: '1px solid var(--border)' }}>
+        {/* Divider */}
+        <div style={{ height: 1, background: 'var(--border)', marginBottom: 32 }} />
+
+        {/* From / To */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 32, marginBottom: 40 }}>
           {[['From', current.from], ['Bill To', current.to]].map(([label, party]) => (
             <div key={label}>
               <p style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-3)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 10 }}>{label}</p>
-              <p style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-1)', marginBottom: 3, letterSpacing: '-0.01em' }}>{party.name || '—'}</p>
+              <p style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-1)', marginBottom: 3 }}>{party.name || '—'}</p>
               {party.email && <p style={{ fontSize: 13, color: 'var(--text-3)' }}>{party.email}</p>}
-              {party.address && <p style={{ fontSize: 13, color: 'var(--text-3)', whiteSpace: 'pre-line', marginTop: 2 }}>{party.address}</p>}
+              {party.address && <p style={{ fontSize: 12, color: 'var(--text-3)', whiteSpace: 'pre-line', marginTop: 3, lineHeight: 1.6 }}>{party.address}</p>}
             </div>
           ))}
         </div>
 
-        {/* Items table */}
-        <div style={{ marginBottom: 32 }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 80px 120px 100px', gap: 12, paddingBottom: 10, borderBottom: '1px solid var(--border)', marginBottom: 4 }}>
-            {['Description', 'Qty', 'Rate', 'Amount'].map((h, i) => (
-              <span key={h} style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-3)', letterSpacing: '0.1em', textTransform: 'uppercase', textAlign: i >= 2 ? 'right' : 'left' }}>{h}</span>
-            ))}
-          </div>
-          {current.items.map(it => {
-            const amt = (parseFloat(it.qty)||0)*(parseFloat(it.rate)||0);
-            return (
-              <div key={it.id} style={{ display: 'grid', gridTemplateColumns: '1fr 80px 120px 100px', gap: 12, padding: '13px 0', borderBottom: '1px solid var(--border)', alignItems: 'start' }}>
-                <span style={{ fontSize: 14, color: 'var(--text-1)' }}>{it.description || '—'}</span>
-                <span style={{ fontSize: 13, color: 'var(--text-2)', textAlign: 'right' }}>{it.qty}</span>
-                <span style={{ fontSize: 13, color: 'var(--text-2)', textAlign: 'right' }}>{fmt(it.rate || 0, current.currency)}</span>
-                <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-1)', textAlign: 'right' }}>{fmt(amt, current.currency)}</span>
-              </div>
-            );
-          })}
+        {/* Divider */}
+        <div style={{ height: 1, background: 'var(--border)', marginBottom: 28 }} />
+
+        {/* Line items */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 72px 110px 100px', gap: 12, paddingBottom: 10, marginBottom: 4, borderBottom: '1px solid var(--border)' }}>
+          {['Description','Qty','Rate','Amount'].map((h, i) => (
+            <span key={h} style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-3)', letterSpacing: '0.08em', textTransform: 'uppercase', textAlign: i >= 2 ? 'right' : 'left' }}>{h}</span>
+          ))}
         </div>
+        {current.items.map(it => {
+          const amt = (parseFloat(it.qty)||0)*(parseFloat(it.rate)||0);
+          return (
+            <div key={it.id} style={{ display: 'grid', gridTemplateColumns: '1fr 72px 110px 100px', gap: 12, padding: '12px 0', borderBottom: '1px solid var(--border)' }}>
+              <span style={{ fontSize: 14, color: 'var(--text-1)' }}>{it.description || '—'}</span>
+              <span style={{ fontSize: 13, color: 'var(--text-2)', textAlign: 'right' }}>{it.qty}</span>
+              <span style={{ fontSize: 13, color: 'var(--text-2)', textAlign: 'right' }}>{fmt(it.rate || 0, current.currency)}</span>
+              <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-1)', textAlign: 'right' }}>{fmt(amt, current.currency)}</span>
+            </div>
+          );
+        })}
 
         {/* Total */}
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: current.notes ? 36 : 0 }}>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: 20 }}>
           <div style={{ minWidth: 220, borderTop: '2px solid var(--text-1)', paddingTop: 14 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: 14, fontWeight: 500, color: 'var(--text-2)' }}>Total Due</span>
-              <span style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-1)', letterSpacing: '-0.03em' }}>{fmt(subtotal(current), current.currency)}</span>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+              <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-2)' }}>Total Due</span>
+              <span style={{ fontSize: 24, fontWeight: 800, color: 'var(--text-1)', letterSpacing: '-0.03em' }}>
+                {fmt(subtotal(current), current.currency)}
+              </span>
             </div>
           </div>
         </div>
 
         {/* Notes */}
         {current.notes && (
-          <div style={{ borderTop: '1px solid var(--border)', paddingTop: 28 }}>
+          <div style={{ borderTop: '1px solid var(--border)', marginTop: 32, paddingTop: 28 }}>
             <p style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-3)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 10 }}>Notes</p>
-            <p style={{ fontSize: 13, color: 'var(--text-2)', lineHeight: 1.7, whiteSpace: 'pre-line' }}>{current.notes}</p>
+            <p style={{ fontSize: 13, color: 'var(--text-2)', lineHeight: 1.75, whiteSpace: 'pre-line' }}>{current.notes}</p>
           </div>
         )}
+
       </div>
     </div>
   );
