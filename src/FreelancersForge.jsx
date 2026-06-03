@@ -2648,126 +2648,130 @@ function InvoiceTab() {
   function buildPDFHtml(inv) {
     const sub = subtotal(inv), tax = taxAmt(inv), disc = discountAmt(inv), tot = total(inv);
     const hasTax = parseFloat(inv.tax) > 0, hasDisc = parseFloat(inv.discount) > 0;
+    const accent = '#2563EB';
     return `<!DOCTYPE html><html><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>${inv.number}</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#fff;color:#111;font-size:14px;line-height:1.55}
-.page{max-width:820px;margin:0 auto;padding:64px 72px}
-/* Header */
-.inv-title{font-size:48px;font-weight:900;letter-spacing:-0.04em;color:#111;margin-bottom:4px}
-.corner-shape{position:absolute;top:0;right:0;width:120px;height:120px;background:#e8e8e8;clip-path:polygon(100% 0,0 0,100% 100%)}
-.header-wrap{position:relative;overflow:hidden;margin-bottom:48px}
-/* Parties */
-.parties-row{display:grid;grid-template-columns:1fr 1fr;gap:48px;margin:36px 0 40px}
-.party-label{font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#888;margin-bottom:8px}
-.party-name{font-size:16px;font-weight:700;color:#111;margin-bottom:4px}
-.party-detail{font-size:13px;color:#555;line-height:1.7}
-/* Meta grid */
-.meta-grid{display:grid;grid-template-columns:auto auto;gap:4px 24px;margin-bottom:40px}
-.meta-label{font-size:13px;color:#888;font-weight:500;text-align:right;white-space:nowrap}
-.meta-value{font-size:13px;color:#111;font-weight:600}
+.page{max-width:820px;margin:0 auto;padding:0}
+/* Header band — matches app preview */
+.header-band{background:${accent};padding:36px 56px;position:relative;overflow:hidden;display:flex;justify-content:space-between;align-items:flex-start;gap:24px}
+.header-band::after{content:'';position:absolute;top:0;right:0;width:110px;height:110px;background:rgba(255,255,255,.1);border-radius:0 0 0 110px}
+.inv-label{font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.6);margin-bottom:6px}
+.inv-number{font-size:32px;font-weight:900;letter-spacing:-0.04em;color:#fff;line-height:1}
+.inv-meta{font-size:12px;color:rgba(255,255,255,.65);margin-top:6px}
+.from-name{font-size:18px;font-weight:700;color:#fff;margin-bottom:4px}
+.from-detail{font-size:13px;color:rgba(255,255,255,.7)}
+/* Parties band — matches app preview */
+.parties-band{display:grid;grid-template-columns:1fr 1fr;background:#EFF6FF;border-bottom:1px solid #DBEAFE}
+.party{padding:22px 32px}
+.party+.party{border-left:1px solid #DBEAFE}
+.party-label{font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:${accent};margin-bottom:9px}
+.party-name{font-size:16px;font-weight:700;color:#111;margin-bottom:3px}
+.party-detail{font-size:13px;color:#555;line-height:1.65}
+/* Body */
+.body{padding:32px 56px 56px}
 /* Table */
-table{width:100%;border-collapse:collapse;margin-bottom:24px}
+.table-wrap{margin-bottom:24px}
+table{width:100%;border-collapse:collapse}
 thead tr{background:#111;color:#fff}
-th{padding:12px 16px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;text-align:left}
+th{padding:12px 14px;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;text-align:left}
 th:not(:first-child){text-align:right}
-th:first-child{width:40px;text-align:center}
+th:first-child{width:44px;text-align:center}
 tbody tr{border-bottom:1px solid #F0F0F0}
-tbody tr:hover{background:#FAFAFA}
-td{padding:14px 16px;font-size:14px;color:#333;vertical-align:top}
-td:first-child{text-align:center;color:#999;font-size:12px;font-weight:700}
-td:not(:first-child):not(:nth-child(2)){text-align:right}
-.item-name{font-weight:600;color:#111;margin-bottom:2px}
-.item-desc{font-size:12px;color:#888}
+td{padding:14px 14px;font-size:14px;color:#333;vertical-align:top}
+td:first-child{text-align:center;color:#999;font-size:12px;font-weight:700;padding-top:16px}
+td:nth-child(3),td:nth-child(4),td:nth-child(5){text-align:right}
+.item-name{font-weight:600;color:#111}
 /* Totals */
-.totals-wrap{display:flex;justify-content:flex-end;margin-bottom:40px}
-.totals-box{min-width:280px}
-.total-row-minor{display:flex;justify-content:space-between;padding:7px 0;font-size:14px;color:#555;border-bottom:1px solid #f0f0f0}
-.total-row-final{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;background:#111;color:#fff;border-radius:6px;margin-top:8px}
-.total-row-final span:first-child{font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;opacity:.8}
-.total-row-final span:last-child{font-size:22px;font-weight:900;letter-spacing:-0.03em}
+.totals-wrap{display:flex;justify-content:flex-end;margin-bottom:36px}
+.totals-inner{min-width:280px}
+.tot-row{display:flex;justify-content:space-between;padding:8px 0;font-size:14px;color:#555;border-bottom:1px solid #f0f0f0}
+.tot-row span:last-child{font-weight:600;color:#333}
+.tot-final{display:flex;justify-content:space-between;align-items:center;padding:15px 22px;background:#111;color:#fff;border-radius:8px;margin-top:10px}
+.tot-final-label{font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;opacity:.75}
+.tot-final-amt{font-size:24px;font-weight:900;letter-spacing:-0.03em}
 /* Bottom */
-.bottom-row{display:grid;grid-template-columns:1fr 1fr;gap:48px;margin-bottom:48px}
-.terms-label{font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#888;margin-bottom:8px}
-.terms-body{font-size:13px;color:#555;line-height:1.7}
-.sign-label{font-size:13px;color:#555;margin-bottom:6px}
-.sign-name{font-size:18px;font-weight:700;color:#111}
-.sign-title{font-size:13px;color:#888}
-.thankyou{font-size:32px;font-weight:900;letter-spacing:-0.03em;color:#111;border-top:1px solid #e8e8e8;padding-top:32px;margin-bottom:20px}
-.footer-bar{border-top:1px solid #e8e8e8;padding-top:16px;display:flex;gap:32px;font-size:12px;color:#888;flex-wrap:wrap}
-.footer-item span:first-child{font-weight:700;color:#555;margin-right:4px}
-@media print{*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}.page{padding:40px 48px}}
+.bottom-row{display:grid;grid-template-columns:1fr 1fr;gap:48px;margin-bottom:44px}
+.section-label{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#888;margin-bottom:8px}
+.thankyou{font-size:34px;font-weight:900;letter-spacing:-0.04em;color:#111;border-top:1px solid #e8e8e8;padding-top:28px;margin-bottom:18px}
+.footer-bar{display:flex;gap:28px;font-size:12px;color:#888;flex-wrap:wrap;padding-top:16px;border-top:1px solid #e8e8e8}
+.footer-item strong{color:#555;margin-right:4px}
+@media print{*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}}
 </style></head><body>
 <div class="page">
-  <div class="header-wrap">
-    <div class="corner-shape"></div>
-    <div class="inv-title">INVOICE</div>
-    <div style="font-size:14px;color:#888;margin-top:2px">${inv.from.name || 'Your Business'}</div>
-  </div>
-
-  <div style="display:grid;grid-template-columns:1fr auto;gap:48px;align-items:start;margin-bottom:40px">
+  <div class="header-band">
     <div>
-      <div class="party-label">To</div>
-      <div class="party-name">${inv.to.name || '—'}</div>
-      ${inv.to.address ? `<div class="party-detail" style="white-space:pre-line">${inv.to.address}</div>` : ''}
-      ${inv.to.email ? `<div class="party-detail"><strong>E:</strong> ${inv.to.email}</div>` : ''}
-      ${inv.to.phone ? `<div class="party-detail"><strong>P:</strong> ${inv.to.phone}</div>` : ''}
-    </div>
-    <div class="meta-grid">
-      <div class="meta-label">INVOICE NO:</div><div class="meta-value">${inv.number}</div>
-      <div class="meta-label">Invoice Date:</div><div class="meta-value">${inv.date}</div>
-      <div class="meta-label">Due Date:</div><div class="meta-value">${inv.dueDate}</div>
-      ${inv.currency !== 'USD' ? `<div class="meta-label">Currency:</div><div class="meta-value">${inv.currency}</div>` : ''}
-    </div>
-  </div>
-
-  <table>
-    <thead><tr><th>No</th><th>Item Description</th><th>Unit Price</th><th>Qty</th><th>Total</th></tr></thead>
-    <tbody>
-      ${inv.items.map((it, i) => {
-        const a = (parseFloat(it.qty)||0)*(parseFloat(it.rate)||0);
-        return `<tr>
-          <td>${String(i+1).padStart(2,'0')}.</td>
-          <td><div class="item-name">${it.description||'—'}</div></td>
-          <td style="text-align:right">${fmt(parseFloat(it.rate||0), inv.currency)}</td>
-          <td style="text-align:right">${it.qty}</td>
-          <td style="text-align:right;font-weight:700">${fmt(a, inv.currency)}</td>
-        </tr>`;
-      }).join('')}
-    </tbody>
-  </table>
-
-  <div class="totals-wrap">
-    <div class="totals-box">
-      <div class="total-row-minor"><span>Sub-Total:</span><span>${fmt(sub, inv.currency)}</span></div>
-      ${hasTax ? `<div class="total-row-minor"><span>Tax (${inv.tax}%):</span><span>${fmt(tax, inv.currency)}</span></div>` : ''}
-      ${hasDisc ? `<div class="total-row-minor"><span>Discount (${inv.discount}%):</span><span>- ${fmt(disc, inv.currency)}</span></div>` : ''}
-      <div class="total-row-final"><span>Total Due:</span><span>${fmt(tot, inv.currency)}</span></div>
-    </div>
-  </div>
-
-  <div class="bottom-row">
-    <div>
-      ${inv.notes ? `<div class="terms-label">Terms &amp; Notes</div><div class="terms-body">${inv.notes}</div>` : ''}
+      <div class="inv-label">Invoice</div>
+      <div class="inv-number">${inv.number}</div>
+      <div class="inv-meta">Issued ${inv.date} &nbsp;·&nbsp; Due ${inv.dueDate}</div>
     </div>
     <div style="text-align:right">
-      <div class="sign-label">Issued by</div>
-      <div class="sign-name">${inv.from.name || ''}</div>
-      ${inv.from.email ? `<div class="sign-title">${inv.from.email}</div>` : ''}
+      <div class="from-name">${inv.from.name || 'Your Business'}</div>
+      ${inv.from.email ? `<div class="from-detail">${inv.from.email}</div>` : ''}
+      ${inv.from.phone ? `<div class="from-detail">${inv.from.phone}</div>` : ''}
     </div>
   </div>
 
-  <div class="thankyou">Thank You!</div>
+  <div class="parties-band">
+    <div class="party">
+      <div class="party-label">Bill To</div>
+      <div class="party-name">${inv.to.name || '—'}</div>
+      ${inv.to.email ? `<div class="party-detail">${inv.to.email}</div>` : ''}
+      ${inv.to.phone ? `<div class="party-detail">${inv.to.phone}</div>` : ''}
+      ${inv.to.address ? `<div class="party-detail" style="white-space:pre-line;margin-top:3px">${inv.to.address}</div>` : ''}
+    </div>
+    <div class="party">
+      <div class="party-label">From</div>
+      <div class="party-name">${inv.from.name || '—'}</div>
+      ${inv.from.email ? `<div class="party-detail">${inv.from.email}</div>` : ''}
+      ${inv.from.phone ? `<div class="party-detail">${inv.from.phone}</div>` : ''}
+      ${inv.from.address ? `<div class="party-detail" style="white-space:pre-line;margin-top:3px">${inv.from.address}</div>` : ''}
+    </div>
+  </div>
 
-  <div class="footer-bar">
-    ${inv.from.phone ? `<div><span class="footer-item"><span>Tel:</span>${inv.from.phone}</span></div>` : ''}
-    ${inv.from.email ? `<div><span class="footer-item"><span>Mail:</span>${inv.from.email}</span></div>` : ''}
-    ${inv.from.address ? `<div><span class="footer-item"><span>Add:</span>${inv.from.address.replace(/\n/g,', ')}</span></div>` : ''}
+  <div class="body">
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>No</th><th>Item Description</th><th>Unit Price</th><th>Qty</th><th>Total</th></tr></thead>
+        <tbody>
+          ${inv.items.map((it, i) => {
+            const a = (parseFloat(it.qty)||0)*(parseFloat(it.rate)||0);
+            return `<tr><td>${String(i+1).padStart(2,'0')}.</td><td><div class="item-name">${it.description||'—'}</div></td><td>${fmt(parseFloat(it.rate||0),inv.currency)}</td><td>${it.qty}</td><td style="font-weight:700">${fmt(a,inv.currency)}</td></tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="totals-wrap">
+      <div class="totals-inner">
+        <div class="tot-row"><span>Sub-Total:</span><span>${fmt(sub,inv.currency)}</span></div>
+        ${hasTax ? `<div class="tot-row"><span>Tax (${inv.tax}%):</span><span>${fmt(tax,inv.currency)}</span></div>` : ''}
+        ${hasDisc ? `<div class="tot-row"><span>Discount (${inv.discount}%):</span><span>- ${fmt(disc,inv.currency)}</span></div>` : ''}
+        <div class="tot-final"><span class="tot-final-label">Total Due:</span><span class="tot-final-amt">${fmt(tot,inv.currency)}</span></div>
+      </div>
+    </div>
+
+    <div class="bottom-row">
+      <div>${inv.notes ? `<div class="section-label">Terms &amp; Notes</div><div style="font-size:13px;color:#555;line-height:1.75">${inv.notes}</div>` : ''}</div>
+      <div style="text-align:right">
+        <div class="section-label">Issued by</div>
+        <div style="font-size:17px;font-weight:700;color:#111;margin-bottom:3px">${inv.from.name||''}</div>
+        ${inv.from.email ? `<div style="font-size:13px;color:#888">${inv.from.email}</div>` : ''}
+      </div>
+    </div>
+
+    <div class="thankyou">Thank You!</div>
+    <div class="footer-bar">
+      ${inv.from.phone ? `<div class="footer-item"><strong>Tel:</strong>${inv.from.phone}</div>` : ''}
+      ${inv.from.email ? `<div class="footer-item"><strong>Mail:</strong>${inv.from.email}</div>` : ''}
+      ${inv.from.address ? `<div class="footer-item"><strong>Add:</strong>${inv.from.address.replace(/\n/g,', ')}</div>` : ''}
+    </div>
   </div>
 </div></body></html>`;
   }
 
-  function downloadPDF(inv) {
+    function downloadPDF(inv) {
     const w = window.open('', '_blank');
     if (w) { w.document.write(buildPDFHtml(inv)); w.document.close(); setTimeout(() => w.print(), 700); }
   }
@@ -2784,14 +2788,14 @@ td:not(:first-child):not(:nth-child(2)){text-align:right}
       background: primary ? 'var(--accent)' : 'var(--bg-2)',
       color: primary ? '#fff' : 'var(--text-2)',
       border: primary ? 'none' : '1px solid var(--border)',
-      borderRadius: 12, fontSize: 15, fontWeight: 600,
+      borderRadius: 999, fontSize: 15, fontWeight: 600,
       cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
       letterSpacing: '-0.01em', ...style
     }}>{children}</button>
   );
 
   const BackBtn = ({ onClick }) => (
-    <button onClick={onClick} style={{ width: 42, height: 42, borderRadius: 12, background: 'var(--bg-2)', border: '1px solid var(--border)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-2)', flexShrink: 0 }}>
+    <button onClick={onClick} style={{ width: 42, height: 42, borderRadius: 999, background: 'var(--bg-2)', border: '1px solid var(--border)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-2)', flexShrink: 0 }}>
       <ArrowRight size={18} style={{ transform: 'rotate(180deg)' }} />
     </button>
   );
@@ -2809,7 +2813,7 @@ td:not(:first-child):not(:nth-child(2)){text-align:right}
         .inv-row-sub { font-size: 12px; color: var(--text-3); margin-top: 2px; }
         .inv-row-amount { font-size: 16px; font-weight: 700; color: var(--text-1); letter-spacing: -0.02em; flex-shrink: 0; margin-right: 10px; }
         .inv-row-actions { display: flex; gap: 6px; flex-shrink: 0; }
-        .inv-icon-btn { width: 34px; height: 34px; border-radius: 9px; background: var(--bg-2); border: 1px solid var(--border); cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-3); transition: color .15s, border-color .15s; }
+        .inv-icon-btn { width: 34px; height: 34px; border-radius: 999px; background: var(--bg-2); border: 1px solid var(--border); cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-3); transition: color .15s, border-color .15s; }
         .inv-icon-btn:hover { color: var(--text-1); border-color: var(--text-2); }
         @media (max-width: 600px) {
           .inv-row { flex-wrap: wrap; }
@@ -2939,7 +2943,7 @@ td:not(:first-child):not(:nth-child(2)){text-align:right}
                 <input className="ff-input" type="number" min="1" value={it.qty} onChange={e => updateItem(it.id,'qty',e.target.value)} style={{ fontSize: 14, textAlign: 'center', padding: '10px 6px' }} />
                 <input className="ff-input" type="number" min="0" step="0.01" placeholder="0.00" value={it.rate} onChange={e => updateItem(it.id,'rate',e.target.value)} style={{ fontSize: 14, textAlign: 'right', padding: '10px 8px' }} />
                 <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-1)', textAlign: 'right', letterSpacing: '-0.01em' }}>{fmt(amt, current.currency)}</span>
-                <button onClick={() => removeItem(it.id)} disabled={current.items.length === 1} style={{ width: 30, height: 30, borderRadius: 8, background: 'var(--bg-2)', border: '1px solid var(--border)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-3)', opacity: current.items.length === 1 ? 0.2 : 1 }}>
+                <button onClick={() => removeItem(it.id)} disabled={current.items.length === 1} style={{ width: 30, height: 30, borderRadius: 999, background: 'var(--bg-2)', border: '1px solid var(--border)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-3)', opacity: current.items.length === 1 ? 0.2 : 1 }}>
                   <X size={13} />
                 </button>
               </div>
