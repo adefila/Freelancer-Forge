@@ -2611,116 +2611,159 @@ function InvoiceTab() {
     number: generateInvoiceNumber(invoices),
     date: new Date().toISOString().slice(0, 10),
     dueDate: new Date(Date.now() + 14 * 86400000).toISOString().slice(0, 10),
-    from: { name: '', email: '', address: '' },
-    to: { name: '', email: '', address: '' },
+    from: { name: '', email: '', address: '', phone: '' },
+    to: { name: '', email: '', address: '', phone: '' },
     items: [{ id: 1, description: '', qty: 1, rate: '' }],
-    notes: '', currency: 'USD',
+    notes: '', currency: 'USD', tax: '', discount: '',
   });
 
   const openNew = () => { setCurrent(blankInvoice()); setView('create'); };
   const openEdit = (inv) => { setCurrent({ ...inv }); setView('create'); };
   const openPreview = (inv) => { setCurrent({ ...inv }); setView('preview'); };
+  const deleteInvoice = (id) => { const u = invoices.filter(i => i.id !== id); setInvoices(u); saveInvoices(u); };
 
-  function deleteInvoice(id) {
-    const u = invoices.filter(i => i.id !== id);
-    setInvoices(u); saveInvoices(u);
-  }
   function saveInvoice() {
     const exists = invoices.find(i => i.id === current.id);
     const u = exists ? invoices.map(i => i.id === current.id ? current : i) : [current, ...invoices];
     setInvoices(u); saveInvoices(u); setView('preview');
   }
+
   function updateItem(id, f, v) {
     setCurrent(c => ({ ...c, items: c.items.map(it => it.id === id ? { ...it, [f]: v } : it) }));
   }
   const addItem = () => setCurrent(c => ({ ...c, items: [...c.items, { id: Date.now(), description: '', qty: 1, rate: '' }] }));
   const removeItem = (id) => setCurrent(c => ({ ...c, items: c.items.filter(it => it.id !== id) }));
-  const subtotal = (inv) => (inv?.items || []).reduce((s, it) => s + (parseFloat(it.qty)||0)*(parseFloat(it.rate)||0), 0);
-  const fmt = (n, cur = 'USD') => { try { return new Intl.NumberFormat('en-US', { style: 'currency', currency: cur }).format(n); } catch { return cur + ' ' + parseFloat(n).toFixed(2); } };
 
-  /* ── PDF builder ─────────────────────────────────────────── */
+  const subtotal = (inv) => (inv?.items || []).reduce((s, it) => s + (parseFloat(it.qty)||0)*(parseFloat(it.rate)||0), 0);
+  const taxAmt = (inv) => subtotal(inv) * ((parseFloat(inv?.tax)||0) / 100);
+  const discountAmt = (inv) => subtotal(inv) * ((parseFloat(inv?.discount)||0) / 100);
+  const total = (inv) => subtotal(inv) + taxAmt(inv) - discountAmt(inv);
+
+  const fmt = (n, cur = 'USD') => {
+    try { return new Intl.NumberFormat('en-US', { style: 'currency', currency: cur }).format(n || 0); }
+    catch { return (cur || '') + ' ' + parseFloat(n || 0).toFixed(2); }
+  };
+
+  /* ── PDF ──────────────────────────────────────────────────── */
   function buildPDFHtml(inv) {
-    const sub = subtotal(inv);
-    return `<!DOCTYPE html><html><head><meta charset="utf-8"/><title>${inv.number}</title>
+    const sub = subtotal(inv), tax = taxAmt(inv), disc = discountAmt(inv), tot = total(inv);
+    const hasTax = parseFloat(inv.tax) > 0, hasDisc = parseFloat(inv.discount) > 0;
+    return `<!DOCTYPE html><html><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>${inv.number}</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#fff;color:#111;font-size:14px;line-height:1.5}
-.page{max-width:800px;margin:0 auto;padding:60px 72px}
-.header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:44px}
-.from-name{font-size:24px;font-weight:800;letter-spacing:-0.03em;color:#111;margin-bottom:4px}
-.from-detail{font-size:13px;color:#666;line-height:1.6}
-.inv-label{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#2563EB;margin-bottom:6px}
-.inv-number{font-size:30px;font-weight:800;letter-spacing:-0.04em;color:#111;text-align:right}
-.inv-meta{font-size:13px;color:#888;margin-top:5px;text-align:right}
-.parties{display:grid;grid-template-columns:1fr 1fr;background:#EFF6FF;border-radius:14px;overflow:hidden;margin:36px 0}
-.party{padding:24px 28px}
-.party+.party{border-left:1px solid #DBEAFE}
-.party-label{font-size:10px;font-weight:800;color:#2563EB;letter-spacing:.12em;text-transform:uppercase;margin-bottom:10px}
-.party-name{font-size:16px;font-weight:700;color:#111;margin-bottom:3px}
-.party-detail{font-size:13px;color:#555;line-height:1.6}
-.table-wrap{border:1px solid #E5E7EB;border-radius:12px;overflow:hidden;margin-bottom:20px}
-thead{background:#F8FAFC}
-th{font-size:11px;font-weight:700;color:#6B7280;letter-spacing:.08em;text-transform:uppercase;padding:13px 18px;text-align:left;border-bottom:1px solid #E5E7EB}
+body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#fff;color:#111;font-size:14px;line-height:1.55}
+.page{max-width:820px;margin:0 auto;padding:64px 72px}
+/* Header */
+.inv-title{font-size:48px;font-weight:900;letter-spacing:-0.04em;color:#111;margin-bottom:4px}
+.corner-shape{position:absolute;top:0;right:0;width:120px;height:120px;background:#e8e8e8;clip-path:polygon(100% 0,0 0,100% 100%)}
+.header-wrap{position:relative;overflow:hidden;margin-bottom:48px}
+/* Parties */
+.parties-row{display:grid;grid-template-columns:1fr 1fr;gap:48px;margin:36px 0 40px}
+.party-label{font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#888;margin-bottom:8px}
+.party-name{font-size:16px;font-weight:700;color:#111;margin-bottom:4px}
+.party-detail{font-size:13px;color:#555;line-height:1.7}
+/* Meta grid */
+.meta-grid{display:grid;grid-template-columns:auto auto;gap:4px 24px;margin-bottom:40px}
+.meta-label{font-size:13px;color:#888;font-weight:500;text-align:right;white-space:nowrap}
+.meta-value{font-size:13px;color:#111;font-weight:600}
+/* Table */
+table{width:100%;border-collapse:collapse;margin-bottom:24px}
+thead tr{background:#111;color:#fff}
+th{padding:12px 16px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;text-align:left}
 th:not(:first-child){text-align:right}
-td{padding:15px 18px;font-size:14px;color:#374151;border-bottom:1px solid #F1F5F9;vertical-align:top}
-td:not(:first-child){text-align:right}
-tr:last-child td{border-bottom:none}
-.total-wrap{display:flex;justify-content:flex-end;margin-bottom:36px}
-.total-box{background:#2563EB;color:#fff;border-radius:12px;padding:20px 32px;display:flex;justify-content:space-between;align-items:center;gap:48px}
-.total-label{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;opacity:.8}
-.total-amount{font-size:26px;font-weight:800;letter-spacing:-0.03em}
-.notes-box{background:#F8FAFC;border:1px solid #E5E7EB;border-radius:12px;padding:22px 26px}
-.notes-label{font-size:10px;font-weight:700;color:#6B7280;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px}
-.notes-body{font-size:13px;color:#555;line-height:1.8}
-.footer{margin-top:44px;padding-top:20px;border-top:1px solid #E5E7EB;text-align:center;font-size:12px;color:#9CA3AF;letter-spacing:.02em}
-@media print{*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}}
+th:first-child{width:40px;text-align:center}
+tbody tr{border-bottom:1px solid #F0F0F0}
+tbody tr:hover{background:#FAFAFA}
+td{padding:14px 16px;font-size:14px;color:#333;vertical-align:top}
+td:first-child{text-align:center;color:#999;font-size:12px;font-weight:700}
+td:not(:first-child):not(:nth-child(2)){text-align:right}
+.item-name{font-weight:600;color:#111;margin-bottom:2px}
+.item-desc{font-size:12px;color:#888}
+/* Totals */
+.totals-wrap{display:flex;justify-content:flex-end;margin-bottom:40px}
+.totals-box{min-width:280px}
+.total-row-minor{display:flex;justify-content:space-between;padding:7px 0;font-size:14px;color:#555;border-bottom:1px solid #f0f0f0}
+.total-row-final{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;background:#111;color:#fff;border-radius:6px;margin-top:8px}
+.total-row-final span:first-child{font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;opacity:.8}
+.total-row-final span:last-child{font-size:22px;font-weight:900;letter-spacing:-0.03em}
+/* Bottom */
+.bottom-row{display:grid;grid-template-columns:1fr 1fr;gap:48px;margin-bottom:48px}
+.terms-label{font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#888;margin-bottom:8px}
+.terms-body{font-size:13px;color:#555;line-height:1.7}
+.sign-label{font-size:13px;color:#555;margin-bottom:6px}
+.sign-name{font-size:18px;font-weight:700;color:#111}
+.sign-title{font-size:13px;color:#888}
+.thankyou{font-size:32px;font-weight:900;letter-spacing:-0.03em;color:#111;border-top:1px solid #e8e8e8;padding-top:32px;margin-bottom:20px}
+.footer-bar{border-top:1px solid #e8e8e8;padding-top:16px;display:flex;gap:32px;font-size:12px;color:#888;flex-wrap:wrap}
+.footer-item span:first-child{font-weight:700;color:#555;margin-right:4px}
+@media print{*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}.page{padding:40px 48px}}
 </style></head><body>
 <div class="page">
-  <div class="header">
-    <div>
-      <div class="from-name">${inv.from.name || 'Your Business'}</div>
-      ${inv.from.email ? `<div class="from-detail">${inv.from.email}</div>` : ''}
-      ${inv.from.address ? `<div class="from-detail" style="white-space:pre-line">${inv.from.address}</div>` : ''}
-    </div>
-    <div>
-      <div class="inv-label">Invoice</div>
-      <div class="inv-number">${inv.number}</div>
-      <div class="inv-meta">Issued ${inv.date}${inv.dueDate ? '&nbsp;&nbsp;·&nbsp;&nbsp;Due ' + inv.dueDate : ''}</div>
-    </div>
+  <div class="header-wrap">
+    <div class="corner-shape"></div>
+    <div class="inv-title">INVOICE</div>
+    <div style="font-size:14px;color:#888;margin-top:2px">${inv.from.name || 'Your Business'}</div>
   </div>
-  <div class="parties">
-    <div class="party">
-      <div class="party-label">From</div>
-      <div class="party-name">${inv.from.name || '—'}</div>
-      ${inv.from.email ? `<div class="party-detail">${inv.from.email}</div>` : ''}
-      ${inv.from.address ? `<div class="party-detail" style="white-space:pre-line;margin-top:2px">${inv.from.address}</div>` : ''}
-    </div>
-    <div class="party">
-      <div class="party-label">Bill To</div>
+
+  <div style="display:grid;grid-template-columns:1fr auto;gap:48px;align-items:start;margin-bottom:40px">
+    <div>
+      <div class="party-label">To</div>
       <div class="party-name">${inv.to.name || '—'}</div>
-      ${inv.to.email ? `<div class="party-detail">${inv.to.email}</div>` : ''}
-      ${inv.to.address ? `<div class="party-detail" style="white-space:pre-line;margin-top:2px">${inv.to.address}</div>` : ''}
+      ${inv.to.address ? `<div class="party-detail" style="white-space:pre-line">${inv.to.address}</div>` : ''}
+      ${inv.to.email ? `<div class="party-detail"><strong>E:</strong> ${inv.to.email}</div>` : ''}
+      ${inv.to.phone ? `<div class="party-detail"><strong>P:</strong> ${inv.to.phone}</div>` : ''}
+    </div>
+    <div class="meta-grid">
+      <div class="meta-label">INVOICE NO:</div><div class="meta-value">${inv.number}</div>
+      <div class="meta-label">Invoice Date:</div><div class="meta-value">${inv.date}</div>
+      <div class="meta-label">Due Date:</div><div class="meta-value">${inv.dueDate}</div>
+      ${inv.currency !== 'USD' ? `<div class="meta-label">Currency:</div><div class="meta-value">${inv.currency}</div>` : ''}
     </div>
   </div>
-  <div class="table-wrap">
-    <table>
-      <thead><tr><th style="width:52%">Description</th><th>Qty</th><th>Rate</th><th>Amount</th></tr></thead>
-      <tbody>
-        ${inv.items.map(it => {
-          const a = (parseFloat(it.qty)||0)*(parseFloat(it.rate)||0);
-          return `<tr><td>${it.description||'—'}</td><td>${it.qty}</td><td>${fmt(parseFloat(it.rate||0),inv.currency)}</td><td style="font-weight:700">${fmt(a,inv.currency)}</td></tr>`;
-        }).join('')}
-      </tbody>
-    </table>
-  </div>
-  <div class="total-wrap">
-    <div class="total-box">
-      <span class="total-label">Total Due</span>
-      <span class="total-amount">${fmt(sub, inv.currency)}</span>
+
+  <table>
+    <thead><tr><th>No</th><th>Item Description</th><th>Unit Price</th><th>Qty</th><th>Total</th></tr></thead>
+    <tbody>
+      ${inv.items.map((it, i) => {
+        const a = (parseFloat(it.qty)||0)*(parseFloat(it.rate)||0);
+        return `<tr>
+          <td>${String(i+1).padStart(2,'0')}.</td>
+          <td><div class="item-name">${it.description||'—'}</div></td>
+          <td style="text-align:right">${fmt(parseFloat(it.rate||0), inv.currency)}</td>
+          <td style="text-align:right">${it.qty}</td>
+          <td style="text-align:right;font-weight:700">${fmt(a, inv.currency)}</td>
+        </tr>`;
+      }).join('')}
+    </tbody>
+  </table>
+
+  <div class="totals-wrap">
+    <div class="totals-box">
+      <div class="total-row-minor"><span>Sub-Total:</span><span>${fmt(sub, inv.currency)}</span></div>
+      ${hasTax ? `<div class="total-row-minor"><span>Tax (${inv.tax}%):</span><span>${fmt(tax, inv.currency)}</span></div>` : ''}
+      ${hasDisc ? `<div class="total-row-minor"><span>Discount (${inv.discount}%):</span><span>- ${fmt(disc, inv.currency)}</span></div>` : ''}
+      <div class="total-row-final"><span>Total Due:</span><span>${fmt(tot, inv.currency)}</span></div>
     </div>
   </div>
-  ${inv.notes ? `<div class="notes-box"><div class="notes-label">Notes</div><div class="notes-body">${inv.notes}</div></div>` : ''}
-  <div class="footer">Generated with Freelancer's Forge</div>
+
+  <div class="bottom-row">
+    <div>
+      ${inv.notes ? `<div class="terms-label">Terms &amp; Notes</div><div class="terms-body">${inv.notes}</div>` : ''}
+    </div>
+    <div style="text-align:right">
+      <div class="sign-label">Issued by</div>
+      <div class="sign-name">${inv.from.name || ''}</div>
+      ${inv.from.email ? `<div class="sign-title">${inv.from.email}</div>` : ''}
+    </div>
+  </div>
+
+  <div class="thankyou">Thank You!</div>
+
+  <div class="footer-bar">
+    ${inv.from.phone ? `<div><span class="footer-item"><span>Tel:</span>${inv.from.phone}</span></div>` : ''}
+    ${inv.from.email ? `<div><span class="footer-item"><span>Mail:</span>${inv.from.email}</span></div>` : ''}
+    ${inv.from.address ? `<div><span class="footer-item"><span>Add:</span>${inv.from.address.replace(/\n/g,', ')}</span></div>` : ''}
+  </div>
 </div></body></html>`;
   }
 
@@ -2729,72 +2772,87 @@ tr:last-child td{border-bottom:none}
     if (w) { w.document.write(buildPDFHtml(inv)); w.document.close(); setTimeout(() => w.print(), 700); }
   }
 
-  /* ── Shared styles ─────────────────────────────────────────── */
-  const card = (extra = {}) => ({ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 14, padding: '22px 24px', ...extra });
-  const lbl = { fontSize: 10, fontWeight: 700, color: 'var(--text-3)', letterSpacing: '0.08em', textTransform: 'uppercase' };
-  const BtnPrimary = ({ onClick, children, style = {} }) => (
-    <button onClick={onClick} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, height: 36, padding: '0 16px', background: 'var(--accent)', color: '#fff', border: 'none', borderRadius: 9, fontSize: 13, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0, ...style }}>
-      {children}
-    </button>
+  /* ── Shared ────────────────────────────────────────────────── */
+  const lbl = { fontSize: 11, fontWeight: 700, color: 'var(--text-3)', letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 6, display: 'block' };
+  const fieldWrap = { display: 'flex', flexDirection: 'column', gap: 6 };
+  const card = (s = {}) => ({ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 14, padding: '22px 24px', ...s });
+
+  const Btn = ({ primary, onClick, children, style = {} }) => (
+    <button onClick={onClick} style={{
+      display: 'inline-flex', alignItems: 'center', gap: 7,
+      height: 42, padding: '0 20px',
+      background: primary ? 'var(--accent)' : 'var(--bg-2)',
+      color: primary ? '#fff' : 'var(--text-2)',
+      border: primary ? 'none' : '1px solid var(--border)',
+      borderRadius: 12, fontSize: 15, fontWeight: 600,
+      cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
+      letterSpacing: '-0.01em', ...style
+    }}>{children}</button>
   );
-  const BtnSecondary = ({ onClick, children, style = {} }) => (
-    <button onClick={onClick} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, height: 36, padding: '0 14px', background: 'var(--bg-2)', color: 'var(--text-2)', border: '1px solid var(--border)', borderRadius: 9, fontSize: 13, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0, ...style }}>
-      {children}
+
+  const BackBtn = ({ onClick }) => (
+    <button onClick={onClick} style={{ width: 42, height: 42, borderRadius: 12, background: 'var(--bg-2)', border: '1px solid var(--border)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-2)', flexShrink: 0 }}>
+      <ArrowRight size={18} style={{ transform: 'rotate(180deg)' }} />
     </button>
   );
 
   /* ── LIST ──────────────────────────────────────────────────── */
   if (view === 'list') return (
     <div style={{ padding: '32px 0' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+      <style>{`
+        .inv-list-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; gap: 16px; flex-wrap: wrap; }
+        .inv-row { display: flex; align-items: center; gap: 14px; padding: 16px 18px; background: var(--bg); border: 1px solid var(--border); border-radius: 13px; cursor: pointer; transition: border-color .15s; }
+        .inv-row:hover { border-color: var(--accent); }
+        .inv-row-icon { width: 44px; height: 44px; border-radius: 12px; background: var(--accent-bg-soft); border: 1px solid var(--accent-border-soft); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .inv-row-body { flex: 1; min-width: 0; }
+        .inv-row-title { font-size: 15px; font-weight: 700; color: var(--text-1); letter-spacing: -0.01em; }
+        .inv-row-sub { font-size: 12px; color: var(--text-3); margin-top: 2px; }
+        .inv-row-amount { font-size: 16px; font-weight: 700; color: var(--text-1); letter-spacing: -0.02em; flex-shrink: 0; margin-right: 10px; }
+        .inv-row-actions { display: flex; gap: 6px; flex-shrink: 0; }
+        .inv-icon-btn { width: 34px; height: 34px; border-radius: 9px; background: var(--bg-2); border: 1px solid var(--border); cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-3); transition: color .15s, border-color .15s; }
+        .inv-icon-btn:hover { color: var(--text-1); border-color: var(--text-2); }
+        @media (max-width: 600px) {
+          .inv-row { flex-wrap: wrap; }
+          .inv-row-amount { margin-right: 0; }
+          .inv-row-actions { margin-left: auto; }
+        }
+      `}</style>
+
+      <div className="inv-list-header">
         <div>
-          <h2 style={{ fontSize: 19, fontWeight: 700, letterSpacing: '-0.025em', color: 'var(--text-1)', lineHeight: 1.2 }}>Invoices</h2>
-          <p style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 4 }}>Stored locally · expires after 15 days</p>
+          <h2 style={{ fontSize: 20, fontWeight: 700, letterSpacing: '-0.025em', color: 'var(--text-1)' }}>Invoices</h2>
+          <p style={{ fontSize: 13, color: 'var(--text-3)', marginTop: 3 }}>Saved locally · expires after 15 days</p>
         </div>
-        <BtnPrimary onClick={openNew}><Plus size={13} />New Invoice</BtnPrimary>
+        <Btn primary onClick={openNew}><Plus size={18} />New Invoice</Btn>
       </div>
 
       {invoices.length === 0 ? (
-        <div style={{ border: '1.5px dashed var(--border)', borderRadius: 16, padding: '56px 32px', textAlign: 'center' }}>
-          <div style={{ width: 48, height: 48, borderRadius: 13, background: 'var(--accent-bg-soft)', border: '1px solid var(--accent-border-soft)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
-            <Receipt size={20} style={{ color: 'var(--accent)' }} />
+        <div style={{ border: '1.5px dashed var(--border)', borderRadius: 16, padding: '60px 24px', textAlign: 'center' }}>
+          <div style={{ width: 56, height: 56, borderRadius: 16, background: 'var(--accent-bg-soft)', border: '1px solid var(--accent-border-soft)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+            <Receipt size={24} style={{ color: 'var(--accent)' }} />
           </div>
-          <p style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-1)', marginBottom: 6 }}>No invoices yet</p>
-          <p style={{ fontSize: 13, color: 'var(--text-3)', marginBottom: 20 }}>Create your first invoice in under a minute</p>
-          <BtnPrimary onClick={openNew}><Plus size={13} />New Invoice</BtnPrimary>
+          <p style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-1)', marginBottom: 6 }}>No invoices yet</p>
+          <p style={{ fontSize: 14, color: 'var(--text-3)', marginBottom: 20 }}>Create your first invoice in under a minute</p>
+          <Btn primary onClick={openNew}><Plus size={18} />New Invoice</Btn>
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {invoices.map(inv => {
             const expires = INVOICE_RETENTION_DAYS - Math.floor((Date.now() - inv.createdAt) / 86400000);
             return (
-              <div key={inv.id}
-                style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 18px', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 12, cursor: 'pointer', transition: 'border-color .15s' }}
-                onClick={() => openPreview(inv)}
-                onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--accent)'}
-                onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border)'}
-              >
-                <div style={{ width: 36, height: 36, borderRadius: 10, background: 'var(--accent-bg-soft)', border: '1px solid var(--accent-border-soft)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <Receipt size={15} style={{ color: 'var(--accent)' }} />
+              <div key={inv.id} className="inv-row" onClick={() => openPreview(inv)}>
+                <div className="inv-row-icon"><Receipt size={20} style={{ color: 'var(--accent)' }} /></div>
+                <div className="inv-row-body">
+                  <div className="inv-row-title">{inv.number}{inv.to.name && <span style={{ fontWeight: 400, color: 'var(--text-3)', marginLeft: 8, fontSize: 14 }}>{inv.to.name}</span>}</div>
+                  <div className="inv-row-sub">Due {inv.dueDate} · expires in {expires}d</div>
                 </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-1)', letterSpacing: '-0.01em' }}>{inv.number}</span>
-                    {inv.to.name && <span style={{ fontSize: 13, color: 'var(--text-3)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 220 }}>{inv.to.name}</span>}
-                  </div>
-                  <div style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 2 }}>Due {inv.dueDate} · expires in {expires}d</div>
-                </div>
-                <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-1)', letterSpacing: '-0.02em', flexShrink: 0, marginRight: 10 }}>
-                  {fmt(subtotal(inv), inv.currency)}
-                </div>
-                <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
-                  <button title="Edit" onClick={e => { e.stopPropagation(); openEdit(inv); }}
-                    style={{ width: 30, height: 30, borderRadius: 7, background: 'var(--bg-2)', border: '1px solid var(--border)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-2)' }}>
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>
+                <div className="inv-row-amount">{fmt(total(inv), inv.currency)}</div>
+                <div className="inv-row-actions">
+                  <button className="inv-icon-btn" title="Edit" onClick={e => { e.stopPropagation(); openEdit(inv); }}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>
                   </button>
-                  <button title="Delete" onClick={e => { e.stopPropagation(); deleteInvoice(inv.id); }}
-                    style={{ width: 30, height: 30, borderRadius: 7, background: 'var(--bg-2)', border: '1px solid var(--border)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-2)' }}>
-                    <X size={13} />
+                  <button className="inv-icon-btn" title="Delete" onClick={e => { e.stopPropagation(); deleteInvoice(inv.id); }}>
+                    <X size={14} />
                   </button>
                 </div>
               </div>
@@ -2808,53 +2866,58 @@ tr:last-child td{border-bottom:none}
   /* ── CREATE / EDIT ─────────────────────────────────────────── */
   if (view === 'create') return (
     <div style={{ padding: '32px 0' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
-        <button onClick={() => setView('list')} style={{ width: 34, height: 34, borderRadius: 9, background: 'var(--bg-2)', border: '1px solid var(--border)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-2)', flexShrink: 0 }}>
-          <ArrowRight size={14} style={{ transform: 'rotate(180deg)' }} />
-        </button>
+      <style>{`
+        .inv-form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .inv-items-grid { display: grid; grid-template-columns: 1fr 72px 110px 100px 32px; gap: 8px; align-items: center; }
+        .inv-items-header { display: grid; grid-template-columns: 1fr 72px 110px 100px 32px; gap: 8px; padding-bottom: 10px; border-bottom: 1px solid var(--border); margin-bottom: 8px; }
+        @media (max-width: 640px) {
+          .inv-form-grid-2 { grid-template-columns: 1fr; }
+          .inv-items-grid { grid-template-columns: 1fr 56px 88px 80px 28px; gap: 6px; }
+          .inv-items-header { grid-template-columns: 1fr 56px 88px 80px 28px; gap: 6px; }
+        }
+        @media (max-width: 480px) {
+          .inv-items-grid { grid-template-columns: 1fr 48px 76px 68px 24px; gap: 4px; }
+          .inv-items-header { grid-template-columns: 1fr 48px 76px 68px 24px; gap: 4px; }
+        }
+      `}</style>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 24 }}>
+        <BackBtn onClick={() => setView('list')} />
         <div>
           <h2 style={{ fontSize: 18, fontWeight: 700, letterSpacing: '-0.02em', color: 'var(--text-1)' }}>
             {invoices.find(i => i.id === current.id) ? 'Edit Invoice' : 'New Invoice'}
           </h2>
-          <p style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 2 }}>{current.number}</p>
+          <p style={{ fontSize: 13, color: 'var(--text-3)', marginTop: 2 }}>{current.number}</p>
         </div>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
 
-        {/* Invoice details */}
+        {/* Invoice meta */}
         <div style={card()}>
-          <p style={{ ...lbl, marginBottom: 16 }}>Invoice Details</p>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-            {[
-              ['Invoice #', <input key="n" className="ff-input" value={current.number} onChange={e => setCurrent(c => ({ ...c, number: e.target.value }))} />],
-              ['Currency', <select key="c" className="ff-input" value={current.currency} onChange={e => setCurrent(c => ({ ...c, currency: e.target.value }))} style={{ cursor: 'pointer' }}>
+          <p style={{ ...lbl, marginBottom: 16, fontSize: 12 }}>Invoice Details</p>
+          <div className="inv-form-grid-2">
+            <div style={fieldWrap}><label style={lbl}>Invoice #</label><input className="ff-input" value={current.number} onChange={e => setCurrent(c => ({ ...c, number: e.target.value }))} /></div>
+            <div style={fieldWrap}><label style={lbl}>Currency</label>
+              <select className="ff-input" value={current.currency} onChange={e => setCurrent(c => ({ ...c, currency: e.target.value }))} style={{ cursor: 'pointer' }}>
                 {['USD','EUR','GBP','CAD','AUD','NGN'].map(c => <option key={c} value={c}>{c}</option>)}
-              </select>],
-              ['Issue Date', <input key="d" className="ff-input" type="date" value={current.date} onChange={e => setCurrent(c => ({ ...c, date: e.target.value }))} />],
-              ['Due Date', <input key="dd" className="ff-input" type="date" value={current.dueDate} onChange={e => setCurrent(c => ({ ...c, dueDate: e.target.value }))} />],
-            ].map(([label, input]) => (
-              <div key={label} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                <label style={lbl}>{label}</label>
-                {input}
-              </div>
-            ))}
+              </select>
+            </div>
+            <div style={fieldWrap}><label style={lbl}>Issue Date</label><input className="ff-input" type="date" value={current.date} onChange={e => setCurrent(c => ({ ...c, date: e.target.value }))} /></div>
+            <div style={fieldWrap}><label style={lbl}>Due Date</label><input className="ff-input" type="date" value={current.dueDate} onChange={e => setCurrent(c => ({ ...c, dueDate: e.target.value }))} /></div>
           </div>
         </div>
 
         {/* From / To */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-          {[['from', 'From — You'], ['to', 'Bill To — Client']].map(([key, title]) => (
+        <div className="inv-form-grid-2">
+          {[['from','From — You'],['to','Bill To — Client']].map(([key, title]) => (
             <div key={key} style={card()}>
-              <p style={{ ...lbl, marginBottom: 16 }}>{title}</p>
+              <p style={{ ...lbl, marginBottom: 16, fontSize: 12 }}>{title}</p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
-                <input className="ff-input" placeholder="Full name or company" value={current[key].name}
-                  onChange={e => setCurrent(c => ({ ...c, [key]: { ...c[key], name: e.target.value } }))} />
-                <input className="ff-input" placeholder="Email address" value={current[key].email}
-                  onChange={e => setCurrent(c => ({ ...c, [key]: { ...c[key], email: e.target.value } }))} />
-                <textarea className="ff-textarea" placeholder="Address (optional)" rows={2} value={current[key].address}
-                  onChange={e => setCurrent(c => ({ ...c, [key]: { ...c[key], address: e.target.value } }))}
-                  style={{ minHeight: 52, resize: 'none', fontSize: 13 }} />
+                <input className="ff-input" placeholder="Full name or company" value={current[key].name} onChange={e => setCurrent(c => ({ ...c, [key]: { ...c[key], name: e.target.value } }))} />
+                <input className="ff-input" placeholder="Email address" value={current[key].email} onChange={e => setCurrent(c => ({ ...c, [key]: { ...c[key], email: e.target.value } }))} />
+                <input className="ff-input" placeholder="Phone (optional)" value={current[key].phone||''} onChange={e => setCurrent(c => ({ ...c, [key]: { ...c[key], phone: e.target.value } }))} />
+                <textarea className="ff-textarea" placeholder="Address (optional)" rows={2} value={current[key].address} onChange={e => setCurrent(c => ({ ...c, [key]: { ...c[key], address: e.target.value } }))} style={{ minHeight: 52, resize: 'none', fontSize: 14 }} />
               </div>
             </div>
           ))}
@@ -2862,57 +2925,55 @@ tr:last-child td{border-bottom:none}
 
         {/* Line items */}
         <div style={card()}>
-          <p style={{ ...lbl, marginBottom: 16 }}>Line Items</p>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 68px 108px 96px 28px', gap: 8, paddingBottom: 10, borderBottom: '1px solid var(--border)', marginBottom: 8 }}>
+          <p style={{ ...lbl, marginBottom: 16, fontSize: 12 }}>Line Items</p>
+          <div className="inv-items-header">
             {['Description','Qty','Rate','Amount',''].map((h, i) => (
-              <span key={i} style={{ ...lbl, fontSize: 10, textAlign: i >= 2 && i < 4 ? 'right' : 'left' }}>{h}</span>
+              <span key={i} style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-3)', letterSpacing: '0.07em', textTransform: 'uppercase', textAlign: i >= 2 && i < 4 ? 'right' : 'left' }}>{h}</span>
             ))}
           </div>
           {current.items.map(it => {
             const amt = (parseFloat(it.qty)||0)*(parseFloat(it.rate)||0);
             return (
-              <div key={it.id} style={{ display: 'grid', gridTemplateColumns: '1fr 68px 108px 96px 28px', gap: 8, alignItems: 'center', marginBottom: 8 }}>
-                <input className="ff-input" placeholder="e.g. Website design" value={it.description}
-                  onChange={e => updateItem(it.id, 'description', e.target.value)} style={{ fontSize: 13 }} />
-                <input className="ff-input" type="number" min="1" value={it.qty}
-                  onChange={e => updateItem(it.id, 'qty', e.target.value)} style={{ fontSize: 13, textAlign: 'center' }} />
-                <input className="ff-input" type="number" min="0" step="0.01" placeholder="0.00" value={it.rate}
-                  onChange={e => updateItem(it.id, 'rate', e.target.value)} style={{ fontSize: 13, textAlign: 'right' }} />
-                <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-1)', textAlign: 'right', letterSpacing: '-0.01em' }}>
-                  {fmt(amt, current.currency)}
-                </span>
-                <button onClick={() => removeItem(it.id)} disabled={current.items.length === 1}
-                  style={{ width: 26, height: 26, borderRadius: 6, background: 'var(--bg-2)', border: '1px solid var(--border)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-3)', opacity: current.items.length === 1 ? 0.2 : 1 }}>
-                  <X size={11} />
+              <div key={it.id} className="inv-items-grid" style={{ marginBottom: 8 }}>
+                <input className="ff-input" placeholder="Item description" value={it.description} onChange={e => updateItem(it.id,'description',e.target.value)} style={{ fontSize: 14 }} />
+                <input className="ff-input" type="number" min="1" value={it.qty} onChange={e => updateItem(it.id,'qty',e.target.value)} style={{ fontSize: 14, textAlign: 'center', padding: '10px 6px' }} />
+                <input className="ff-input" type="number" min="0" step="0.01" placeholder="0.00" value={it.rate} onChange={e => updateItem(it.id,'rate',e.target.value)} style={{ fontSize: 14, textAlign: 'right', padding: '10px 8px' }} />
+                <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-1)', textAlign: 'right', letterSpacing: '-0.01em' }}>{fmt(amt, current.currency)}</span>
+                <button onClick={() => removeItem(it.id)} disabled={current.items.length === 1} style={{ width: 30, height: 30, borderRadius: 8, background: 'var(--bg-2)', border: '1px solid var(--border)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-3)', opacity: current.items.length === 1 ? 0.2 : 1 }}>
+                  <X size={13} />
                 </button>
               </div>
             );
           })}
-          <button onClick={addItem} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 13, fontWeight: 600, color: 'var(--accent)', background: 'none', border: 'none', cursor: 'pointer', padding: '8px 0 0' }}>
-            <Plus size={13} />Add line item
+          <button onClick={addItem} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 14, fontWeight: 600, color: 'var(--accent)', background: 'none', border: 'none', cursor: 'pointer', padding: '8px 0 0', marginBottom: 16 }}>
+            <Plus size={16} />Add line item
           </button>
-          <div style={{ borderTop: '1px solid var(--border)', marginTop: 16, paddingTop: 16, display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 14 }}>
-            <span style={{ fontSize: 13, color: 'var(--text-3)', fontWeight: 500 }}>Total</span>
-            <span style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-1)', letterSpacing: '-0.03em' }}>
-              {fmt(subtotal(current), current.currency)}
-            </span>
+          {/* Subtotals */}
+          <div style={{ borderTop: '1px solid var(--border)', paddingTop: 16 }}>
+            <div className="inv-form-grid-2" style={{ gap: 10, marginBottom: 14 }}>
+              <div style={fieldWrap}><label style={lbl}>Tax %<span style={{ fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}> (optional)</span></label><input className="ff-input" type="number" min="0" max="100" placeholder="0" value={current.tax||''} onChange={e => setCurrent(c => ({ ...c, tax: e.target.value }))} /></div>
+              <div style={fieldWrap}><label style={lbl}>Discount %<span style={{ fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}> (optional)</span></label><input className="ff-input" type="number" min="0" max="100" placeholder="0" value={current.discount||''} onChange={e => setCurrent(c => ({ ...c, discount: e.target.value }))} /></div>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'flex-end' }}>
+              <div style={{ display: 'flex', gap: 24, fontSize: 14, color: 'var(--text-3)' }}><span>Subtotal</span><span style={{ fontWeight: 600, color: 'var(--text-2)', minWidth: 90, textAlign: 'right' }}>{fmt(subtotal(current), current.currency)}</span></div>
+              {parseFloat(current.tax) > 0 && <div style={{ display: 'flex', gap: 24, fontSize: 14, color: 'var(--text-3)' }}><span>Tax ({current.tax}%)</span><span style={{ fontWeight: 600, color: 'var(--text-2)', minWidth: 90, textAlign: 'right' }}>{fmt(taxAmt(current), current.currency)}</span></div>}
+              {parseFloat(current.discount) > 0 && <div style={{ display: 'flex', gap: 24, fontSize: 14, color: 'var(--text-3)' }}><span>Discount ({current.discount}%)</span><span style={{ fontWeight: 600, color: 'var(--text-2)', minWidth: 90, textAlign: 'right' }}>- {fmt(discountAmt(current), current.currency)}</span></div>}
+              <div style={{ display: 'flex', gap: 24, fontSize: 17, fontWeight: 800, color: 'var(--text-1)', letterSpacing: '-0.02em', borderTop: '1px solid var(--border)', paddingTop: 10, marginTop: 4 }}>
+                <span>Total</span><span style={{ minWidth: 90, textAlign: 'right' }}>{fmt(total(current), current.currency)}</span>
+              </div>
+            </div>
           </div>
         </div>
 
         {/* Notes */}
         <div style={card()}>
-          <p style={{ ...lbl, marginBottom: 14 }}>Notes
-            <span style={{ fontWeight: 400, textTransform: 'none', letterSpacing: 0, fontSize: 11, color: 'var(--text-3)', marginLeft: 6 }}>— optional</span>
-          </p>
-          <textarea className="ff-textarea" placeholder="Payment terms, bank details, thank you message..." rows={3}
-            value={current.notes} onChange={e => setCurrent(c => ({ ...c, notes: e.target.value }))}
-            style={{ minHeight: 72, resize: 'vertical' }} />
+          <label style={{ ...lbl, marginBottom: 10 }}>Notes &amp; Terms<span style={{ fontWeight: 400, textTransform: 'none', letterSpacing: 0, marginLeft: 6 }}>— optional</span></label>
+          <textarea className="ff-textarea" placeholder="Payment terms, bank details, thank you message..." rows={3} value={current.notes} onChange={e => setCurrent(c => ({ ...c, notes: e.target.value }))} style={{ minHeight: 80, resize: 'vertical' }} />
         </div>
 
-        {/* Actions */}
-        <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', paddingTop: 4 }}>
-          <BtnSecondary onClick={() => setView('list')}>Cancel</BtnSecondary>
-          <BtnPrimary onClick={saveInvoice}><Check size={13} />Save Invoice</BtnPrimary>
+        <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', flexWrap: 'wrap', paddingTop: 4 }}>
+          <Btn onClick={() => setView('list')}>Cancel</Btn>
+          <Btn primary onClick={saveInvoice}><Check size={18} />Save Invoice</Btn>
         </div>
       </div>
     </div>
@@ -2920,92 +2981,129 @@ tr:last-child td{border-bottom:none}
 
   /* ── PREVIEW ───────────────────────────────────────────────── */
   if (view === 'preview') {
-    const sub = subtotal(current);
+    const sub = subtotal(current), tax = taxAmt(current), disc = discountAmt(current), tot = total(current);
+    const hasTax = parseFloat(current.tax) > 0, hasDisc = parseFloat(current.discount) > 0;
     return (
       <div style={{ padding: '32px 0' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <button onClick={() => setView('list')} style={{ width: 34, height: 34, borderRadius: 9, background: 'var(--bg-2)', border: '1px solid var(--border)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-2)', flexShrink: 0 }}>
-              <ArrowRight size={14} style={{ transform: 'rotate(180deg)' }} />
-            </button>
+        <style>{`
+          .inv-preview-parties { display: grid; grid-template-columns: 1fr 1fr; }
+          .inv-preview-items-hdr { display: grid; grid-template-columns: 40px 1fr 100px 72px 100px; gap: 10px; }
+          .inv-preview-items-row { display: grid; grid-template-columns: 40px 1fr 100px 72px 100px; gap: 10px; }
+          @media (max-width: 640px) {
+            .inv-preview-parties { grid-template-columns: 1fr; }
+            .inv-preview-items-hdr { grid-template-columns: 32px 1fr 80px 50px 80px; gap: 6px; }
+            .inv-preview-items-row { grid-template-columns: 32px 1fr 80px 50px 80px; gap: 6px; }
+          }
+          @media (max-width: 480px) {
+            .inv-preview-items-hdr { display: none; }
+            .inv-preview-items-row { grid-template-columns: 1fr auto; gap: 8px; }
+            .inv-preview-items-row .hide-mobile { display: none; }
+          }
+        `}</style>
+
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24, gap: 12, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+            <BackBtn onClick={() => setView('list')} />
             <div>
               <h2 style={{ fontSize: 18, fontWeight: 700, letterSpacing: '-0.02em', color: 'var(--text-1)' }}>{current.number}</h2>
-              <p style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 2 }}>
-                {current.to.name && `${current.to.name} · `}Due {current.dueDate}
-              </p>
+              <p style={{ fontSize: 13, color: 'var(--text-3)', marginTop: 2 }}>{current.to.name && `${current.to.name} · `}Due {current.dueDate}</p>
             </div>
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
-            <BtnSecondary onClick={() => openEdit(current)}>Edit</BtnSecondary>
-            <BtnPrimary onClick={() => downloadPDF(current)}><ArrowRight size={13} />Download PDF</BtnPrimary>
+            <Btn onClick={() => openEdit(current)}>Edit</Btn>
+            <Btn primary onClick={() => downloadPDF(current)}><ArrowRight size={18} />Download PDF</Btn>
           </div>
         </div>
 
         {/* Invoice card */}
         <div style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 16, overflow: 'hidden' }}>
 
-          {/* Blue header */}
-          <div style={{ background: 'var(--accent)', padding: '30px 36px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <div>
-              <div style={{ fontSize: 20, fontWeight: 800, color: '#fff', letterSpacing: '-0.025em', marginBottom: 4 }}>
-                {current.from.name || 'Your Name'}
+          {/* Header band */}
+          <div style={{ background: 'var(--accent)', padding: '28px 32px', position: 'relative', overflow: 'hidden' }}>
+            <div style={{ position: 'absolute', top: 0, right: 0, width: 100, height: 100, background: 'rgba(255,255,255,.1)', borderRadius: '0 0 0 100%' }} />
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16 }}>
+              <div>
+                <div style={{ fontSize: 11, fontWeight: 800, color: 'rgba(255,255,255,.6)', letterSpacing: '0.14em', textTransform: 'uppercase', marginBottom: 6 }}>Invoice</div>
+                <div style={{ fontSize: 28, fontWeight: 900, color: '#fff', letterSpacing: '-0.04em', lineHeight: 1 }}>{current.number}</div>
               </div>
-              {current.from.email && <div style={{ fontSize: 13, color: 'rgba(255,255,255,.7)' }}>{current.from.email}</div>}
-            </div>
-            <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,.6)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 5 }}>Invoice</div>
-              <div style={{ fontSize: 24, fontWeight: 800, color: '#fff', letterSpacing: '-0.04em' }}>{current.number}</div>
-              <div style={{ fontSize: 12, color: 'rgba(255,255,255,.65)', marginTop: 5 }}>
-                Issued {current.date} · Due {current.dueDate}
+              <div style={{ textAlign: 'right' }}>
+                <div style={{ fontSize: 17, fontWeight: 700, color: '#fff', marginBottom: 4 }}>{current.from.name || 'Your Name'}</div>
+                {current.from.email && <div style={{ fontSize: 13, color: 'rgba(255,255,255,.7)' }}>{current.from.email}</div>}
+                <div style={{ fontSize: 12, color: 'rgba(255,255,255,.6)', marginTop: 6 }}>Issued {current.date} · Due {current.dueDate}</div>
               </div>
             </div>
           </div>
 
           {/* Parties */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', background: '#EFF6FF', borderBottom: '1px solid #DBEAFE' }}>
-            {[['From', current.from], ['Bill To', current.to]].map(([label, party], i) => (
-              <div key={label} style={{ padding: '22px 28px', borderRight: i === 0 ? '1px solid #DBEAFE' : 'none' }}>
-                <p style={{ fontSize: 10, fontWeight: 800, color: 'var(--accent)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 9 }}>{label}</p>
-                <p style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-1)', marginBottom: 3 }}>{party.name || '—'}</p>
+          <div className="inv-preview-parties" style={{ background: '#EFF6FF', borderBottom: '1px solid #DBEAFE' }}>
+            {[['Bill To', current.to], ['From', current.from]].map(([label, party], i) => (
+              <div key={label} style={{ padding: '20px 28px', borderRight: i === 0 ? '1px solid #DBEAFE' : 'none' }}>
+                <p style={{ fontSize: 10, fontWeight: 800, color: 'var(--accent)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 8 }}>{label}</p>
+                <p style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-1)', marginBottom: 2 }}>{party.name || '—'}</p>
                 {party.email && <p style={{ fontSize: 13, color: 'var(--text-3)' }}>{party.email}</p>}
-                {party.address && <p style={{ fontSize: 12, color: 'var(--text-3)', whiteSpace: 'pre-line', marginTop: 3, lineHeight: 1.6 }}>{party.address}</p>}
+                {party.phone && <p style={{ fontSize: 13, color: 'var(--text-3)' }}>{party.phone}</p>}
+                {party.address && <p style={{ fontSize: 13, color: 'var(--text-3)', whiteSpace: 'pre-line', marginTop: 3, lineHeight: 1.6 }}>{party.address}</p>}
               </div>
             ))}
           </div>
 
-          {/* Line items */}
+          {/* Items */}
           <div style={{ padding: '24px 28px' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 72px 110px 110px', gap: 12, paddingBottom: 11, borderBottom: '1px solid var(--border)', marginBottom: 4 }}>
-              {['Description','Qty','Rate','Amount'].map((h, i) => (
-                <span key={h} style={{ ...lbl, fontSize: 11, textAlign: i >= 2 ? 'right' : 'left' }}>{h}</span>
-              ))}
+            <div className="inv-preview-items-hdr" style={{ paddingBottom: 10, borderBottom: '2px solid var(--text-1)', marginBottom: 4 }}>
+              <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-3)', letterSpacing: '0.08em', textTransform: 'uppercase', textAlign: 'center' }}>No</span>
+              <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-3)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Item Description</span>
+              <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-3)', letterSpacing: '0.08em', textTransform: 'uppercase', textAlign: 'right' }}>Unit Price</span>
+              <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-3)', letterSpacing: '0.08em', textTransform: 'uppercase', textAlign: 'right' }}>Qty</span>
+              <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-3)', letterSpacing: '0.08em', textTransform: 'uppercase', textAlign: 'right' }}>Total</span>
             </div>
-            {current.items.map(it => {
+            {current.items.map((it, idx) => {
               const amt = (parseFloat(it.qty)||0)*(parseFloat(it.rate)||0);
               return (
-                <div key={it.id} style={{ display: 'grid', gridTemplateColumns: '1fr 72px 110px 110px', gap: 12, padding: '12px 0', borderBottom: '1px solid var(--border)' }}>
-                  <span style={{ fontSize: 14, color: 'var(--text-1)' }}>{it.description||'—'}</span>
-                  <span style={{ fontSize: 14, color: 'var(--text-2)', textAlign: 'right' }}>{it.qty}</span>
-                  <span style={{ fontSize: 14, color: 'var(--text-2)', textAlign: 'right' }}>{fmt(it.rate||0, current.currency)}</span>
-                  <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-1)', textAlign: 'right' }}>{fmt(amt, current.currency)}</span>
+                <div key={it.id} className="inv-preview-items-row" style={{ padding: '13px 0', borderBottom: '1px solid var(--border)' }}>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-3)', textAlign: 'center', paddingTop: 1 }}>{String(idx+1).padStart(2,'0')}.</span>
+                  <span style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-1)' }}>{it.description||'—'}</span>
+                  <span className="hide-mobile" style={{ fontSize: 14, color: 'var(--text-2)', textAlign: 'right' }}>{fmt(it.rate||0, current.currency)}</span>
+                  <span className="hide-mobile" style={{ fontSize: 14, color: 'var(--text-2)', textAlign: 'right' }}>{it.qty}</span>
+                  <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-1)', textAlign: 'right' }}>{fmt(amt, current.currency)}</span>
                 </div>
               );
             })}
 
-            {/* Total */}
+            {/* Totals */}
             <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: 20 }}>
-              <div style={{ background: 'var(--accent)', borderRadius: 11, padding: '16px 28px', display: 'inline-flex', alignItems: 'center', gap: 28 }}>
-                <span style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,.75)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Total Due</span>
-                <span style={{ fontSize: 24, fontWeight: 800, color: '#fff', letterSpacing: '-0.03em' }}>{fmt(sub, current.currency)}</span>
+              <div style={{ minWidth: 260 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', fontSize: 14, color: 'var(--text-3)', borderBottom: '1px solid var(--border)' }}>
+                  <span>Sub-Total</span><span style={{ fontWeight: 600, color: 'var(--text-2)' }}>{fmt(sub, current.currency)}</span>
+                </div>
+                {hasTax && <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', fontSize: 14, color: 'var(--text-3)', borderBottom: '1px solid var(--border)' }}>
+                  <span>Tax ({current.tax}%)</span><span style={{ fontWeight: 600, color: 'var(--text-2)' }}>{fmt(tax, current.currency)}</span>
+                </div>}
+                {hasDisc && <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', fontSize: 14, color: 'var(--text-3)', borderBottom: '1px solid var(--border)' }}>
+                  <span>Discount ({current.discount}%)</span><span style={{ fontWeight: 600, color: 'var(--text-2)' }}>- {fmt(disc, current.currency)}</span>
+                </div>}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 20px', background: 'var(--text-1)', borderRadius: 10, marginTop: 10 }}>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,.7)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Total Due</span>
+                  <span style={{ fontSize: 22, fontWeight: 900, color: '#fff', letterSpacing: '-0.03em' }}>{fmt(tot, current.currency)}</span>
+                </div>
               </div>
             </div>
 
+            {/* Notes + Thank you */}
             {current.notes && (
-              <div style={{ marginTop: 22, padding: '16px 20px', background: 'var(--bg-2)', borderRadius: 10, border: '1px solid var(--border)' }}>
-                <p style={{ ...lbl, fontSize: 10, marginBottom: 8 }}>Notes</p>
+              <div style={{ marginTop: 24, padding: '16px 20px', background: 'var(--bg-2)', borderRadius: 10, border: '1px solid var(--border)' }}>
+                <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-3)', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 8 }}>Terms &amp; Notes</p>
                 <p style={{ fontSize: 14, color: 'var(--text-2)', lineHeight: 1.7, whiteSpace: 'pre-line' }}>{current.notes}</p>
               </div>
             )}
+            <div style={{ marginTop: 28, paddingTop: 20, borderTop: '1px solid var(--border)' }}>
+              <p style={{ fontSize: 24, fontWeight: 900, color: 'var(--text-1)', letterSpacing: '-0.03em' }}>Thank You!</p>
+              {(current.from.phone || current.from.email) && (
+                <div style={{ display: 'flex', gap: 24, marginTop: 10, flexWrap: 'wrap' }}>
+                  {current.from.phone && <span style={{ fontSize: 13, color: 'var(--text-3)' }}><strong style={{ color: 'var(--text-2)' }}>Tel:</strong> {current.from.phone}</span>}
+                  {current.from.email && <span style={{ fontSize: 13, color: 'var(--text-3)' }}><strong style={{ color: 'var(--text-2)' }}>Mail:</strong> {current.from.email}</span>}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
