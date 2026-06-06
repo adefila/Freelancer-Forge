@@ -1488,7 +1488,7 @@ const CSS = `
 .ff-root-inner {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 48px 32px 96px;
+  padding: 48px 32px 48px;
 }
 
 .ff-topbar {
@@ -2802,7 +2802,7 @@ td:nth-child(3),td:nth-child(4),td:nth-child(5){text-align:right}
 
   /* ── LIST ──────────────────────────────────────────────────── */
   if (view === 'list') return (
-    <div style={{ padding: '32px 0' }}>
+    <div style={{ paddingTop: 28, paddingBottom: 48 }}>
       <style>{`
         .inv-list-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; gap: 16px; flex-wrap: wrap; }
         .inv-row { display: flex; align-items: center; gap: 14px; padding: 16px 18px; background: var(--bg); border: 1px solid var(--border); border-radius: 13px; cursor: pointer; transition: border-color .15s; }
@@ -2869,7 +2869,7 @@ td:nth-child(3),td:nth-child(4),td:nth-child(5){text-align:right}
 
   /* ── CREATE / EDIT ─────────────────────────────────────────── */
   if (view === 'create') return (
-    <div style={{ padding: '32px 0' }}>
+    <div style={{ paddingTop: 28, paddingBottom: 48 }}>
       <style>{`
         .inv-form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .inv-items-grid { display: grid; grid-template-columns: 1fr 72px 110px 100px 32px; gap: 8px; align-items: center; }
@@ -2988,7 +2988,7 @@ td:nth-child(3),td:nth-child(4),td:nth-child(5){text-align:right}
     const sub = subtotal(current), tax = taxAmt(current), disc = discountAmt(current), tot = total(current);
     const hasTax = parseFloat(current.tax) > 0, hasDisc = parseFloat(current.discount) > 0;
     return (
-      <div style={{ padding: '32px 0' }}>
+      <div style={{ paddingTop: 28, paddingBottom: 48 }}>
         <style>{`
           .inv-preview-parties { display: grid; grid-template-columns: 1fr 1fr; }
           .inv-preview-items-hdr { display: grid; grid-template-columns: 40px 1fr 100px 72px 100px; gap: 10px; }
