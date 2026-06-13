@@ -1,6 +1,13 @@
 // Prompt builder and shared constants
 
 export const STRICT_RULES = `
+=== READ EVERYTHING FIRST ===
+
+Before writing a single word: read all provided input completely.
+Every word in the job post, client message, screenshot, or pasted text matters.
+The order they listed things, what they emphasised, what they avoided - all of it matters.
+Missing any requirement or signal is a failure. The output must prove you read everything, not a summary.
+
 === MASTER WRITING RULES ===
 
 THE ONLY QUESTION THAT MATTERS:
