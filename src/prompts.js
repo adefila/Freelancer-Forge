@@ -1,6 +1,13 @@
 // Prompt builder and shared constants
 
 export const STRICT_RULES = `
+=== CONFIDENCE SCORE PHILOSOPHY ===
+
+The confidenceScore is a closing tool, not a modesty signal.
+Score 88-99 when: output is specific to this input only, proof mirrors their situation directly, tone matches how they wrote, every requirement addressed, CTA references something they said.
+Score 70-87 when: post is vague, portfolio has no direct match, difficult client signals (burned before, low budget vs huge scope), highly competitive field.
+NEVER default to 78. That number means nothing. Every score must be earned by the specific input in front of you.
+
 === READ EVERYTHING FIRST ===
 
 Before writing a single word: read all provided input completely.
@@ -126,8 +133,8 @@ Return ONLY valid JSON:
   "whatChanged": "1-2 sentences. What you changed and exactly why.",
   "clientPsychology": {
     "buyerType": "5-8 words. What kind of client this is.",
-    "confidenceScore": 85,
-    "confidenceRationale": "1 sentence. Where the relationship stands and what the freelancer needs to watch."
+    "confidenceScore": <score 70-99 based on: client warmth, urgency signals, whether they initiated, specificity of their ask, tone of their message>,
+    "confidenceRationale": "1 sentence. What specifically in this message raises or lowers confidence, and what to watch to protect the deal."
   }
 }`;
   }
@@ -173,8 +180,8 @@ Return ONLY valid JSON:
   "clientPsychology": {
     "buyerType": "5-8 words.",
     "budgetRange": "Realistic range based on signals.",
-    "confidenceScore": 72,
-    "confidenceRationale": "1 sentence. Likelihood of reply and why."
+    "confidenceScore": <score 65-95 based on: how targeted is the observation, how specific is the proof, how easy is the ask, how relevant is the match>,
+    "confidenceRationale": "1 sentence. What makes this DM likely to get a reply, and the one thing that could kill it."
   }
 }`;
   }
@@ -225,8 +232,8 @@ Return ONLY valid JSON:
   "clientPsychology": {
     "buyerType": "5-8 words.",
     "budgetRange": "Realistic range.",
-    "confidenceScore": 68,
-    "confidenceRationale": "1 sentence. What makes this worth replying to."
+    "confidenceScore": <score 65-95 based on: specificity of subject, relevance of proof, frictionlessness of the ask, how well it matches their situation>,
+    "confidenceRationale": "1 sentence. What makes this email stand out from what they normally get, and the risk."
   }
 }`;
   }
@@ -270,8 +277,8 @@ Return ONLY valid JSON:
   "alternativeAngle": "1 sentence. If this doesn't land, what to try next.",
   "clientPsychology": {
     "buyerType": "5-8 words.",
-    "confidenceScore": 60,
-    "confidenceRationale": "1 sentence. What silence probably means and the actual likelihood of revival."
+    "confidenceScore": <score 50-90 based on: how warm was the last interaction, how long ago, what type of silence, what follow-up type was chosen>,
+    "confidenceRationale": "1 sentence. Honest read of why they went quiet and the real likelihood this reopens."
   }
 }`;
   }
@@ -333,8 +340,8 @@ Return ONLY valid JSON:
   "clientPsychology": {
     "buyerType": "5-8 words. The type of hiring manager this is.",
     "budgetRange": "Estimated salary range based on role and company signals.",
-    "confidenceScore": 80,
-    "confidenceRationale": "1 sentence. Strongest fit signal and the one honest gap."
+    "confidenceScore": <score 70-99 based on: how closely the applicant's background matches the role challenge, how specific the proof is, how strong the differentiation>,
+    "confidenceRationale": "1 sentence. The single strongest alignment that makes this stand out, and the one gap that could cost the interview."
   }
 }`;
   }
@@ -451,8 +458,8 @@ Return ONLY valid JSON. No markdown. No preamble:
   "clientPsychology": {
     "buyerType": "5-8 words. The type of buyer this person is.",
     "budgetRange": "Realistic range based on all signals.",
-    "confidenceScore": 78,
-    "confidenceRationale": "1 sentence. The single strongest alignment between what you bring and what they need - and the one honest gap."
+    "confidenceScore": <score 70-99. Score HIGH (90+) when: the hook names a specific pain they signalled, proof directly matches their situation, why-me is earned not generic, CTA references something specific they said. Score LOWER only when the match is genuinely weak or the post is vague. Default assumption: if you read the post carefully and wrote specifically for it, the score should be 88-96>,
+    "confidenceRationale": "1 sentence. The single most specific thing that makes this proposal stand out from the other 40, and one honest thing to watch."
   }
 }
 
