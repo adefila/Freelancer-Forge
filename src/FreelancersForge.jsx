@@ -239,15 +239,15 @@ const CSS = `
   --t-slow: 380ms cubic-bezier(0.4, 0, 0.2, 1);
 
   /* LIGHT MODE */
-  --bg: #f9f8f7;
-  --bg-elev-1: #f3f2f0;
-  --bg-elev-2: #ebe9e7;
+  --bg: #ffffff;
+  --bg-elev-1: #f7f7f8;
+  --bg-elev-2: #f0f0f2;
   --bg-input: #ffffff;
   --text-1: #0a0a0a;
   --text-2: #4a4a4f;
   --text-3: #6b6b70;
-  --border: rgba(0, 0, 0, 0.09);
-  --border-strong: rgba(0, 0, 0, 0.14);
+  --border: rgba(0, 0, 0, 0.08);
+  --border-strong: rgba(0, 0, 0, 0.13);
   --accent: #2563eb;
   --accent-hover: #1d4ed8;
   --accent-active: #1e40af;
@@ -277,7 +277,7 @@ const CSS = `
 }
 
 .ff-root.dark {
-  --bg: #111113;
+  --bg: #0e0e10;
   --bg-elev-1: #1c1c20;
   --bg-elev-2: #26262b;
   --bg-input: #18181c;
@@ -358,7 +358,7 @@ const CSS = `
   padding: 12px 20px;
   border: none;
   cursor: pointer;
-  border-radius: var(--r-md);
+  border-radius: 999px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -540,7 +540,7 @@ const CSS = `
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
-  border-radius: var(--r-md);
+  border-radius: 999px;
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -636,11 +636,11 @@ const CSS = `
   border-bottom: 2px solid transparent;
   color: var(--text-3);
   font-family: var(--font-text);
-  font-size: 14px;
+  font-size: 13.5px;
   font-weight: 500;
-  letter-spacing: -0.01em;
-  padding: 13px 0;
-  margin-right: 24px;
+  letter-spacing: -0.005em;
+  padding: 14px 0;
+  margin-right: 28px;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -683,7 +683,7 @@ const CSS = `
   letter-spacing: -0.005em;
   padding: 9px 14px;
   cursor: pointer;
-  border-radius: var(--r-md);
+  border-radius: 999px;
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -750,8 +750,8 @@ const CSS = `
   border: 1px solid var(--border);
   border-radius: var(--r-lg);
   padding: 28px;
-  box-shadow: var(--sh-1);
-  transition: background-color var(--t-slow), border-color var(--t-slow), box-shadow var(--t-slow);
+  box-shadow: none;
+  transition: background-color var(--t-slow), border-color var(--t-slow);
 }
 .ff-card-elevated {
   background-color: var(--bg);
@@ -1017,9 +1017,9 @@ const CSS = `
   white-space: pre-wrap;
   font-family: var(--font-text);
   font-size: 15px;
-  line-height: 1.65;
+  line-height: 1.7;
   color: var(--text-1);
-  letter-spacing: -0.005em;
+  letter-spacing: -0.008em;
 }
 
 .ff-subject-card {
@@ -1495,19 +1495,19 @@ const CSS = `
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 52px;
+  margin-bottom: 44px;
   gap: 12px;
 }
 
 .ff-hero {
-  margin-bottom: 60px;
+  margin-bottom: 48px;
 }
 
 .ff-hero-heading {
-  font-size: clamp(34px, 5.6vw, 68px);
-  line-height: 1.02;
-  font-weight: 500;
-  letter-spacing: -0.038em;
+  font-size: clamp(32px, 5vw, 62px);
+  line-height: 1.04;
+  font-weight: 600;
+  letter-spacing: -0.04em;
   max-width: 100%;
   margin-bottom: 20px;
 }
@@ -1522,7 +1522,7 @@ const CSS = `
 }
 
 .ff-tabs-nav {
-  margin-bottom: 48px;
+  margin-bottom: 40px;
 }
 
 .ff-cv-selector {
@@ -3122,7 +3122,9 @@ export default function FreelancersForge() {
   const [systemTheme, setSystemTheme] = useState(getSystemTheme);
   const [themeMenuOpen, setThemeMenuOpen] = useState(false);
   const [tab, setTab] = useState('optimize');
-  const [preloading, setPreloading] = useState(true);
+  const [preloading, setPreloading] = useState(() => {
+    try { return !localStorage.getItem('ff_visited'); } catch { return true; }
+  });
   const themeMenuRef = useRef(null);
 
   // Resolved theme: 'light' or 'dark'
@@ -3156,7 +3158,10 @@ export default function FreelancersForge() {
     <div className={`ff-root ${theme}`}>
       <style>{CSS}</style>
 
-      {preloading && <Preloader onDone={() => setPreloading(false)} theme={theme} />}
+      {preloading && <Preloader onDone={() => {
+        setPreloading(false);
+        try { localStorage.setItem('ff_visited', '1'); } catch {}
+      }} theme={theme} />}
 
       <div className="ff-gradient-bg" aria-hidden="true"></div>
       <div className="ff-root-inner" style={{ position: 'relative', zIndex: 1 }}>
@@ -3228,10 +3233,10 @@ export default function FreelancersForge() {
         <div className="ff-hero">
           <h1 className="ff-display ff-text-1 ff-hero-heading">
             Your freelance edge.<br />
-            <span style={{ color: 'var(--accent)', fontWeight: 500 }}>Built to win clients.</span>
+            <span style={{ color: 'var(--accent)' }}>Built to win clients.</span>
           </h1>
-          <p className="ff-text-2 ff-hero-sub">
-            Audit your pages, close more clients, track your pipeline, and get expert freelance advice — all in one place.
+          <p className="ff-text-2 ff-hero-sub" style={{ maxWidth: 500 }}>
+            Audit any page. Write proposals that get clicked. Track your pipeline. Get tactical freelance advice — no account needed.
           </p>
         </div>
 
