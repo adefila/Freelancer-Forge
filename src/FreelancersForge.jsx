@@ -205,7 +205,7 @@ const SUGGESTED_PROMPTS = [
   { label: 'What should I charge?', text: 'I do UX/product design, 3 years experience, mostly SaaS clients. What hourly rate should I be at and how do I justify it to clients who push back?' },
   { label: 'Client ghosted after proposal', text: 'Sent a proposal 5 days ago. Client said they loved it and would get back to me. Radio silence since. What do I say, and when?' },
   { label: 'Lowball response', text: 'Client came back offering 60% of my quote. They seem serious but say budget is tight. Give me the exact reply to send.' },
-  { label: 'Raise rates on retainer', text: 'I have 3 clients I've had for 9 months and I've been undercharging. How do I raise rates 40% without losing them?' },
+  { label: 'Raise rates on retainer', text: 'I have 3 clients I\'ve had for 9 months and I\'ve been undercharging. How do I raise rates 40% without losing them?' },
   { label: 'Dry pipeline fix', text: 'No new client inquiry in 6 weeks. My work is strong but nothing is coming in. What do I actually do this week?' },
   { label: 'Scope creep script', text: 'Give me a script to push back on a client who keeps adding work outside the original scope.' },
 ];
