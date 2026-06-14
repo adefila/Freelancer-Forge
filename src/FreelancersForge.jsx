@@ -1723,13 +1723,14 @@ const CSS = `
   display: grid;
   grid-template-columns: 220px 1fr;
   gap: 0;
-  height: calc(100vh - 320px);
-  min-height: 500px;
-  max-height: 780px;
+  height: calc(100vh - 300px);
+  min-height: 520px;
+  max-height: 800px;
   background: var(--bg);
   border: 1px solid var(--border);
   border-radius: 16px;
   overflow: hidden;
+  position: relative;
 }
 
 /* ── Sidebar ─────────────────────────────────────────────────────────── */
@@ -1740,6 +1741,8 @@ const CSS = `
   flex-direction: column;
   background: var(--bg-elev-1);
   flex-shrink: 0;
+  height: 100%;
+  overflow: hidden;
 }
 .ff-chat-sidebar-head {
   display: flex;
@@ -1849,16 +1852,20 @@ const CSS = `
   display: flex;
   flex-direction: column;
   min-width: 0;
+  height: 100%;
+  overflow: hidden;
   background: var(--bg);
 }
 .ff-chat-messages {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
   padding: 24px 24px 12px;
   display: flex;
   flex-direction: column;
   gap: 18px;
   scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
 }
 .ff-chat-messages::-webkit-scrollbar { width: 4px; }
 .ff-chat-messages::-webkit-scrollbar-track { background: transparent; }
@@ -3456,10 +3463,12 @@ function AskAnythingTab() {
   const messages = convos.find(c => c.id === activeId)?.messages || [];
 
   useEffect(() => {
-    // Scroll only within the chat container — never scrollIntoView which scrolls the page
-    if (!messagesContainerRef.current || messages.length === 0) return;
+    if (!messagesContainerRef.current) return;
     const el = messagesContainerRef.current;
-    el.scrollTop = el.scrollHeight;
+    // Use rAF so DOM has painted before we measure scrollHeight
+    requestAnimationFrame(() => {
+      el.scrollTop = el.scrollHeight;
+    });
   }, [messages, loading]);
 
   useEffect(() => {
@@ -3694,7 +3703,7 @@ Write more than needed. Saying less, more precisely, is almost always better.`,
       </div>
 
       {/* Main layout */}
-      <div className="ff-ask-layout" style={{ position: 'relative' }}>
+      <div className="ff-ask-layout">
 
         {/* Sidebar (desktop only) */}
         <div className="ff-chat-sidebar">
