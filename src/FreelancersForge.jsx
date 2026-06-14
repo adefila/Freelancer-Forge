@@ -218,6 +218,7 @@ const CSS = `
 @import url('https://rsms.me/inter/inter.css');
 
 .ff-root {
+  overflow-x: hidden;
   --font-display: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   --font-text: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
   --font-mono: 'SF Mono', 'JetBrains Mono', ui-monospace, monospace;
@@ -1489,6 +1490,8 @@ const CSS = `
   max-width: 1280px;
   margin: 0 auto;
   padding: 48px 32px 48px;
+  min-width: 0;
+  overflow-x: hidden;
 }
 
 .ff-topbar {
@@ -1642,38 +1645,39 @@ const CSS = `
 /* Mobile overrides */
 @media (max-width: 768px) {
   .ff-root-inner {
-    padding: 28px 20px 56px;
+    padding: 24px 16px 56px;
   }
 
   .ff-topbar {
-    margin-bottom: 24px;
+    margin-bottom: 20px;
   }
 
   .ff-hero {
-    margin-bottom: 28px;
+    margin-bottom: 24px;
   }
 
   .ff-tabs-nav {
-    margin-bottom: 24px;
+    margin-bottom: 20px;
+    overflow-x: auto;
   }
 
   .ff-2col {
     grid-template-columns: 1fr;
-    gap: 16px;
-    margin-bottom: 24px;
+    gap: 14px;
+    margin-bottom: 20px;
   }
 
   .ff-2col-stack {
     grid-template-columns: 1fr;
-    gap: 32px;
+    gap: 28px;
   }
 
   .ff-pipeline-table-header {
-    grid-template-columns: 80px 1fr 100px 28px;
+    grid-template-columns: 76px 1fr 96px 28px;
   }
 
   .ff-pipeline-row-grid {
-    grid-template-columns: 80px 1fr 100px 28px;
+    grid-template-columns: 76px 1fr 96px 28px;
   }
 
   .ff-pipeline-col-type,
@@ -1682,31 +1686,83 @@ const CSS = `
   }
 
   .ff-card {
-    padding: 18px 16px;
+    padding: 16px 14px;
   }
 
   .ff-optimize-cta {
-    padding: 20px 18px;
+    padding: 18px 16px;
   }
-
 
   .ff-dropdown-menu {
-    min-width: 260px;
+    min-width: min(260px, calc(100vw - 32px));
+    max-width: calc(100vw - 32px);
   }
+
+  /* Prevent inputs from overflowing */
+  .ff-input, .ff-textarea {
+    max-width: 100%;
+    min-width: 0;
+    width: 100%;
+  }
+
+  /* Fix portfolio form on mobile */
+  .ff-portfolio-form {
+    width: 100%;
+    overflow: hidden;
+  }
+
+  /* Fix grid children from overflowing */
+  .ff-detail-grid > * {
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  /* Fix output text */
+  .ff-output-text {
+    font-size: 14px;
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+
+  .ff-subheading { font-size: 17px; }
+
+  /* Btn full-width on very small screens */
+  .ff-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Score card grid on mobile */
+  .space-y-5 > * + * { margin-top: 14px !important; }
 }
 
 @media (max-width: 480px) {
+  .ff-root-inner {
+    padding: 20px 14px 48px;
+  }
+
   .ff-hero-heading {
-    font-size: 28px;
+    font-size: 26px;
   }
 
   .ff-2col-stack {
-    gap: 28px;
+    gap: 24px;
   }
 
-
   .ff-modal {
-    border-radius: 16px;
+    border-radius: 14px;
+  }
+
+  /* Keep buttons from being too small */
+  .ff-btn {
+    font-size: 14px;
+    padding: 10px 16px;
+  }
+
+  /* Tab labels shorter on tiny screens */
+  .ff-tab {
+    font-size: 12.5px;
+    margin-right: 18px;
   }
 }
 
@@ -5043,31 +5099,38 @@ function CloseTab() {
 
   return (
     <>
-      {/* Profile bar */}
-      <div style={{ display:'flex', alignItems:'center', justifyContent:'flex-end', marginBottom:12 }}>
-        <button onClick={() => setProfileOpen(p => !p)} style={{ display:'inline-flex', alignItems:'center', gap:7, height:34, padding:'0 14px', background: profile.name ? 'var(--accent-bg-soft)' : 'var(--bg-2)', color: profile.name ? 'var(--accent)' : 'var(--text-2)', border: profile.name ? '1px solid var(--accent-border-soft)' : '1px solid var(--border)', borderRadius:999, fontSize:12.5, fontWeight:600, cursor:'pointer', letterSpacing:'-0.01em', flexShrink:0, fontFamily:'var(--font-text)' }}>
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-          {profile.name ? `${profile.name} · ${profile.niche||'No niche set'}` : 'Set my profile — auto-fills every prompt'}
+      {/* Profile strip */}
+      <div style={{ display:'flex', alignItems:'stretch', gap:0, background:'var(--bg-elev-1)', border:'1px solid var(--border)', borderRadius:12, marginBottom:20, overflow:'hidden' }}>
+        <div style={{ display:'flex', alignItems:'center', gap:10, padding:'10px 14px', flex:1, minWidth:0 }}>
+          <div style={{ width:30, height:30, borderRadius:999, background: profile.name ? 'var(--accent)' : 'var(--bg-elev-2)', border:'1px solid var(--border)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={profile.name ? '#fff' : 'var(--text-3)'} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+          </div>
+          {profile.name ? (
+            <div style={{ minWidth:0 }}>
+              <p style={{ fontSize:13, fontWeight:700, color:'var(--text-1)', letterSpacing:'-0.01em', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{profile.name}</p>
+              <p style={{ fontSize:11.5, color:'var(--text-3)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{profile.niche || 'No niche set'}{profile.results ? ` · ${profile.results.slice(0,40)}…` : ''}</p>
+            </div>
+          ) : (
+            <p style={{ fontSize:13, color:'var(--text-3)', letterSpacing:'-0.005em' }}>Set your profile — auto-fills every output</p>
+          )}
+        </div>
+        <button onClick={() => setProfileOpen(p => !p)} style={{ display:'flex', alignItems:'center', gap:5, padding:'0 16px', background:'none', border:'none', borderLeft:'1px solid var(--border)', cursor:'pointer', color:'var(--text-2)', fontSize:12.5, fontWeight:600, letterSpacing:'-0.01em', fontFamily:'var(--font-text)', whiteSpace:'nowrap', flexShrink:0 }}>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity:.6 }}>{profileOpen ? <path d="M18 15l-6-6-6 6"/> : <path d="M6 9l6 6 6-6"/>}</svg>
+          {profileOpen ? 'Done' : 'Edit'}
         </button>
       </div>
       {profileOpen && (
-        <div style={{ background:'var(--bg)', border:'1px solid var(--border)', borderRadius:14, padding:'18px 20px', marginBottom:20 }}>
-          <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:14 }}>
-            <p style={{ fontSize:13, fontWeight:700, color:'var(--text-1)' }}>My Profile <span style={{ fontWeight:400, color:'var(--text-3)', fontSize:12 }}>— injected silently into every proposal, DM, email, cover letter</span></p>
-            <button onClick={() => setProfileOpen(false)} style={{ background:'none', border:'none', cursor:'pointer', color:'var(--text-3)', padding:2, display:'flex' }}><X size={14}/></button>
-          </div>
+        <div style={{ background:'var(--bg)', border:'1px solid var(--border)', borderRadius:12, padding:'16px 18px', marginBottom:16, marginTop:-12 }}>
           <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10 }}>
-            {[['Your name', 'name', 'e.g. Adefilasaur', false], ['Your niche', 'niche', 'e.g. Framer developer for SaaS', false], ['Key result to reference', 'results', 'e.g. 31% lift in demo-to-close for a fintech SaaS', true]].map(([label, key, ph, wide]) => (
-              <div key={key} style={{ display:'flex', flexDirection:'column', gap:5, gridColumn: wide ? 'span 2' : 'auto' }}>
+            {[['Name', 'name', 'Your name'], ['Niche', 'niche', 'e.g. Framer dev for SaaS']].map(([label, key, ph]) => (
+              <div key={key} style={{ display:'flex', flexDirection:'column', gap:5 }}>
                 <label style={{ fontSize:10.5, fontWeight:700, color:'var(--text-3)', letterSpacing:'.07em', textTransform:'uppercase' }}>{label}</label>
                 <input className="ff-input" placeholder={ph} value={profile[key]||''} onChange={e => saveProfileLocal({...profile, [key]: e.target.value})} style={{ fontSize:13.5 }}/>
               </div>
             ))}
-            <div style={{ display:'flex', flexDirection:'column', gap:5 }}>
-              <label style={{ fontSize:10.5, fontWeight:700, color:'var(--text-3)', letterSpacing:'.07em', textTransform:'uppercase' }}>Default tone</label>
-              <select className="ff-input" value={profile.defaultTone||'Auto'} onChange={e => saveProfileLocal({...profile, defaultTone:e.target.value})} style={{ cursor:'pointer', fontSize:13.5 }}>
-                {['Auto','Direct','Warm','Sharp','Persuasive','Casual','Bold','Witty','Empathetic','Authoritative'].map(t => <option key={t}>{t}</option>)}
-              </select>
+            <div style={{ display:'flex', flexDirection:'column', gap:5, gridColumn:'span 2' }}>
+              <label style={{ fontSize:10.5, fontWeight:700, color:'var(--text-3)', letterSpacing:'.07em', textTransform:'uppercase' }}>Key result to reference</label>
+              <input className="ff-input" placeholder="e.g. 31% lift in demo-to-close for a fintech SaaS" value={profile.results||''} onChange={e => saveProfileLocal({...profile, results: e.target.value})} style={{ fontSize:13.5 }}/>
             </div>
           </div>
         </div>
@@ -6447,32 +6510,6 @@ Return ONLY valid JSON:
               <p className="ff-output-text" onClick={selectAllText} style={{ cursor:'text' }}>{proposalText}</p>
             </div>
           )}
-        </div>
-      )}
-
-      {/* Tone Switcher */}
-      {proposalText && (
-        <div className="ff-fadeup" style={{ animationDelay:'75ms' }}>
-          <div style={{ display:'flex', alignItems:'center', gap:8, flexWrap:'wrap' }}>
-            <span style={{ fontSize:11.5, fontWeight:600, color:'var(--text-3)', letterSpacing:'.02em', flexShrink:0 }}>Regenerate as:</span>
-            {[
-              { label:'⚡ Sharper', instruction:'Make every sentence more direct and punchy. Cut anything that does not add to the argument. No softening language.' },
-              { label:'🔥 Bolder', instruction:'Make stronger, more confident claims. Take a clearer position. Sound like someone who has done this 100 times.' },
-              { label:'💬 More human', instruction:'Sound more human and less like a proposal template. Write how you would talk to this client at a coffee meeting.' },
-              { label:'📊 More proof', instruction:'Strengthen the proof section with more specific evidence and sharper numbers. Make the results feel undeniable.' },
-              { label:'✂️ Shorter', instruction:'Cut this proposal by 30%. Remove every sentence that does not earn its place. Same impact, fewer words.' },
-            ].map(({ label, instruction }) => (
-              <button key={label} onClick={() => {
-                const el = document.querySelector('[data-regen-input]');
-                if (el) { el.value = instruction; el.dispatchEvent(new Event('change', { bubbles:true })); }
-                window._forgeRegenInstruction = instruction;
-              }} style={{ display:'inline-flex', alignItems:'center', gap:5, height:30, padding:'0 12px', background:'var(--bg)', border:'1px solid var(--border)', borderRadius:999, fontSize:12.5, fontWeight:500, color:'var(--text-2)', cursor:'pointer', letterSpacing:'-0.005em', transition:'border-color .15s, color .15s, background .15s', fontFamily:'var(--font-text)', whiteSpace:'nowrap' }}
-                onMouseEnter={e => { e.currentTarget.style.borderColor='var(--accent)'; e.currentTarget.style.color='var(--accent)'; e.currentTarget.style.background='var(--accent-bg-soft)'; }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor='var(--border)'; e.currentTarget.style.color='var(--text-2)'; e.currentTarget.style.background='var(--bg)'; }}>
-                {label}
-              </button>
-            ))}
-          </div>
         </div>
       )}
 
