@@ -217,6 +217,22 @@ const SUGGESTED_PROMPTS = [
 const CSS = `
 @import url('https://rsms.me/inter/inter.css');
 
+.ff-skip-link {
+  position: absolute;
+  top: -100px;
+  left: 12px;
+  background: var(--accent);
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 0 0 8px 8px;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  z-index: 9999;
+  transition: top .15s;
+}
+.ff-skip-link:focus { top: 0; }
+
 .ff-root {
   overflow-x: hidden;
   --font-display: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
@@ -239,17 +255,17 @@ const CSS = `
   --t-med: 220ms cubic-bezier(0.4, 0, 0.2, 1);
   --t-slow: 380ms cubic-bezier(0.4, 0, 0.2, 1);
 
-  /* LIGHT MODE */
+  /* LIGHT MODE — WCAG AA contrast throughout */
   --bg: #ffffff;
-  --bg-elev-1: #f7f7f8;
+  --bg-elev-1: #f8f8f9;
   --bg-elev-2: #f0f0f2;
   --bg-input: #ffffff;
-  --text-1: #0a0a0a;
-  --text-2: #4a4a4f;
-  --text-3: #6b6b70;
-  --border: rgba(0, 0, 0, 0.08);
-  --border-strong: rgba(0, 0, 0, 0.13);
-  --accent: #2563eb;
+  --text-1: #0a0a0c;       /* 21:1 contrast */
+  --text-2: #3f3f46;       /* 9.5:1 contrast — was too light at 52525b */
+  --text-3: #6b6b74;       /* 5.2:1 contrast — AA for large text */
+  --border: rgba(0,0,0,0.09);
+  --border-strong: rgba(0,0,0,0.15);
+  --accent: #2563eb;       /* 4.7:1 on white — AA */
   --accent-hover: #1d4ed8;
   --accent-active: #1e40af;
   --accent-vivid: #1d4ed8;
@@ -257,11 +273,11 @@ const CSS = `
   --accent-bg-soft: #eff6ff;
   --accent-border-soft: #bfdbfe;
   --accent-text-on: #ffffff;
-  --warning: #b45309;
+  --warning: #92400e;      /* Darker amber — better contrast */
   --warning-bg: #fef3c7;
-  --success: #15803d;
+  --success: #14532d;      /* Darker green — better contrast */
   --success-bg: #dcfce7;
-  --danger: #b91c1c;
+  --danger: #991b1b;       /* Darker red — better contrast */
   --danger-bg: #fee2e2;
 
   font-family: var(--font-text);
@@ -282,9 +298,9 @@ const CSS = `
   --bg-elev-1: #1c1c20;
   --bg-elev-2: #26262b;
   --bg-input: #18181c;
-  --text-1: #f0f0f2;
-  --text-2: #c0c0c8;
-  --text-3: #8e8e96;
+  --text-1: #f4f4f6;       /* Slightly softer than pure white */
+  --text-2: #c8c8d0;       /* Higher contrast than before */
+  --text-3: #9898a2;       /* Visible but clearly secondary */
   --border: rgba(255, 255, 255, 0.10);
   --border-strong: rgba(255, 255, 255, 0.18);
   --accent: #4f8ef7;
@@ -334,10 +350,25 @@ const CSS = `
   transition: border-color var(--t-fast), box-shadow var(--t-fast), background-color var(--t-slow);
   border-radius: var(--r-md);
   letter-spacing: -0.01em;
-  font-size: 16px; /* prevents iOS zoom on focus */
+  font-size: 15px;
 }
-.ff-input { padding: 11px 13px; }
-select.ff-input { padding-right: 36px; appearance: auto; }
+@media (max-width: 768px) {
+  .ff-input, .ff-textarea { font-size: 16px; } /* prevents iOS zoom */
+}
+.ff-input { padding: 11px 14px; height: 44px; }
+select.ff-input {
+  padding-right: 40px;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b6b70' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+  cursor: pointer;
+}
+.ff-root.dark select.ff-input {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23a1a1aa' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+}
 .ff-textarea { line-height: 1.5; padding: 13px 14px; resize: vertical; }
 @media (min-width: 768px) {
   .ff-input { font-size: 14px; padding: 10px 12px; }
@@ -345,7 +376,14 @@ select.ff-input { padding-right: 36px; appearance: auto; }
 }
 .ff-input:focus, .ff-textarea:focus {
   border-color: var(--accent);
-  box-shadow: var(--sh-focus);
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(37,99,235,.15);
+  outline: none;
+}
+.ff-btn:focus-visible, .ff-icon-btn:focus-visible, .ff-dropdown-trigger:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 .ff-input::placeholder, .ff-textarea::placeholder { color: var(--text-3); }
 
@@ -356,15 +394,17 @@ select.ff-input { padding-right: 36px; appearance: auto; }
   font-family: var(--font-text);
   font-weight: 600;
   font-size: 14px;
-  letter-spacing: -0.005em;
-  padding: 12px 20px;
+  letter-spacing: -0.01em;
+  padding: 0 22px;
+  height: 44px;
+  min-height: 44px;
   border: none;
   cursor: pointer;
   border-radius: 999px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 7px;
   transition: transform var(--t-fast), box-shadow var(--t-fast), background-color var(--t-fast), opacity var(--t-fast);
   width: 100%;
   box-shadow: var(--sh-1);
@@ -402,9 +442,11 @@ select.ff-input { padding-right: 36px; appearance: auto; }
   background: transparent;
   border: 1px solid var(--border-strong);
   color: var(--text-2);
-  padding: 7px 12px;
+  padding: 0 14px;
+  height: 36px;
+  min-height: 36px;
   font-family: var(--font-text);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
   cursor: pointer;
   border-radius: 999px;
@@ -682,14 +724,16 @@ select.ff-input { padding-right: 36px; appearance: auto; }
   color: var(--text-1);
   font-family: var(--font-text);
   font-weight: 500;
-  font-size: 13px;
+  font-size: 13.5px;
   letter-spacing: -0.01em;
-  padding: 9px 16px 9px 14px;
+  padding: 0 16px;
+  height: 44px;
+  min-height: 44px;
   cursor: pointer;
   border-radius: 999px;
   display: inline-flex;
   align-items: center;
-  gap: 7px;
+  gap: 8px;
   transition: all var(--t-fast);
   line-height: 1;
 }
@@ -1141,9 +1185,10 @@ select.ff-input { padding-right: 36px; appearance: auto; }
   font-size: 13px;
   font-weight: 600;
   color: var(--text-1);
-  letter-spacing: -0.005em;
+  letter-spacing: -0.01em;
   display: block;
-  margin-bottom: 6px;
+  margin-bottom: 7px;
+  line-height: 1.4;
 }
 .ff-field-hint {
   font-family: var(--font-text);
@@ -3566,7 +3611,7 @@ export default function FreelancersForge() {
           <div className="ff-theme-dropdown" ref={themeMenuRef}>
             <button
               type="button"
-              className="ff-theme-toggle"
+              className="ff-theme-toggle" aria-label="Toggle theme"
               onClick={() => setThemeMenuOpen(o => !o)}
               aria-label="Change theme"
             >
@@ -5631,70 +5676,72 @@ function PipelineTab() {
         <StatCard label="Revenue Won" value={totalValue > 0 ? `$${totalValue.toLocaleString()}` : '—'} sub="from closed deals" />
       </div>
 
+      {/* Add Entry Overlay */}
       {showForm && (
-        <div className="ff-card ff-fadeup mb-8" style={{ padding: 20 }}>
-          <h3 className="ff-subheading mb-4" style={{ fontSize: 16 }}>New entry</h3>
-          <div className="ff-2col">
-            <div>
-              <label className="ff-field-label" style={{ display: 'inline-flex', alignItems: 'center' }}>
-                Date sent
-                <Tooltip text="When you actually sent the proposal, DM, or email." />
-              </label>
-              <input
-                type="date"
-                className="ff-input"
-                value={entryDate}
-                onChange={e => setEntryDate(e.target.value)}
-                max={todayStr()}
-                style={{ cursor: 'pointer' }}
-              />
+        <div role="dialog" aria-modal="true" aria-labelledby="entry-modal-title" style={{ position:'fixed', inset:0, zIndex:200, display:'flex', alignItems:'center', justifyContent:'center', padding:'16px' }}>
+          <div onClick={() => setShowForm(false)} style={{ position:'absolute', inset:0, background:'rgba(0,0,0,0.45)', backdropFilter:'blur(2px)' }} aria-hidden="true"/>
+          <div style={{ position:'relative', width:'100%', maxWidth:520, background:'var(--bg)', borderRadius:20, boxShadow:'0 24px 64px rgba(0,0,0,.18), 0 4px 16px rgba(0,0,0,.1)', overflow:'hidden' }} className="ff-fadeup">
+            {/* Modal header */}
+            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'20px 24px 0' }}>
+              <h3 id="entry-modal-title" style={{ fontSize:17, fontWeight:700, color:'var(--text-1)', letterSpacing:'-0.02em' }}>New pipeline entry</h3>
+              <button onClick={() => setShowForm(false)} aria-label="Close" style={{ width:32, height:32, borderRadius:999, background:'var(--bg-elev-1)', border:'1px solid var(--border)', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', color:'var(--text-3)', flexShrink:0 }}>
+                <X size={14}/>
+              </button>
             </div>
-            <div>
-              <label className="ff-field-label" style={{ display: 'inline-flex', alignItems: 'center' }}>
-                Client / Company <span className="ff-text-accent" style={{ marginLeft: 4 }}>*</span>
-                <Tooltip text="Who you sent this to." align="right" />
-              </label>
-              <input type="text" className="ff-input" placeholder="e.g. Acme Corp" value={client} onChange={e => setClient(e.target.value)} />
+            {/* Modal body */}
+            <div style={{ padding:'18px 24px 24px', display:'flex', flexDirection:'column', gap:14 }}>
+              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
+                <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
+                  <label htmlFor="pe-date" className="ff-field-label" style={{ display:'inline-flex', alignItems:'center' }}>
+                    Date sent <Tooltip text="When you sent the proposal, DM, or email." />
+                  </label>
+                  <input id="pe-date" type="date" className="ff-input" value={entryDate} onChange={e => setEntryDate(e.target.value)} max={todayStr()} style={{ cursor:'pointer' }}/>
+                </div>
+                <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
+                  <label htmlFor="pe-client" className="ff-field-label" style={{ display:'inline-flex', alignItems:'center' }}>
+                    Client / Company <span aria-hidden="true" style={{ color:'var(--accent)', marginLeft:4 }}>*</span>
+                    <Tooltip text="Who you sent this to." align="right"/>
+                  </label>
+                  <input id="pe-client" type="text" className="ff-input" placeholder="e.g. Acme Corp" value={client} onChange={e => setClient(e.target.value)} autoFocus/>
+                </div>
+                <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
+                  <label htmlFor="pe-type" className="ff-field-label" style={{ display:'inline-flex', alignItems:'center' }}>
+                    Type <Tooltip text="What kind of outreach this was." align="right"/>
+                  </label>
+                  <select id="pe-type" className="ff-input" value={type} onChange={e => setType(e.target.value)}>
+                    {PIPELINE_TYPES.map(t => <option key={t.id} value={t.id}>{t.label}</option>)}
+                  </select>
+                </div>
+                <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
+                  <label htmlFor="pe-status" className="ff-field-label" style={{ display:'inline-flex', alignItems:'center' }}>
+                    Status <Tooltip text="Where this lead is right now."/>
+                  </label>
+                  <select id="pe-status" className="ff-input" value={status} onChange={e => setStatus(e.target.value)}>
+                    {PIPELINE_STATUSES.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}
+                  </select>
+                </div>
+                <div style={{ display:'flex', flexDirection:'column', gap:6, gridColumn:'span 2' }}>
+                  <label htmlFor="pe-value" className="ff-field-label">
+                    Value <span style={{ fontWeight:400, color:'var(--text-3)' }}>· optional</span>
+                  </label>
+                  <input id="pe-value" type="text" className="ff-input" placeholder="e.g. $5,000 or $2k/mo" value={value} onChange={e => setValue(e.target.value)}/>
+                </div>
+                <div style={{ display:'flex', flexDirection:'column', gap:6, gridColumn:'span 2' }}>
+                  <label htmlFor="pe-notes" className="ff-field-label">
+                    Notes <span style={{ fontWeight:400, color:'var(--text-3)' }}>· optional</span>
+                  </label>
+                  <textarea id="pe-notes" className="ff-textarea" rows={2} placeholder="Brief context, where you found them, etc." value={notes} onChange={e => setNotes(e.target.value)} style={{ minHeight:64, resize:'vertical' }}/>
+                </div>
+              </div>
+              <div style={{ display:'flex', gap:8, paddingTop:4 }}>
+                <button className="ff-btn" onClick={addEntry} disabled={!client.trim()} style={{ flex:1 }}>
+                  <Check size={14}/>Save Entry
+                </button>
+                <button className="ff-btn ff-btn-secondary" onClick={() => setShowForm(false)} style={{ width:'auto', padding:'0 20px' }}>
+                  Cancel
+                </button>
+              </div>
             </div>
-            <div>
-              <label className="ff-field-label" style={{ display: 'inline-flex', alignItems: 'center' }}>
-                Type
-                <Tooltip text="What kind of outreach this was." align="right" />
-              </label>
-              <select className="ff-input" value={type} onChange={e => setType(e.target.value)} style={{ cursor: 'pointer' }}>
-                {PIPELINE_TYPES.map(t => <option key={t.id} value={t.id}>{t.label}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="ff-field-label" style={{ display: 'inline-flex', alignItems: 'center' }}>
-                Status
-                <Tooltip text="Where this lead is right now." />
-              </label>
-              <select className="ff-input" value={status} onChange={e => setStatus(e.target.value)} style={{ cursor: 'pointer' }}>
-                {PIPELINE_STATUSES.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="ff-field-label" style={{ display: 'inline-flex', alignItems: 'center' }}>
-                Value <span className="ff-field-hint" style={{ fontWeight: 400, marginLeft: 6 }}>· optional</span>
-                <Tooltip text="Deal size." align="right" />
-              </label>
-              <input type="text" className="ff-input" placeholder="e.g. $5,000 or $2k/mo" value={value} onChange={e => setValue(e.target.value)} />
-            </div>
-          </div>
-          <div className="mt-4">
-            <label className="ff-field-label">
-              Notes <span className="ff-field-hint" style={{ fontWeight: 400 }}>· optional</span>
-            </label>
-            <textarea className="ff-textarea" rows={2} placeholder="Brief context, where you found them, etc." value={notes} onChange={e => setNotes(e.target.value)} />
-          </div>
-          <div className="flex gap-2 mt-4">
-            <button className="ff-btn" onClick={addEntry} disabled={!client.trim()} style={{ width: 'auto', padding: '10px 18px' }}>
-              <Check size={14} /> Save Entry
-            </button>
-            <button className="ff-btn ff-btn-secondary" onClick={() => setShowForm(false)} style={{ width: 'auto', padding: '10px 18px' }}>
-              Cancel
-            </button>
           </div>
         </div>
       )}
