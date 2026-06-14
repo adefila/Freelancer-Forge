@@ -5553,8 +5553,6 @@ function PipelineTab() {
     return days >= 5;
   }).map(e => e.id);
 
-  const daysSince = (dateStr) => Math.floor((Date.now() - new Date(dateStr).getTime()) / 86400000);
-
   const stats = {
     total: entries.length,
     sent: entries.filter(e => e.status === 'sent').length,
@@ -5900,6 +5898,11 @@ function SummaryStat({ label, value, accent, muted }) {
     </div>
   );
 }
+
+const daysSince = (dateStr) => {
+  if (!dateStr) return 0;
+  try { return Math.floor((Date.now() - new Date(dateStr).getTime()) / 86400000); } catch { return 0; }
+};
 
 function PipelineRow({ entry, onStatusChange, onRemove, delay }) {
   const status = PIPELINE_STATUSES.find(s => s.id === entry.status);
