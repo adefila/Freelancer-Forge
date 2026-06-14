@@ -2708,10 +2708,11 @@ function InvoiceTab() {
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{height:100%}
 body{font-family:'Inter',system-ui,sans-serif;background:#eef2f7;color:#1e293b;font-size:13px;line-height:1.5;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-.shell{padding:32px 20px;min-height:100%}
-.page{max-width:720px;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.10)}
+.shell{padding:24px 16px;min-height:100%}
+.page{max-width:720px;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.10);page-break-inside:avoid}
+.page>*{page-break-inside:avoid}
 /* ── header ── */
-.hd{background:linear-gradient(135deg,${DARK} 0%,${DARK2} 100%);padding:36px 44px 32px;position:relative;overflow:hidden}
+.hd{background:linear-gradient(135deg,${DARK} 0%,${DARK2} 100%);padding:28px 36px 24px;position:relative;overflow:hidden}
 .hd-circle1{position:absolute;top:-48px;right:-48px;width:180px;height:180px;border-radius:50%;background:rgba(255,255,255,.035);pointer-events:none}
 .hd-circle2{position:absolute;bottom:-72px;left:38%;width:260px;height:260px;border-radius:50%;background:rgba(37,99,235,.06);pointer-events:none}
 .hd-inner{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;position:relative;z-index:1;flex-wrap:wrap}
@@ -2735,44 +2736,44 @@ body{font-family:'Inter',system-ui,sans-serif;background:#eef2f7;color:#1e293b;f
 .stamp-wrap{position:absolute;right:20px;top:50%;transform:translateY(-50%);pointer-events:none}
 /* ── parties ── */
 .parties{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid #e8edf5}
-.party{padding:22px 28px;position:relative}
+.party{padding:18px 24px;position:relative}
 .party:first-child{border-right:1px solid #e8edf5}
-.party-badge{display:inline-flex;align-items:center;gap:5px;background:#eff6ff;border:1px solid #dbeafe;border-radius:5px;padding:2px 8px;font-size:8.5px;font-weight:800;color:${BLUE};letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px}
-.party-name{font-size:15px;font-weight:800;color:#0f172a;margin-bottom:3px;letter-spacing:-0.01em}
-.party-detail{font-size:12px;color:#64748b;line-height:1.7}
+.party-badge{display:inline-flex;align-items:center;gap:5px;background:#eff6ff;border:1px solid #dbeafe;border-radius:5px;padding:2px 8px;font-size:8px;font-weight:800;color:${BLUE};letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px}
+.party-name{font-size:14.5px;font-weight:800;color:#0f172a;margin-bottom:3px;letter-spacing:-0.01em}
+.party-detail{font-size:11.5px;color:#64748b;line-height:1.65}
 /* ── items table ── */
-.items-section{padding:24px 28px 0}
-.items-label{font-size:9px;font-weight:800;color:#94a3b8;letter-spacing:.14em;text-transform:uppercase;margin-bottom:12px}
-table{width:100%;border-collapse:collapse;border:1px solid #e8edf5;border-radius:10px;overflow:hidden}
+.items-section{padding:18px 24px 0}
+.items-label{font-size:8.5px;font-weight:800;color:#94a3b8;letter-spacing:.14em;text-transform:uppercase;margin-bottom:10px}
+table{width:100%;border-collapse:collapse;border:1px solid #e8edf5;border-radius:8px;overflow:hidden}
 thead tr{background:#f8fafc}
-th{padding:10px 14px;font-size:9px;font-weight:800;color:#64748b;letter-spacing:.08em;text-transform:uppercase;border-bottom:1px solid #e8edf5;text-align:left}
-th:not(:nth-child(2)){text-align:right;width:80px}
+th{padding:8px 12px;font-size:8.5px;font-weight:800;color:#64748b;letter-spacing:.07em;text-transform:uppercase;border-bottom:1px solid #e8edf5;text-align:left}
+th:not(:nth-child(2)){text-align:right;width:76px}
 th:nth-child(2){text-align:left}
-th:first-child{text-align:center;width:38px}
+th:first-child{text-align:center;width:34px}
 tbody tr:nth-child(even){background:#fafbff}
 tbody tr{border-bottom:1px solid #f1f5f9}
 tbody tr:last-child{border-bottom:none}
-td{padding:11px 14px;font-size:13px;color:#334155;vertical-align:middle}
-td:first-child{text-align:center;font-size:10px;font-weight:800;color:#94a3b8}
+td{padding:9px 12px;font-size:12.5px;color:#334155;vertical-align:middle}
+td:first-child{text-align:center;font-size:9.5px;font-weight:800;color:#94a3b8}
 td:nth-child(2){font-weight:600;color:#0f172a}
-td:nth-child(3),td:nth-child(4){text-align:right;color:#64748b;font-size:12.5px}
+td:nth-child(3),td:nth-child(4){text-align:right;color:#64748b;font-size:12px}
 td:nth-child(5){text-align:right;font-weight:800;color:#0f172a}
 /* ── totals ── */
-.totals-section{padding:16px 28px 24px;display:flex;justify-content:flex-end}
-.totals-card{min-width:264px;border:1px solid #e8edf5;border-radius:12px;overflow:hidden}
-.tot-row{display:flex;justify-content:space-between;padding:9px 16px;font-size:12.5px;color:#64748b;border-bottom:1px solid #f1f5f9}
+.totals-section{padding:12px 24px 18px;display:flex;justify-content:flex-end}
+.totals-card{min-width:256px;border:1px solid #e8edf5;border-radius:10px;overflow:hidden}
+.tot-row{display:flex;justify-content:space-between;padding:7px 14px;font-size:12px;color:#64748b;border-bottom:1px solid #f1f5f9}
 .tot-row span:last-child{font-weight:600;color:#334155}
 .tot-discount{color:#dc2626}
 .tot-final{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;background:linear-gradient(135deg,${DARK},${DARK2})}
 .tot-final-lbl{font-size:8.5px;font-weight:800;color:rgba(255,255,255,.55);letter-spacing:.1em;text-transform:uppercase}
 .tot-final-amt{font-size:22px;font-weight:900;color:#fff;letter-spacing:-0.04em}
 /* ── footer ── */
-.footer-row{display:grid;grid-template-columns:1fr 1fr;gap:24px;padding:20px 28px;border-top:1px solid #e8edf5;background:#f8fafc}
-.footer-lbl{font-size:8.5px;font-weight:800;color:#94a3b8;letter-spacing:.12em;text-transform:uppercase;margin-bottom:6px}
-.footer-body{font-size:12px;color:#475569;line-height:1.75}
+.footer-row{display:grid;grid-template-columns:1fr 1fr;gap:20px;padding:16px 24px;border-top:1px solid #e8edf5;background:#f8fafc}
+.footer-lbl{font-size:8px;font-weight:800;color:#94a3b8;letter-spacing:.12em;text-transform:uppercase;margin-bottom:5px}
+.footer-body{font-size:11.5px;color:#475569;line-height:1.7}
 /* ── thank you band ── */
-.ty{background:linear-gradient(135deg,${DARK},${DARK2});padding:18px 28px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
-.ty-text{font-size:21px;font-weight:900;color:#fff;letter-spacing:-0.04em}
+.ty{background:linear-gradient(135deg,${DARK},${DARK2});padding:14px 24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.ty-text{font-size:18px;font-weight:900;color:#fff;letter-spacing:-0.04em}
 .ty-contact{display:flex;gap:16px;flex-wrap:wrap}
 .ty-item{font-size:11px;color:rgba(255,255,255,.6)}
 .ty-item strong{color:rgba(255,255,255,.88);margin-right:3px}
@@ -2810,11 +2811,13 @@ td:nth-child(5){text-align:right;font-weight:800;color:#0f172a}
       <div class="bar-to-lbl">Billed to</div>
       <div class="bar-to">${inv.to.name||'—'}</div>
     </div>
-    <div class="bar-amt">
-      <div class="bar-amt-lbl">Total Due</div>
-      <div class="bar-amt-val">${fmt(tot,inv.currency)}</div>
+    <div style="display:flex;align-items:center;gap:14px">
+      <div class="stamp-wrap" style="position:static;transform:rotate(-15deg);opacity:0.22;pointer-events:none">${stampSVG}</div>
+      <div class="bar-amt">
+        <div class="bar-amt-lbl">Total Due</div>
+        <div class="bar-amt-val">${fmt(tot,inv.currency)}</div>
+      </div>
     </div>
-    <div class="stamp-wrap">${stampSVG}</div>
   </div>
 
   <div class="parties">
@@ -2828,7 +2831,8 @@ td:nth-child(5){text-align:right;font-weight:800;color:#0f172a}
     <div class="party">
       <div class="party-badge">From</div>
       <div class="party-name">${inv.from.name||'—'}</div>
-      ${inv.from.address?`<div class="party-detail" style="white-space:pre-line">${inv.from.address}</div>`:''}
+      ${inv.from.address?`<div class="party-detail" style="white-space:pre-line;margin-top:2px">${inv.from.address}</div>`:''}
+      ${(!inv.logo&&inv.from.email)?`<div class="party-detail" style="margin-top:3px;color:#94a3b8;font-size:11px">${inv.from.email}</div>`:''}
     </div>
   </div>
 
@@ -2970,7 +2974,9 @@ td:nth-child(5){text-align:right;font-weight:800;color:#0f172a}
             const expires=INVOICE_RETENTION_DAYS-Math.floor((Date.now()-inv.createdAt)/86400000);
             return (
               <div key={inv.id} className="inv-row" onClick={()=>openPreview(inv)}>
-                <div className="inv-row-icon"><Receipt size={17} style={{color:'var(--accent)'}}/></div>
+                <div className="inv-row-icon">
+                  {inv.logo ? <img src={inv.logo} alt="" style={{width:24,height:24,objectFit:'contain',borderRadius:4}}/> : <Receipt size={17} style={{color:'var(--accent)'}}/>}
+                </div>
                 <div className="inv-row-body">
                   <div className="inv-row-num">{inv.number}</div>
                   {inv.to.name&&<div className="inv-row-client">{inv.to.name}</div>}
@@ -3218,15 +3224,16 @@ td:nth-child(5){text-align:right;font-weight:800;color:#0f172a}
             </div>
           </div>
 
-          {/* Parties — no repetition: only contact details unique to each side */}
+          {/* Parties — Bill To: full details. From: name + address only (email/phone in header) */}
           <div className="inv-pp">
-            {[['Bill To',current.to],['From',current.from]].map(([label,party],i)=>(
-              <div key={label} style={{padding:'20px 26px',borderRight:i===0?'1px solid var(--border)':'none'}}>
-                <div style={{display:'inline-flex',alignItems:'center',gap:4,background:'var(--accent-bg-soft)',border:'1px solid var(--accent-border-soft)',borderRadius:5,padding:'2px 8px',fontSize:9,fontWeight:800,color:BLUE,letterSpacing:'.1em',textTransform:'uppercase',marginBottom:10}}>{label}</div>
-                <div style={{fontSize:15,fontWeight:800,color:'var(--text-1)',marginBottom:3,letterSpacing:'-0.01em'}}>{party.name||'—'}</div>
-                {party.email&&<div style={{fontSize:12.5,color:'var(--text-3)'}}>{party.email}</div>}
-                {party.phone&&<div style={{fontSize:12.5,color:'var(--text-3)'}}>{party.phone}</div>}
+            {[['Bill To',current.to,true],['From',current.from,false]].map(([label,party,full],i)=>(
+              <div key={label} style={{padding:'18px 24px',borderRight:i===0?'1px solid var(--border)':'none'}}>
+                <div style={{display:'inline-flex',alignItems:'center',gap:4,background:'var(--accent-bg-soft)',border:'1px solid var(--accent-border-soft)',borderRadius:5,padding:'2px 8px',fontSize:8.5,fontWeight:800,color:BLUE,letterSpacing:'.1em',textTransform:'uppercase',marginBottom:9}}>{label}</div>
+                <div style={{fontSize:14.5,fontWeight:800,color:'var(--text-1)',marginBottom:3,letterSpacing:'-0.01em'}}>{party.name||'—'}</div>
+                {full&&party.email&&<div style={{fontSize:12.5,color:'var(--text-3)'}}>{party.email}</div>}
+                {full&&party.phone&&<div style={{fontSize:12.5,color:'var(--text-3)'}}>{party.phone}</div>}
                 {party.address&&<div style={{fontSize:12,color:'var(--text-3)',whiteSpace:'pre-line',marginTop:3,lineHeight:1.6}}>{party.address}</div>}
+                {!full&&!party.address&&party.email&&<div style={{fontSize:11.5,color:'var(--text-3)',marginTop:2}}>{party.email}</div>}
               </div>
             ))}
           </div>
