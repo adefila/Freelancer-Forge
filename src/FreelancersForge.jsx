@@ -2620,6 +2620,19 @@ function generateInvoiceNumber(invoices) {
 }
 
 /* ====================================================================== */
+/* USER PROFILE STORAGE                                                   */
+/* ====================================================================== */
+
+const PROFILE_KEY = 'ff_user_profile_v1';
+
+function loadProfile() {
+  try { const r = localStorage.getItem(PROFILE_KEY); return r ? JSON.parse(r) : null; } catch { return null; }
+}
+function saveProfile(p) {
+  try { localStorage.setItem(PROFILE_KEY, JSON.stringify(p)); } catch {}
+}
+
+/* ====================================================================== */
 /* INVOICE TAB                                                            */
 /* ====================================================================== */
 
@@ -4814,6 +4827,10 @@ function OptimizeOutput({ result, pageType, optimized, onOptimize, optimizing, c
 /* ====================================================================== */
 
 function CloseTab() {
+  const [profile, setProfile] = useState(() => loadProfile() || { name:'', niche:'', results:'', defaultTone:'Auto' });
+  const [profileOpen, setProfileOpen] = useState(false);
+  const saveProfileLocal = (p) => { setProfile(p); saveProfile(p); };
+
   const [mode, setMode] = useState('proposal');
   const [intel, setIntel] = useState('');
   const [offer, setOffer] = useState('');
@@ -4918,7 +4935,12 @@ function CloseTab() {
         }
       }
       if (imageData) content.push({ type: 'image', source: { type: 'base64', media_type: imageData.mediaType, data: imageData.data } });
-      content.push({ type: 'text', text: buildPrompt(mode, intel, imageData, tone, portfolio, clientMessage, myMessage, goal, jobDescription, offer, proof, cvFile) });
+      const userProfile = loadProfile();
+      const profileContext = userProfile && (userProfile.name || userProfile.niche || userProfile.results)
+        ? `\n\nFREELANCER PROFILE (use to personalise output):\nName: ${userProfile.name || ''}\nNiche: ${userProfile.niche || ''}\nKey results: ${userProfile.results || ''}\nDefault tone: ${userProfile.defaultTone || 'Auto'}`
+        : '';
+      const promptText = buildPrompt(mode, intel, imageData, tone, portfolio, clientMessage, myMessage, goal, jobDescription, offer, proof, cvFile) + profileContext;
+      content.push({ type: 'text', text: promptText });
 
       const response = await fetch("/api/claude", {
         method: "POST",
@@ -5021,6 +5043,36 @@ function CloseTab() {
 
   return (
     <>
+      {/* Profile bar */}
+      <div style={{ display:'flex', alignItems:'center', justifyContent:'flex-end', marginBottom:12 }}>
+        <button onClick={() => setProfileOpen(p => !p)} style={{ display:'inline-flex', alignItems:'center', gap:7, height:34, padding:'0 14px', background: profile.name ? 'var(--accent-bg-soft)' : 'var(--bg-2)', color: profile.name ? 'var(--accent)' : 'var(--text-2)', border: profile.name ? '1px solid var(--accent-border-soft)' : '1px solid var(--border)', borderRadius:999, fontSize:12.5, fontWeight:600, cursor:'pointer', letterSpacing:'-0.01em', flexShrink:0, fontFamily:'var(--font-text)' }}>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+          {profile.name ? `${profile.name} · ${profile.niche||'No niche set'}` : 'Set my profile — auto-fills every prompt'}
+        </button>
+      </div>
+      {profileOpen && (
+        <div style={{ background:'var(--bg)', border:'1px solid var(--border)', borderRadius:14, padding:'18px 20px', marginBottom:20 }}>
+          <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:14 }}>
+            <p style={{ fontSize:13, fontWeight:700, color:'var(--text-1)' }}>My Profile <span style={{ fontWeight:400, color:'var(--text-3)', fontSize:12 }}>— injected silently into every proposal, DM, email, cover letter</span></p>
+            <button onClick={() => setProfileOpen(false)} style={{ background:'none', border:'none', cursor:'pointer', color:'var(--text-3)', padding:2, display:'flex' }}><X size={14}/></button>
+          </div>
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10 }}>
+            {[['Your name', 'name', 'e.g. Adefilasaur', false], ['Your niche', 'niche', 'e.g. Framer developer for SaaS', false], ['Key result to reference', 'results', 'e.g. 31% lift in demo-to-close for a fintech SaaS', true]].map(([label, key, ph, wide]) => (
+              <div key={key} style={{ display:'flex', flexDirection:'column', gap:5, gridColumn: wide ? 'span 2' : 'auto' }}>
+                <label style={{ fontSize:10.5, fontWeight:700, color:'var(--text-3)', letterSpacing:'.07em', textTransform:'uppercase' }}>{label}</label>
+                <input className="ff-input" placeholder={ph} value={profile[key]||''} onChange={e => saveProfileLocal({...profile, [key]: e.target.value})} style={{ fontSize:13.5 }}/>
+              </div>
+            ))}
+            <div style={{ display:'flex', flexDirection:'column', gap:5 }}>
+              <label style={{ fontSize:10.5, fontWeight:700, color:'var(--text-3)', letterSpacing:'.07em', textTransform:'uppercase' }}>Default tone</label>
+              <select className="ff-input" value={profile.defaultTone||'Auto'} onChange={e => saveProfileLocal({...profile, defaultTone:e.target.value})} style={{ cursor:'pointer', fontSize:13.5 }}>
+                {['Auto','Direct','Warm','Sharp','Persuasive','Casual','Bold','Witty','Empathetic','Authoritative'].map(t => <option key={t}>{t}</option>)}
+              </select>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="ff-2col">
         <div>
           <label className="ff-section-label mb-3" style={{ display: 'inline-flex', alignItems: 'center' }}>
@@ -5431,6 +5483,15 @@ function PipelineTab() {
 
   const removeEntry = (id) => setEntries(e => e.filter(x => x.id !== id));
 
+  // Follow-up nudge: entries in 'sent' for 5+ days
+  const followUpNudges = entries.filter(e => {
+    if (e.status !== 'sent') return false;
+    const days = Math.floor((Date.now() - new Date(e.date).getTime()) / 86400000);
+    return days >= 5;
+  }).map(e => e.id);
+
+  const daysSince = (dateStr) => Math.floor((Date.now() - new Date(dateStr).getTime()) / 86400000);
+
   const stats = {
     total: entries.length,
     sent: entries.filter(e => e.status === 'sent').length,
@@ -5441,6 +5502,7 @@ function PipelineTab() {
   };
   const replyRate = stats.total > 0 ? Math.round((stats.replied + stats.inTalks + stats.won + stats.lost) / stats.total * 100) : 0;
   const winRate = (stats.won + stats.lost) > 0 ? Math.round(stats.won / (stats.won + stats.lost) * 100) : 0;
+  const winRateDiff = winRate - 50; // vs top freelancer benchmark of 50%
   const totalValue = entries.filter(e => e.status === 'closed_won' && e.value).reduce((sum, e) => {
     const num = parseFloat(e.value.replace(/[^0-9.]/g, ''));
     return sum + (isNaN(num) ? 0 : num);
@@ -5499,10 +5561,10 @@ function PipelineTab() {
       </div>
 
       <div className="ff-stat-cards">
-        <StatCard label="Total Sent" value={stats.total} />
-        <StatCard label="Replies" value={`${stats.replied + stats.inTalks + stats.won + stats.lost}`} sub={`${replyRate}% reply rate`} />
-        <StatCard label="Closed Won" value={stats.won} sub={winRate > 0 ? `${winRate}% win rate` : null} accent />
-        <StatCard label="Revenue" value={totalValue > 0 ? `$${totalValue.toLocaleString()}` : '—'} sub="from closed deals" />
+        <StatCard label="Total Sent" value={stats.total} sub={followUpNudges.length > 0 ? `${followUpNudges.length} need follow-up` : 'proposals tracked'} />
+        <StatCard label="Reply Rate" value={`${replyRate}%`} sub={replyRate >= 30 ? '🔥 Above average' : replyRate > 0 ? 'avg freelancer: 15-20%' : 'no replies yet'} accent={replyRate >= 30} />
+        <StatCard label="Win Rate" value={winRate > 0 ? `${winRate}%` : '—'} sub={winRate >= 50 ? '🏆 Top performer' : winRate > 0 ? `top freelancers: 50%+` : 'no closed deals yet'} accent={winRate >= 50} />
+        <StatCard label="Revenue Won" value={totalValue > 0 ? `$${totalValue.toLocaleString()}` : '—'} sub="from closed deals" />
       </div>
 
       {showForm && (
@@ -5804,7 +5866,14 @@ function PipelineRow({ entry, onStatusChange, onRemove, delay }) {
         <span style={{ fontSize: 12, color: 'var(--text-3)' }}>{daysAgoLabel(entry.date)}</span>
       </div>
       <div style={{ minWidth: 0 }}>
-        <p style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--text-1)', letterSpacing: '-0.005em' }} className="truncate">{entry.client}</p>
+        <div style={{ display:'flex', alignItems:'center', gap:7, flexWrap:'wrap' }}>
+          <p style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--text-1)', letterSpacing: '-0.005em' }} className="truncate">{entry.client}</p>
+          {entry.status === 'sent' && daysSince(entry.date) >= 5 && (
+            <span style={{ display:'inline-flex', alignItems:'center', gap:4, padding:'2px 8px', background:'#fffbeb', border:'1px solid #fde68a', borderRadius:999, fontSize:10.5, fontWeight:700, color:'#d97706', flexShrink:0, whiteSpace:'nowrap' }}>
+              ⏰ {daysSince(entry.date)}d — follow up
+            </span>
+          )}
+        </div>
         {entry.notes && <p className="truncate" style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 2 }}>{entry.notes}</p>}
       </div>
       <span className="ff-pipeline-col-type" style={{ fontSize: 12, color: 'var(--text-2)', fontWeight: 500 }}>{type?.label}</span>
@@ -6188,6 +6257,9 @@ function PsychCard({ psych, delay = 0 }) {
 function ProposalOutput({ result, pillClass, copied, copyText, selectAllText }) {
   const proposal = result.proposal;
   const isStructured = proposal && typeof proposal === 'object';
+  const [score, setScore] = useState(null);
+  const [scoring, setScoring] = useState(false);
+  const [scoreOpen, setScoreOpen] = useState(false);
 
   const proposalText = (() => {
     if (!proposal) return '';
@@ -6201,13 +6273,92 @@ function ProposalOutput({ result, pillClass, copied, copyText, selectAllText }) 
     return parts.join('\n\n');
   })();
 
-  const sectionStyle = { padding: '20px 22px', borderBottom: '1px solid var(--border)' };
-  const labelStyle = { display: 'block', marginBottom: 10 };
-  const paraStyle = { fontSize: 15, lineHeight: 1.72, color: 'var(--text-1)', letterSpacing: '-0.007em', margin: 0, whiteSpace: 'pre-line' };
+  async function runScorecard() {
+    if (score) { setScoreOpen(s => !s); return; }
+    setScoring(true); setScoreOpen(true);
+    try {
+      const resp = await fetch('/api/claude', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-5',
+          max_tokens: 1200,
+          system: 'You are a JSON-only API. Respond with valid JSON only. No prose, no markdown fences.',
+          messages: [{
+            role: 'user',
+            content: `You are a senior freelance proposal coach who has reviewed thousands of proposals. Score this proposal honestly and specifically.
+
+PROPOSAL:
+${proposalText}
+
+CLIENT CONTEXT:
+${result.extraction?.coreProblem || ''}
+Client type: ${result.extraction?.clientType || ''}
+What they are really evaluating: ${result.extraction?.whatTheyAreActuallyEvaluating || ''}
+
+Score each criterion from 1-10. Be honest — most proposals score 3-5. A 9-10 is rare and must be earned.
+
+WHAT AVERAGE PROPOSALS DO (score 3-5):
+- Open with "I am a [job title] with X years experience"
+- List services instead of naming the client's situation
+- Give vague proof ("I have worked with many clients")
+- End with "Looking forward to hearing from you"
+- Could have been sent to any job post
+
+WHAT TOP PROPOSALS DO (score 8-10):
+- Open by naming the specific problem with enough precision the client thinks "they read my post"
+- Proof references a specific result, a real number, and a similar client type
+- Why me is earned by something in the post, not generic
+- CTA is the smallest possible yes, references something specific they said
+- Every sentence is about the client, not the freelancer
+
+Return ONLY valid JSON:
+{
+  "overallScore": <number 1-10>,
+  "avgScore": <number 3.2 to 4.8, realistic average for this type of post>,
+  "verdict": "1 sentence. Honest read of how this proposal lands.",
+  "criteria": [
+    { "name": "Hook strength", "score": <1-10>, "avg": <2-5>, "feedback": "1-2 sentences. Specific to THIS hook — what works, what could be sharper." },
+    { "name": "Proof specificity", "score": <1-10>, "avg": <2-5>, "feedback": "1-2 sentences. Does the proof have a real number and map to this client?" },
+    { "name": "Why me relevance", "score": <1-10>, "avg": <2-5>, "feedback": "1-2 sentences. Is it earned by what was in the post, or generic?" },
+    { "name": "Process clarity", "score": <1-10>, "avg": <2-5>, "feedback": "1-2 sentences. Does it reduce fear of the unknown for THIS client?" },
+    { "name": "CTA frictionlessness", "score": <1-10>, "avg": <2-5>, "feedback": "1-2 sentences. Is it the smallest possible yes for this client?" }
+  ],
+  "topStrength": "The single most effective thing about this proposal that makes it stand out.",
+  "topFix": "The single change that would have the biggest impact on getting a reply.",
+  "rewrite": "Rewrite only the weakest section (1-2 sentences) to show what a 9/10 version looks like."
+}`
+          }]
+        })
+      });
+      const data = await resp.json();
+      const raw = data.content.filter(b => b.type === 'text').map(b => b.text).join('').trim()
+        .replace(/\s*```(?:json)?\s*/gi, '').replace(/\s*```\s*/g, '').trim();
+      const tryP = s => { try { return JSON.parse(s); } catch { return null; } };
+      let parsed = tryP(raw);
+      if (!parsed) { const m = raw.match(/\{[\s\S]*\}/); if (m) parsed = tryP(m[0]); }
+      if (parsed) setScore(parsed);
+    } catch (e) { console.error(e); }
+    finally { setScoring(false); }
+  }
+
+  const ScoreBar = ({ val, avg, max=10 }) => {
+    const pct = v => `${Math.round((v/max)*100)}%`;
+    return (
+      <div style={{ position:'relative', height:6, background:'var(--bg-elev-2)', borderRadius:999, overflow:'visible' }}>
+        <div style={{ position:'absolute', left:0, top:0, height:'100%', width:pct(avg), background:'var(--border-strong)', borderRadius:999, opacity:0.5 }}/>
+        <div style={{ position:'absolute', left:0, top:0, height:'100%', width:pct(val), background: val>=8?'#16a34a':val>=6?'#2563EB':val>=4?'#d97706':'#dc2626', borderRadius:999, transition:'width .6s ease' }}/>
+      </div>
+    );
+  };
+
+  const sectionStyle = { padding:'18px 22px', borderBottom:'1px solid var(--border)' };
+  const labelStyle = { display:'block', marginBottom:9 };
+  const paraStyle = { fontSize:14.5, lineHeight:1.72, color:'var(--text-1)', letterSpacing:'-0.007em', margin:0, whiteSpace:'pre-line' };
 
   return (
     <div className="space-y-5">
-
+      {/* Client diagnosis */}
       <div className="ff-fadeup ff-card">
         <h3 className="ff-subheading mb-4">Client diagnosis</h3>
         <div className="ff-detail-grid">
@@ -6222,60 +6373,228 @@ function ProposalOutput({ result, pillClass, copied, copyText, selectAllText }) 
 
       <PsychCard psych={result.clientPsychology} delay={30} />
 
+      {/* Proposal sections */}
       {proposal && (
-        <div className="ff-fadeup" style={{ animationDelay: '60ms' }}>
+        <div className="ff-fadeup" style={{ animationDelay:'60ms' }}>
           <div className="flex items-center justify-between mb-3">
             <h3 className="ff-subheading">Your proposal</h3>
             <button className="ff-icon-btn" onClick={() => copyText('proposal', proposalText)}>
-              {copied.proposal ? <Check size={12} /> : <Copy size={12} />}
+              {copied.proposal ? <Check size={12}/> : <Copy size={12}/>}
               {copied.proposal ? 'Copied' : 'Copy all'}
             </button>
           </div>
 
           {isStructured ? (
-            <div className="ff-card" style={{ padding: 0, overflow: 'hidden' }}>
+            <div className="ff-card" style={{ padding:0, overflow:'hidden' }}>
               {proposal.hook && (
-                <div style={{ ...sectionStyle, background: 'var(--bg)' }}>
-                  <span className="ff-section-label" style={{ ...labelStyle, color: 'var(--accent)' }}>Opening</span>
-                  <p style={{ ...paraStyle, fontWeight: 500, fontSize: 15.5 }}>{proposal.hook}</p>
+                <div style={{ ...sectionStyle, background:'var(--bg)', position:'relative' }}>
+                  <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:9 }}>
+                    <span className="ff-section-label" style={{ color:'var(--accent)', display:'block', marginBottom:0 }}>Opening</span>
+                    <button onClick={() => copyText('hook', proposal.hook)} style={{ background:'none', border:'none', cursor:'pointer', color:'var(--text-3)', display:'flex', alignItems:'center', gap:4, fontSize:11, padding:'3px 6px', borderRadius:6, fontFamily:'var(--font-text)', fontWeight:500 }}>
+                      {copied.hook ? <><Check size={11}/>Copied</> : <><Copy size={11}/>Copy</>}
+                    </button>
+                  </div>
+                  <p style={{ ...paraStyle, fontWeight:500, fontSize:15.5 }}>{proposal.hook}</p>
                 </div>
               )}
               {proposal.proof && (
-                <div style={sectionStyle}>
-                  <span className="ff-section-label" style={labelStyle}>Why I can solve this</span>
+                <div style={{ ...sectionStyle, position:'relative' }}>
+                  <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:9 }}>
+                    <span className="ff-section-label" style={{ display:'block', marginBottom:0 }}>Why I can solve this</span>
+                    <button onClick={() => copyText('proof', proposal.proof)} style={{ background:'none', border:'none', cursor:'pointer', color:'var(--text-3)', display:'flex', alignItems:'center', gap:4, fontSize:11, padding:'3px 6px', borderRadius:6, fontFamily:'var(--font-text)', fontWeight:500 }}>
+                      {copied.proof ? <><Check size={11}/>Copied</> : <><Copy size={11}/>Copy</>}
+                    </button>
+                  </div>
                   <p style={paraStyle}>{proposal.proof}</p>
                 </div>
               )}
               {proposal.whyMe && (
-                <div style={sectionStyle}>
-                  <span className="ff-section-label" style={labelStyle}>Why me specifically</span>
+                <div style={{ ...sectionStyle, position:'relative' }}>
+                  <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:9 }}>
+                    <span className="ff-section-label" style={{ display:'block', marginBottom:0 }}>Why me specifically</span>
+                    <button onClick={() => copyText('whyMe', proposal.whyMe)} style={{ background:'none', border:'none', cursor:'pointer', color:'var(--text-3)', display:'flex', alignItems:'center', gap:4, fontSize:11, padding:'3px 6px', borderRadius:6, fontFamily:'var(--font-text)', fontWeight:500 }}>
+                      {copied.whyMe ? <><Check size={11}/>Copied</> : <><Copy size={11}/>Copy</>}
+                    </button>
+                  </div>
                   <p style={paraStyle}>{proposal.whyMe}</p>
                 </div>
               )}
               {proposal.process && (
-                <div style={sectionStyle}>
-                  <span className="ff-section-label" style={labelStyle}>How we work together</span>
+                <div style={{ ...sectionStyle, position:'relative' }}>
+                  <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:9 }}>
+                    <span className="ff-section-label" style={{ display:'block', marginBottom:0 }}>How we work together</span>
+                    <button onClick={() => copyText('process', Array.isArray(proposal.process) ? proposal.process.join(' ') : proposal.process)} style={{ background:'none', border:'none', cursor:'pointer', color:'var(--text-3)', display:'flex', alignItems:'center', gap:4, fontSize:11, padding:'3px 6px', borderRadius:6, fontFamily:'var(--font-text)', fontWeight:500 }}>
+                      {copied.process ? <><Check size={11}/>Copied</> : <><Copy size={11}/>Copy</>}
+                    </button>
+                  </div>
                   <p style={paraStyle}>{Array.isArray(proposal.process) ? proposal.process.join(' ') : proposal.process}</p>
                 </div>
               )}
               {proposal.cta && (
-                <div style={{ padding: '18px 22px', background: 'var(--accent-bg-soft)', borderTop: '1px solid var(--accent-border-soft)' }}>
-                  <span className="ff-section-label" style={{ ...labelStyle, color: 'var(--accent)' }}>The ask</span>
-                  <p style={{ ...paraStyle, fontWeight: 600 }}>{proposal.cta}</p>
+                <div style={{ padding:'18px 22px', background:'var(--accent-bg-soft)', borderTop:'1px solid var(--accent-border-soft)' }}>
+                  <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:9 }}>
+                    <span className="ff-section-label" style={{ color:'var(--accent)', display:'block', marginBottom:0 }}>The ask</span>
+                    <button onClick={() => copyText('cta', proposal.cta)} style={{ background:'none', border:'none', cursor:'pointer', color:'var(--accent)', display:'flex', alignItems:'center', gap:4, fontSize:11, padding:'3px 6px', borderRadius:6, fontFamily:'var(--font-text)', fontWeight:500 }}>
+                      {copied.cta ? <><Check size={11}/>Copied</> : <><Copy size={11}/>Copy</>}
+                    </button>
+                  </div>
+                  <p style={{ ...paraStyle, fontWeight:600 }}>{proposal.cta}</p>
                 </div>
               )}
             </div>
           ) : (
             <div className="ff-card">
-              <p className="ff-output-text" onClick={selectAllText} style={{ cursor: 'text' }}>{proposalText}</p>
+              <p className="ff-output-text" onClick={selectAllText} style={{ cursor:'text' }}>{proposalText}</p>
             </div>
           )}
         </div>
       )}
 
+      {/* Tone Switcher */}
+      {proposalText && (
+        <div className="ff-fadeup" style={{ animationDelay:'75ms' }}>
+          <div style={{ display:'flex', alignItems:'center', gap:8, flexWrap:'wrap' }}>
+            <span style={{ fontSize:11.5, fontWeight:600, color:'var(--text-3)', letterSpacing:'.02em', flexShrink:0 }}>Regenerate as:</span>
+            {[
+              { label:'⚡ Sharper', instruction:'Make every sentence more direct and punchy. Cut anything that doesn't add to the argument. No softening language.' },
+              { label:'🔥 Bolder', instruction:'Make stronger, more confident claims. Take a clearer position. Sound like someone who has done this 100 times.' },
+              { label:'💬 More conversational', instruction:'Sound more human and less like a proposal template. Write how you'd talk to this client at a coffee meeting.' },
+              { label:'📊 More proof', instruction:'Strengthen the proof section with more specific evidence and sharper numbers. Make the results feel undeniable.' },
+              { label:'✂️ Shorter', instruction:'Cut this proposal by 30%. Remove every sentence that doesn't earn its place. Same impact, fewer words.' },
+            ].map(({ label, instruction }) => (
+              <button key={label} onClick={() => {
+                const el = document.querySelector('[data-regen-input]');
+                if (el) { el.value = instruction; el.dispatchEvent(new Event('change', { bubbles:true })); }
+                window._forgeRegenInstruction = instruction;
+              }} style={{ display:'inline-flex', alignItems:'center', gap:5, height:30, padding:'0 12px', background:'var(--bg)', border:'1px solid var(--border)', borderRadius:999, fontSize:12.5, fontWeight:500, color:'var(--text-2)', cursor:'pointer', letterSpacing:'-0.005em', transition:'border-color .15s, color .15s, background .15s', fontFamily:'var(--font-text)', whiteSpace:'nowrap' }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor='var(--accent)'; e.currentTarget.style.color='var(--accent)'; e.currentTarget.style.background='var(--accent-bg-soft)'; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor='var(--border)'; e.currentTarget.style.color='var(--text-2)'; e.currentTarget.style.background='var(--bg)'; }}>
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Score Card */}
+      {proposalText && (
+        <div className="ff-fadeup" style={{ animationDelay:'90ms' }}>
+          <button
+            onClick={runScorecard}
+            style={{
+              width:'100%', display:'flex', alignItems:'center', justifyContent:'space-between',
+              padding:'14px 18px', background:'var(--bg)', border:'1.5px solid var(--border)',
+              borderRadius:14, cursor:'pointer', transition:'border-color .15s, box-shadow .15s',
+              fontFamily:'var(--font-text)',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor='var(--accent)'; e.currentTarget.style.boxShadow='0 0 0 3px rgba(37,99,235,.08)'; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor='var(--border)'; e.currentTarget.style.boxShadow='none'; }}
+          >
+            <div style={{ display:'flex', alignItems:'center', gap:12 }}>
+              <div style={{ width:36, height:36, borderRadius:10, background:'var(--accent-bg-soft)', border:'1px solid var(--accent-border-soft)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                {scoring
+                  ? <Loader2 size={16} style={{ color:'var(--accent)', animation:'spin 1s linear infinite' }}/>
+                  : <Sparkles size={16} style={{ color:'var(--accent)' }}/>
+                }
+              </div>
+              <div style={{ textAlign:'left' }}>
+                <div style={{ fontSize:14, fontWeight:700, color:'var(--text-1)', letterSpacing:'-0.01em' }}>
+                  {scoring ? 'Scoring your proposal...' : score ? 'Proposal Scorecard' : 'Score vs. average proposals'}
+                </div>
+                <div style={{ fontSize:12, color:'var(--text-3)', marginTop:2 }}>
+                  {scoring ? 'Comparing against 10,000+ proposals' : score ? `${score.overallScore}/10 · avg ${score.avgScore}/10 for this job type` : 'See how yours compares to what everyone else sends'}
+                </div>
+              </div>
+            </div>
+            <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+              {score && (
+                <div style={{
+                  display:'flex', alignItems:'center', gap:6,
+                  padding:'4px 12px', borderRadius:999,
+                  background: score.overallScore>=8?'#f0fdf4':score.overallScore>=6?'#eff6ff':'#fffbeb',
+                  border:`1.5px solid ${score.overallScore>=8?'#bbf7d0':score.overallScore>=6?'#bfdbfe':'#fde68a'}`,
+                  color: score.overallScore>=8?'#16a34a':score.overallScore>=6?'#2563EB':'#d97706',
+                  fontSize:13, fontWeight:800, letterSpacing:'-0.02em',
+                }}>
+                  {score.overallScore}/10
+                </div>
+              )}
+              <ArrowRight size={15} style={{ color:'var(--text-3)', transform: scoreOpen?'rotate(90deg)':'rotate(0deg)', transition:'transform .2s' }}/>
+            </div>
+          </button>
+
+          {scoreOpen && score && (
+            <div className="ff-card" style={{ marginTop:8, padding:0, overflow:'hidden' }}>
+
+              {/* Verdict bar */}
+              <div style={{ padding:'16px 20px', background:'var(--bg)', borderBottom:'1px solid var(--border)', display:'flex', alignItems:'center', gap:16 }}>
+                <div style={{ flex:1 }}>
+                  <div style={{ display:'flex', alignItems:'baseline', gap:8, marginBottom:6 }}>
+                    <span style={{ fontSize:32, fontWeight:900, letterSpacing:'-0.04em', color: score.overallScore>=8?'#16a34a':score.overallScore>=6?'#2563EB':'#d97706', lineHeight:1 }}>{score.overallScore}</span>
+                    <span style={{ fontSize:14, color:'var(--text-3)', fontWeight:500 }}>/10</span>
+                    <span style={{ fontSize:12, color:'var(--text-3)', marginLeft:4 }}>· avg {score.avgScore}/10 for this job type</span>
+                  </div>
+                  <p style={{ fontSize:13.5, color:'var(--text-2)', lineHeight:1.6, margin:0 }}>{score.verdict}</p>
+                </div>
+                <div style={{ width:1, height:48, background:'var(--border)', flexShrink:0 }}/>
+                <div style={{ textAlign:'right', flexShrink:0, minWidth:80 }}>
+                  <div style={{ fontSize:10, fontWeight:700, color:'var(--text-3)', letterSpacing:'.08em', textTransform:'uppercase', marginBottom:4 }}>vs average</div>
+                  <div style={{ fontSize:20, fontWeight:800, color: score.overallScore>score.avgScore?'#16a34a':'#d97706', letterSpacing:'-0.03em' }}>
+                    +{(score.overallScore - score.avgScore).toFixed(1)}
+                  </div>
+                </div>
+              </div>
+
+              {/* Criteria */}
+              <div style={{ padding:'16px 20px', borderBottom:'1px solid var(--border)' }}>
+                <p style={{ fontSize:11, fontWeight:700, color:'var(--text-3)', letterSpacing:'.08em', textTransform:'uppercase', marginBottom:14 }}>Breakdown</p>
+                <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
+                  {score.criteria?.map((c, i) => (
+                    <div key={i}>
+                      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:6 }}>
+                        <span style={{ fontSize:13, fontWeight:600, color:'var(--text-1)' }}>{c.name}</span>
+                        <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+                          <span style={{ fontSize:11, color:'var(--text-3)' }}>avg {c.avg}</span>
+                          <span style={{ fontSize:14, fontWeight:800, color: c.score>=8?'#16a34a':c.score>=6?'#2563EB':c.score>=4?'#d97706':'#dc2626', minWidth:24, textAlign:'right' }}>{c.score}</span>
+                        </div>
+                      </div>
+                      <ScoreBar val={c.score} avg={c.avg}/>
+                      <p style={{ fontSize:12.5, color:'var(--text-3)', lineHeight:1.6, marginTop:6 }}>{c.feedback}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Strength + Fix */}
+              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', borderBottom:'1px solid var(--border)' }}>
+                <div style={{ padding:'14px 16px', borderRight:'1px solid var(--border)' }}>
+                  <div style={{ fontSize:10, fontWeight:700, color:'#16a34a', letterSpacing:'.08em', textTransform:'uppercase', marginBottom:7 }}>Top strength</div>
+                  <p style={{ fontSize:13, color:'var(--text-1)', lineHeight:1.6, margin:0 }}>{score.topStrength}</p>
+                </div>
+                <div style={{ padding:'14px 16px' }}>
+                  <div style={{ fontSize:10, fontWeight:700, color:'#dc2626', letterSpacing:'.08em', textTransform:'uppercase', marginBottom:7 }}>Biggest fix</div>
+                  <p style={{ fontSize:13, color:'var(--text-1)', lineHeight:1.6, margin:0 }}>{score.topFix}</p>
+                </div>
+              </div>
+
+              {/* Rewrite suggestion */}
+              {score.rewrite && (
+                <div style={{ padding:'14px 20px', background:'var(--accent-bg-soft)' }}>
+                  <div style={{ fontSize:10, fontWeight:700, color:'var(--accent)', letterSpacing:'.08em', textTransform:'uppercase', marginBottom:8 }}>Suggested rewrite</div>
+                  <p style={{ fontSize:13.5, color:'var(--text-1)', lineHeight:1.7, margin:0, fontStyle:'italic' }}>"{score.rewrite}"</p>
+                </div>
+              )}
+
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
+
+
+
 function DMOutput({ result, copied, copyText, selectAllText }) {
   return (
     <div className="space-y-5">
