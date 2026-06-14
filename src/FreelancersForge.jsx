@@ -1,12 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { buildPrompt, STRICT_RULES, CV_STRICT_RULES } from './prompts.js';
 import {
-  ArrowRight, Copy, Check, Loader2, Sparkles, Paperclip, X, ImageIcon,
-  Sun, Moon, Plus, ExternalLink, Link as LinkIcon, ChevronDown, Receipt,
-  Mail, MessageSquare, FileText, Reply, Type, Image as ImgIcon,
-  Target, Award, Briefcase, User, Layers, Wand2, Monitor,
-  TrendingUp, Trash2, HelpCircle, PenLine, Bot, Send, RotateCcw,
-  ChevronUp
+  ArrowRight, ArrowLeft, Copy, Check, Loader2, Sparkles, Paperclip, X,
+  Plus, ExternalLink, Link as LinkIcon, ChevronDown, ChevronUp, Receipt,
+  Mail, MessageSquare, FileText, CornerDownRight, Type,
+  Target, BarChart2, Briefcase, User, Layers, Wand2, Monitor,
+  TrendingUp, Trash2, CircleHelp, PenLine, Bot, SendHorizonal, RotateCcw,
+  Image as ImgIcon, ImageIcon, SlidersHorizontal, Sun, Moon, Award, Reply, Send
 } from 'lucide-react';
 
 /* ====================================================================== */
@@ -337,6 +337,7 @@ const CSS = `
   font-size: 16px; /* prevents iOS zoom on focus */
 }
 .ff-input { padding: 11px 13px; }
+select.ff-input { padding-right: 36px; appearance: auto; }
 .ff-textarea { line-height: 1.5; padding: 13px 14px; resize: vertical; }
 @media (min-width: 768px) {
   .ff-input { font-size: 14px; padding: 10px 12px; }
@@ -401,16 +402,17 @@ const CSS = `
   background: transparent;
   border: 1px solid var(--border-strong);
   color: var(--text-2);
-  padding: 6px 10px;
+  padding: 7px 12px;
   font-family: var(--font-text);
   font-size: 12px;
   font-weight: 500;
   cursor: pointer;
-  border-radius: var(--r-sm);
+  border-radius: 999px;
   display: inline-flex;
   align-items: center;
   gap: 6px;
   transition: all var(--t-fast);
+  letter-spacing: -0.01em;
 }
 .ff-icon-btn:hover {
   border-color: var(--accent);
@@ -639,7 +641,7 @@ const CSS = `
   font-family: var(--font-text);
   font-size: 13.5px;
   font-weight: 500;
-  letter-spacing: -0.005em;
+  letter-spacing: -0.01em;
   padding: 14px 0;
   margin-right: 28px;
   cursor: pointer;
@@ -681,14 +683,15 @@ const CSS = `
   font-family: var(--font-text);
   font-weight: 500;
   font-size: 13px;
-  letter-spacing: -0.005em;
-  padding: 9px 14px;
+  letter-spacing: -0.01em;
+  padding: 9px 16px 9px 14px;
   cursor: pointer;
   border-radius: 999px;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
   transition: all var(--t-fast);
+  line-height: 1;
 }
 .ff-dropdown-trigger:hover {
   background-color: var(--bg-elev-2);
@@ -3058,7 +3061,7 @@ td:last-child{text-align:right;font-weight:800;color:#0f172a;padding-right:0}
       cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center',
       color:'var(--text-2)', flexShrink:0,
     }}>
-      <ArrowRight size={15} style={{transform:'rotate(180deg)'}}/>
+      <ArrowLeft size={15}/>
     </button>
   );
 
@@ -6140,7 +6143,7 @@ function Tooltip({ text, align = 'center' }) {
   return (
     <span className="ff-tooltip-wrap">
       <button type="button" className="ff-tooltip-trigger" aria-label="More info" tabIndex={0} onClick={(e) => e.preventDefault()}>
-        <HelpCircle size={13} strokeWidth={2.2} />
+        <CircleHelp size={13} strokeWidth={2.2} />
       </button>
       <span className={`ff-tooltip-bubble${align === 'right' ? ' ff-tooltip-bubble--right' : ''}`} role="tooltip">{text}</span>
     </span>
