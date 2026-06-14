@@ -2704,7 +2704,7 @@ function InvoiceTab() {
   /* ── Status dropdown component ──────────────────────────────── */
   function StatusDropdown({ status, onChange, size='sm' }) {
     const [open, setOpen] = useState(false);
-    const [pos, setPos] = useState({top:0, right:0});
+    const [pos, setPos] = useState({top:0, left:0, right:'auto'});
     const ref = useRef(null);
     const s = ST[status] || ST.unpaid;
 
@@ -2718,7 +2718,14 @@ function InvoiceTab() {
       e.stopPropagation();
       if (ref.current) {
         const r = ref.current.getBoundingClientRect();
-        setPos({ top: r.bottom + window.scrollY + 6, right: window.innerWidth - r.right });
+        const dropW = 148;
+        const spaceRight = window.innerWidth - r.right;
+        // If enough space on right, align left edge; otherwise right-align
+        if (spaceRight >= dropW + 8) {
+          setPos({ top: r.bottom + window.scrollY + 6, left: r.left, right: 'auto' });
+        } else {
+          setPos({ top: r.bottom + window.scrollY + 6, left: 'auto', right: window.innerWidth - r.right });
+        }
       }
       setOpen(o => !o);
     };
@@ -2744,12 +2751,13 @@ function InvoiceTab() {
         </button>
         {open && (
           <div style={{
-            position:'fixed', zIndex:9999,
+            position:'fixed', zIndex:99999,
             background:'var(--bg)', border:'1px solid var(--border)',
             borderRadius:13, padding:6, minWidth:148,
             boxShadow:'0 12px 40px rgba(0,0,0,.18), 0 2px 8px rgba(0,0,0,.08)',
             top: pos.top,
-            right: pos.right,
+            left: pos.left !== 'auto' ? pos.left : 'auto',
+            right: pos.right !== 'auto' ? pos.right : 'auto',
           }}>
             {Object.entries(ST).map(([key, st]) => (
               <button key={key} onClick={e => {e.stopPropagation(); onChange(key); setOpen(false);}} style={{
@@ -3819,6 +3827,7 @@ function AskAnythingTab() {
       setActiveId(id);
     }
 
+    const currentAttachment = attachment; // capture before setAttachment(null)
     const userMsg = { role: 'user', content: trimmed || `[Attached: ${attachment?.name}]`, attachment: attachment ? { type: attachment.type, name: attachment.name, preview: attachment.preview } : null, ts: Date.now() };
     const currentMsgs = convos.find(c => c.id === currentId)?.messages || [];
     const updatedMsgs = [...currentMsgs, userMsg];
@@ -3834,17 +3843,23 @@ function AskAnythingTab() {
       const recentMsgs = updatedMsgs.length > 10 ? updatedMsgs.slice(-10) : updatedMsgs;
       const apiMessages = recentMsgs.map((m, idx) => {
         const isLast = idx === recentMsgs.length - 1;
-        if (m.role !== 'user') return { role: m.role, content: m.content || '' };
-        const parts = [];
-        if (isLast && attachment) {
-          if (attachment.type === 'image') parts.push({ type: 'image', source: { type: 'base64', media_type: attachment.mediaType, data: attachment.data } });
-          else if (attachment.type === 'pdf') parts.push({ type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: attachment.data } });
+        if (m.role !== 'user') {
+          return { role: 'assistant', content: m.content || ' ' };
         }
-        const msgText = isLast ? trimmed : (m.content || '');
-        if (msgText) parts.push({ type: 'text', text: msgText });
-        if (parts.length === 0) parts.push({ type: 'text', text: m.content || '' });
+        // For non-last messages just use stored content
+        if (!isLast) {
+          return { role: 'user', content: m.content || ' ' };
+        }
+        // For the last (current) message, include attachment if any
+        const parts = [];
+        if (currentAttachment) {
+          if (currentAttachment.type === 'image') parts.push({ type: 'image', source: { type: 'base64', media_type: currentAttachment.mediaType, data: currentAttachment.data } });
+          else if (currentAttachment.type === 'pdf') parts.push({ type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: currentAttachment.data } });
+        }
+        if (trimmed) parts.push({ type: 'text', text: trimmed });
+        if (parts.length === 0) parts.push({ type: 'text', text: m.content || ' ' });
         return { role: 'user', content: parts.length === 1 && parts[0].type === 'text' ? parts[0].text : parts };
-      }).filter(m => m.content && (typeof m.content === 'string' ? m.content.length > 0 : m.content.length > 0));
+      });
 
       const response = await fetch('/api/claude', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
