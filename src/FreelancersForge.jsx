@@ -3834,15 +3834,17 @@ function AskAnythingTab() {
       const recentMsgs = updatedMsgs.length > 10 ? updatedMsgs.slice(-10) : updatedMsgs;
       const apiMessages = recentMsgs.map((m, idx) => {
         const isLast = idx === recentMsgs.length - 1;
-        if (m.role !== 'user') return { role: m.role, content: m.content };
+        if (m.role !== 'user') return { role: m.role, content: m.content || '' };
         const parts = [];
         if (isLast && attachment) {
           if (attachment.type === 'image') parts.push({ type: 'image', source: { type: 'base64', media_type: attachment.mediaType, data: attachment.data } });
           else if (attachment.type === 'pdf') parts.push({ type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: attachment.data } });
         }
-        if (trimmed) parts.push({ type: 'text', text: trimmed });
+        const msgText = isLast ? trimmed : (m.content || '');
+        if (msgText) parts.push({ type: 'text', text: msgText });
+        if (parts.length === 0) parts.push({ type: 'text', text: m.content || '' });
         return { role: 'user', content: parts.length === 1 && parts[0].type === 'text' ? parts[0].text : parts };
-      });
+      }).filter(m => m.content && (typeof m.content === 'string' ? m.content.length > 0 : m.content.length > 0));
 
       const response = await fetch('/api/claude', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
