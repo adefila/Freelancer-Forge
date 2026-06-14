@@ -2625,14 +2625,23 @@ function generateInvoiceNumber(invoices) {
 
 function InvoiceTab() {
   const [invoices, setInvoices] = useState(() => loadInvoices());
-  const [view, setView]   = useState('list');
+  const [view, setView]     = useState('list');
   const [current, setCurrent] = useState(null);
+
+  const STATUS_OPTIONS = ['unpaid','paid','overdue'];
+  const STATUS_STYLE = {
+    paid:    { bg:'#dcfce7', color:'#15803d', border:'#bbf7d0', label:'PAID' },
+    unpaid:  { bg:'#fef9c3', color:'#92400e', border:'#fde68a', label:'UNPAID' },
+    overdue: { bg:'#fee2e2', color:'#b91c1c', border:'#fca5a5', label:'OVERDUE' },
+  };
 
   const blankInvoice = () => ({
     id: Date.now(), createdAt: Date.now(),
     number: generateInvoiceNumber(invoices),
     date: new Date().toISOString().slice(0,10),
     dueDate: new Date(Date.now()+14*86400000).toISOString().slice(0,10),
+    status: 'unpaid',
+    logo: null,           // base64 data URL
     from: { name:'', email:'', phone:'', address:'' },
     to:   { name:'', email:'', phone:'', address:'' },
     items: [{ id:1, description:'', qty:1, rate:'' }],
@@ -2643,149 +2652,169 @@ function InvoiceTab() {
   const openEdit    = (inv) => { setCurrent({...inv}); setView('create'); };
   const openPreview = (inv) => { setCurrent({...inv}); setView('preview'); };
   const deleteInvoice = (id) => {
-    const u = invoices.filter(i => i.id !== id);
+    const u = invoices.filter(i=>i.id!==id);
     setInvoices(u); saveInvoices(u);
   };
   const saveInvoice = () => {
-    const exists = invoices.find(i => i.id === current.id);
-    const u = exists ? invoices.map(i => i.id===current.id ? current : i) : [current,...invoices];
+    const exists = invoices.find(i=>i.id===current.id);
+    const u = exists ? invoices.map(i=>i.id===current.id?current:i) : [current,...invoices];
     setInvoices(u); saveInvoices(u); setView('preview');
   };
   const updateItem = (id,f,v) =>
-    setCurrent(c => ({...c, items: c.items.map(it => it.id===id ? {...it,[f]:v} : it)}));
+    setCurrent(c=>({...c,items:c.items.map(it=>it.id===id?{...it,[f]:v}:it)}));
   const addItem = () =>
-    setCurrent(c => ({...c, items:[...c.items,{id:Date.now(),description:'',qty:1,rate:''}]}));
+    setCurrent(c=>({...c,items:[...c.items,{id:Date.now(),description:'',qty:1,rate:''}]}));
   const removeItem = (id) =>
-    setCurrent(c => ({...c, items: c.items.filter(it => it.id!==id)}));
+    setCurrent(c=>({...c,items:c.items.filter(it=>it.id!==id)}));
+  const toggleStatus = (inv) => {
+    const next = { unpaid:'paid', paid:'overdue', overdue:'unpaid' };
+    const updated = {...inv, status: next[inv.status||'unpaid']};
+    const u = invoices.map(i=>i.id===inv.id?updated:i);
+    setInvoices(u); saveInvoices(u);
+    if (current?.id===inv.id) setCurrent(updated);
+  };
 
-  const subtotal  = inv => (inv?.items||[]).reduce((s,it)=>s+(parseFloat(it.qty)||0)*(parseFloat(it.rate)||0),0);
-  const taxAmt    = inv => subtotal(inv)*((parseFloat(inv?.tax)||0)/100);
-  const discAmt   = inv => subtotal(inv)*((parseFloat(inv?.discount)||0)/100);
-  const total     = inv => subtotal(inv)+taxAmt(inv)-discAmt(inv);
-  const fmt       = (n,cur='USD') => { try { return new Intl.NumberFormat('en-US',{style:'currency',currency:cur}).format(n||0); } catch { return (cur||'')+' '+parseFloat(n||0).toFixed(2); } };
+  const subtotal = inv=>(inv?.items||[]).reduce((s,it)=>s+(parseFloat(it.qty)||0)*(parseFloat(it.rate)||0),0);
+  const taxAmt   = inv=>subtotal(inv)*((parseFloat(inv?.tax)||0)/100);
+  const discAmt  = inv=>subtotal(inv)*((parseFloat(inv?.discount)||0)/100);
+  const total    = inv=>subtotal(inv)+taxAmt(inv)-discAmt(inv);
+  const fmt      = (n,cur='USD')=>{ try{return new Intl.NumberFormat('en-US',{style:'currency',currency:cur}).format(n||0);}catch{return(cur||'')+' '+parseFloat(n||0).toFixed(2);} };
+
+  const handleLogo = (file, cb) => {
+    if (!file || !file.type.startsWith('image/')) return;
+    if (file.size > 2*1024*1024) return;
+    const r = new FileReader();
+    r.onload = e => cb(e.target.result);
+    r.readAsDataURL(file);
+  };
 
   /* ── PDF ─────────────────────────────────────────────────── */
   function buildPDFHtml(inv) {
     const sub=subtotal(inv),tax=taxAmt(inv),disc=discAmt(inv),tot=total(inv);
     const hasTax=parseFloat(inv.tax)>0, hasDisc=parseFloat(inv.discount)>0;
-    const A='#1a1a2e', AL='#2563EB', AG='#16213e';
+    const st = STATUS_STYLE[inv.status||'unpaid'];
+    const DARK='#1a1a2e', DARK2='#16213e', BLUE='#2563EB';
+
+    // Stamp SVG - rotated watermark style
+    const stampSVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="130" height="130" style="transform:rotate(-22deg);opacity:.13">
+      <circle cx="80" cy="80" r="74" fill="none" stroke="${st.color}" stroke-width="6"/>
+      <circle cx="80" cy="80" r="64" fill="none" stroke="${st.color}" stroke-width="2"/>
+      <text x="80" y="88" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="26" font-weight="900" fill="${st.color}" letter-spacing="6">${st.label}</text>
+    </svg>`;
+
     return `<!DOCTYPE html><html><head><meta charset="utf-8"/><title>${inv.number}</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Inter',system-ui,sans-serif;background:#f4f6fb;color:#1a1a2e;font-size:13.5px;line-height:1.5;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-.shell{min-height:100vh;background:#f4f6fb;padding:40px 24px}
-.page{max-width:760px;margin:0 auto;background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.10),0 4px 12px rgba(0,0,0,.06)}
+html,body{height:100%}
+body{font-family:'Inter',system-ui,sans-serif;background:#eef2f7;color:#1e293b;font-size:13px;line-height:1.5;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.shell{padding:32px 20px;min-height:100%}
+.page{max-width:720px;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.10)}
 /* ── header ── */
-.hd{background:linear-gradient(135deg,${A} 0%,${AG} 100%);padding:44px 52px 40px;position:relative;overflow:hidden}
-.hd::before{content:'';position:absolute;top:-60px;right:-60px;width:220px;height:220px;border-radius:50%;background:rgba(255,255,255,.04)}
-.hd::after{content:'';position:absolute;bottom:-80px;left:30%;width:300px;height:300px;border-radius:50%;background:rgba(37,99,235,.08)}
-.hd-inner{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;position:relative;z-index:1;flex-wrap:wrap}
-.hd-left{}
-.inv-word{font-size:11px;font-weight:800;color:rgba(255,255,255,.45);letter-spacing:.18em;text-transform:uppercase;margin-bottom:10px}
-.inv-num{font-size:38px;font-weight:900;color:#fff;letter-spacing:-0.05em;line-height:1}
+.hd{background:linear-gradient(135deg,${DARK} 0%,${DARK2} 100%);padding:36px 44px 32px;position:relative;overflow:hidden}
+.hd-circle1{position:absolute;top:-48px;right:-48px;width:180px;height:180px;border-radius:50%;background:rgba(255,255,255,.035);pointer-events:none}
+.hd-circle2{position:absolute;bottom:-72px;left:38%;width:260px;height:260px;border-radius:50%;background:rgba(37,99,235,.06);pointer-events:none}
+.hd-inner{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;position:relative;z-index:1;flex-wrap:wrap}
+.inv-eyebrow{font-size:9.5px;font-weight:800;color:rgba(255,255,255,.38);letter-spacing:.2em;text-transform:uppercase;margin-bottom:8px}
+.inv-num{font-size:34px;font-weight:900;color:#fff;letter-spacing:-0.05em;line-height:1}
 .inv-dates{display:flex;gap:20px;margin-top:14px;flex-wrap:wrap}
-.inv-date-item{}
-.inv-date-label{font-size:9px;font-weight:700;color:rgba(255,255,255,.4);letter-spacing:.1em;text-transform:uppercase;margin-bottom:3px}
-.inv-date-val{font-size:13px;font-weight:600;color:rgba(255,255,255,.85)}
-.hd-right{text-align:right}
-.brand-name{font-size:20px;font-weight:800;color:#fff;letter-spacing:-0.02em;margin-bottom:4px}
-.brand-detail{font-size:12px;color:rgba(255,255,255,.6);line-height:1.7}
-/* ── status badge ── */
-.status-strip{background:${AL};padding:10px 52px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
-.status-label{font-size:10px;font-weight:800;color:rgba(255,255,255,.7);letter-spacing:.12em;text-transform:uppercase}
-.status-val{font-size:13px;font-weight:700;color:#fff}
+.inv-date-lbl{font-size:8.5px;font-weight:700;color:rgba(255,255,255,.35);letter-spacing:.1em;text-transform:uppercase;margin-bottom:2px}
+.inv-date-val{font-size:12.5px;font-weight:600;color:rgba(255,255,255,.8)}
+.hd-brand{text-align:right}
+.brand-logo{max-width:100px;max-height:48px;object-fit:contain;margin-bottom:8px;display:block;margin-left:auto;filter:brightness(0) invert(1) opacity(.85)}
+.brand-name{font-size:17px;font-weight:800;color:#fff;letter-spacing:-0.02em;margin-bottom:3px}
+.brand-detail{font-size:11.5px;color:rgba(255,255,255,.55);line-height:1.65}
+/* ── blue bar ── */
+.blue-bar{background:${BLUE};padding:9px 32px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.bar-to{font-size:13.5px;font-weight:700;color:#fff}
+.bar-to-lbl{font-size:8.5px;font-weight:700;color:rgba(255,255,255,.55);letter-spacing:.1em;text-transform:uppercase;margin-bottom:1px}
+.bar-amt{text-align:right}
+.bar-amt-lbl{font-size:8.5px;font-weight:700;color:rgba(255,255,255,.55);letter-spacing:.1em;text-transform:uppercase;margin-bottom:1px}
+.bar-amt-val{font-size:17px;font-weight:900;color:#fff;letter-spacing:-0.03em}
+/* ── stamp ── */
+.stamp-wrap{position:absolute;right:20px;top:50%;transform:translateY(-50%);pointer-events:none}
 /* ── parties ── */
-.parties{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid #edf0f7}
-.party{padding:28px 32px}
-.party:first-child{border-right:1px solid #edf0f7}
-.party-badge{display:inline-block;background:#f0f4ff;border:1px solid #dbeafe;border-radius:6px;padding:3px 10px;font-size:9.5px;font-weight:800;color:${AL};letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px}
-.party-name{font-size:16px;font-weight:800;color:#1a1a2e;margin-bottom:4px;letter-spacing:-0.01em}
-.party-detail{font-size:12.5px;color:#64748b;line-height:1.7}
-/* ── table ── */
-.table-section{padding:32px 32px 0}
-.table-label{font-size:9.5px;font-weight:800;color:#94a3b8;letter-spacing:.12em;text-transform:uppercase;margin-bottom:14px}
-table{width:100%;border-collapse:collapse;border-radius:12px;overflow:hidden;border:1px solid #edf0f7}
-thead{background:#f8fafc}
-th{padding:11px 16px;font-size:10px;font-weight:800;color:#64748b;letter-spacing:.08em;text-transform:uppercase;text-align:left;border-bottom:1px solid #edf0f7}
-th:not(:nth-child(2)){text-align:right}
+.parties{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid #e8edf5}
+.party{padding:22px 28px;position:relative}
+.party:first-child{border-right:1px solid #e8edf5}
+.party-badge{display:inline-flex;align-items:center;gap:5px;background:#eff6ff;border:1px solid #dbeafe;border-radius:5px;padding:2px 8px;font-size:8.5px;font-weight:800;color:${BLUE};letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px}
+.party-name{font-size:15px;font-weight:800;color:#0f172a;margin-bottom:3px;letter-spacing:-0.01em}
+.party-detail{font-size:12px;color:#64748b;line-height:1.7}
+/* ── items table ── */
+.items-section{padding:24px 28px 0}
+.items-label{font-size:9px;font-weight:800;color:#94a3b8;letter-spacing:.14em;text-transform:uppercase;margin-bottom:12px}
+table{width:100%;border-collapse:collapse;border:1px solid #e8edf5;border-radius:10px;overflow:hidden}
+thead tr{background:#f8fafc}
+th{padding:10px 14px;font-size:9px;font-weight:800;color:#64748b;letter-spacing:.08em;text-transform:uppercase;border-bottom:1px solid #e8edf5;text-align:left}
+th:not(:nth-child(2)){text-align:right;width:80px}
 th:nth-child(2){text-align:left}
-th:first-child{text-align:center;width:48px}
-tbody tr{border-bottom:1px solid #f1f5f9;transition:background .15s}
-tbody tr:last-child{border-bottom:none}
+th:first-child{text-align:center;width:38px}
 tbody tr:nth-child(even){background:#fafbff}
-td{padding:14px 16px;font-size:13.5px;color:#334155;vertical-align:middle}
-td:first-child{text-align:center;font-size:11px;font-weight:800;color:#94a3b8}
-td:nth-child(2){font-weight:600;color:#1e293b}
-td:nth-child(3),td:nth-child(4){text-align:right;color:#64748b}
-td:nth-child(5){text-align:right;font-weight:800;color:#1a1a2e}
+tbody tr{border-bottom:1px solid #f1f5f9}
+tbody tr:last-child{border-bottom:none}
+td{padding:11px 14px;font-size:13px;color:#334155;vertical-align:middle}
+td:first-child{text-align:center;font-size:10px;font-weight:800;color:#94a3b8}
+td:nth-child(2){font-weight:600;color:#0f172a}
+td:nth-child(3),td:nth-child(4){text-align:right;color:#64748b;font-size:12.5px}
+td:nth-child(5){text-align:right;font-weight:800;color:#0f172a}
 /* ── totals ── */
-.totals-section{padding:20px 32px 32px;display:flex;justify-content:flex-end}
-.totals-card{min-width:280px;background:#f8fafc;border:1px solid #edf0f7;border-radius:14px;overflow:hidden}
-.tot-row{display:flex;justify-content:space-between;align-items:center;padding:10px 18px;font-size:13px;color:#64748b;border-bottom:1px solid #edf0f7}
+.totals-section{padding:16px 28px 24px;display:flex;justify-content:flex-end}
+.totals-card{min-width:264px;border:1px solid #e8edf5;border-radius:12px;overflow:hidden}
+.tot-row{display:flex;justify-content:space-between;padding:9px 16px;font-size:12.5px;color:#64748b;border-bottom:1px solid #f1f5f9}
 .tot-row span:last-child{font-weight:600;color:#334155}
-.tot-final{display:flex;justify-content:space-between;align-items:center;padding:16px 18px;background:linear-gradient(135deg,${A},${AG})}
-.tot-final-label{font-size:10px;font-weight:800;color:rgba(255,255,255,.65);letter-spacing:.1em;text-transform:uppercase}
-.tot-final-amt{font-size:26px;font-weight:900;color:#fff;letter-spacing:-0.04em}
-/* ── footer section ── */
-.footer-section{padding:28px 32px;display:grid;grid-template-columns:1fr 1fr;gap:32px;border-top:1px solid #edf0f7;background:#f8fafc}
-.footer-label{font-size:9.5px;font-weight:800;color:#94a3b8;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px}
-.footer-body{font-size:12.5px;color:#475569;line-height:1.75}
-.sign-name{font-size:16px;font-weight:800;color:#1a1a2e;margin-bottom:2px}
-/* ── thank you ── */
-.ty-band{background:linear-gradient(135deg,${A},${AG});padding:24px 32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
-.ty-text{font-size:26px;font-weight:900;color:#fff;letter-spacing:-0.04em}
-.ty-contact{display:flex;gap:20px;flex-wrap:wrap}
-.ty-item{font-size:11.5px;color:rgba(255,255,255,.65)}
-.ty-item strong{color:rgba(255,255,255,.9);margin-right:4px}
+.tot-discount{color:#dc2626}
+.tot-final{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;background:linear-gradient(135deg,${DARK},${DARK2})}
+.tot-final-lbl{font-size:8.5px;font-weight:800;color:rgba(255,255,255,.55);letter-spacing:.1em;text-transform:uppercase}
+.tot-final-amt{font-size:22px;font-weight:900;color:#fff;letter-spacing:-0.04em}
+/* ── footer ── */
+.footer-row{display:grid;grid-template-columns:1fr 1fr;gap:24px;padding:20px 28px;border-top:1px solid #e8edf5;background:#f8fafc}
+.footer-lbl{font-size:8.5px;font-weight:800;color:#94a3b8;letter-spacing:.12em;text-transform:uppercase;margin-bottom:6px}
+.footer-body{font-size:12px;color:#475569;line-height:1.75}
+/* ── thank you band ── */
+.ty{background:linear-gradient(135deg,${DARK},${DARK2});padding:18px 28px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.ty-text{font-size:21px;font-weight:900;color:#fff;letter-spacing:-0.04em}
+.ty-contact{display:flex;gap:16px;flex-wrap:wrap}
+.ty-item{font-size:11px;color:rgba(255,255,255,.6)}
+.ty-item strong{color:rgba(255,255,255,.88);margin-right:3px}
 @media print{
-  body{background:#fff;padding:0}
-  .shell{background:#fff;padding:0;min-height:auto}
-  .page{box-shadow:none;border-radius:0;margin:0;max-width:100%}
-}
-@media(max-width:600px){
-  .hd{padding:28px 24px 24px}
-  .inv-num{font-size:28px}
-  .status-strip{padding:10px 24px}
-  .party{padding:18px 20px}
-  .table-section,.totals-section,.footer-section{padding-left:16px;padding-right:16px}
-  .totals-section{justify-content:stretch}
-  .totals-card{min-width:100%;width:100%}
-  .footer-section{grid-template-columns:1fr}
-  .ty-band{padding:20px 20px}
-  .ty-text{font-size:20px}
+  body,html{background:#fff}
+  .shell{padding:0;background:#fff}
+  .page{box-shadow:none;border-radius:0;max-width:100%;margin:0}
+  .stamp-wrap{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
 </style></head><body>
-<div class="shell">
-<div class="page">
+<div class="shell"><div class="page">
+
   <div class="hd">
+    <div class="hd-circle1"></div><div class="hd-circle2"></div>
     <div class="hd-inner">
-      <div class="hd-left">
-        <div class="inv-word">Invoice</div>
+      <div>
+        <div class="inv-eyebrow">Invoice</div>
         <div class="inv-num">${inv.number}</div>
         <div class="inv-dates">
-          <div class="inv-date-item"><div class="inv-date-label">Issue Date</div><div class="inv-date-val">${inv.date}</div></div>
-          ${inv.dueDate ? `<div class="inv-date-item"><div class="inv-date-label">Due Date</div><div class="inv-date-val">${inv.dueDate}</div></div>` : ''}
+          <div><div class="inv-date-lbl">Issue Date</div><div class="inv-date-val">${inv.date}</div></div>
+          ${inv.dueDate?`<div><div class="inv-date-lbl">Due Date</div><div class="inv-date-val">${inv.dueDate}</div></div>`:''}
         </div>
       </div>
-      <div class="hd-right">
-        <div class="brand-name">${inv.from.name||'Your Business'}</div>
+      <div class="hd-brand">
+        ${inv.logo?`<img src="${inv.logo}" class="brand-logo" alt="Logo"/>`:''}
+        ${!inv.logo&&inv.from.name?`<div class="brand-name">${inv.from.name}</div>`:''}
         ${inv.from.email?`<div class="brand-detail">${inv.from.email}</div>`:''}
         ${inv.from.phone?`<div class="brand-detail">${inv.from.phone}</div>`:''}
-        ${inv.from.address?`<div class="brand-detail" style="white-space:pre-line;margin-top:2px">${inv.from.address}</div>`:''}
       </div>
     </div>
   </div>
 
-  <div class="status-strip">
+  <div class="blue-bar" style="position:relative;overflow:hidden">
     <div>
-      <div class="status-label">Billed to</div>
-      <div class="status-val">${inv.to.name||'—'}</div>
+      <div class="bar-to-lbl">Billed to</div>
+      <div class="bar-to">${inv.to.name||'—'}</div>
     </div>
-    <div style="text-align:right">
-      <div class="status-label">Amount Due</div>
-      <div class="status-val" style="font-size:16px">${fmt(tot,inv.currency)}</div>
+    <div class="bar-amt">
+      <div class="bar-amt-lbl">Total Due</div>
+      <div class="bar-amt-val">${fmt(tot,inv.currency)}</div>
     </div>
+    <div class="stamp-wrap">${stampSVG}</div>
   </div>
 
   <div class="parties">
@@ -2794,19 +2823,17 @@ td:nth-child(5){text-align:right;font-weight:800;color:#1a1a2e}
       <div class="party-name">${inv.to.name||'—'}</div>
       ${inv.to.email?`<div class="party-detail">${inv.to.email}</div>`:''}
       ${inv.to.phone?`<div class="party-detail">${inv.to.phone}</div>`:''}
-      ${inv.to.address?`<div class="party-detail" style="white-space:pre-line;margin-top:3px">${inv.to.address}</div>`:''}
+      ${inv.to.address?`<div class="party-detail" style="white-space:pre-line;margin-top:2px">${inv.to.address}</div>`:''}
     </div>
     <div class="party">
       <div class="party-badge">From</div>
       <div class="party-name">${inv.from.name||'—'}</div>
-      ${inv.from.email?`<div class="party-detail">${inv.from.email}</div>`:''}
-      ${inv.from.phone?`<div class="party-detail">${inv.from.phone}</div>`:''}
-      ${inv.from.address?`<div class="party-detail" style="white-space:pre-line;margin-top:3px">${inv.from.address}</div>`:''}
+      ${inv.from.address?`<div class="party-detail" style="white-space:pre-line">${inv.from.address}</div>`:''}
     </div>
   </div>
 
-  <div class="table-section">
-    <div class="table-label">Services &amp; Deliverables</div>
+  <div class="items-section">
+    <div class="items-label">Services &amp; Deliverables</div>
     <table>
       <thead><tr><th>#</th><th>Description</th><th>Rate</th><th>Qty</th><th>Total</th></tr></thead>
       <tbody>${inv.items.map((it,i)=>{
@@ -2820,34 +2847,33 @@ td:nth-child(5){text-align:right;font-weight:800;color:#1a1a2e}
     <div class="totals-card">
       <div class="tot-row"><span>Subtotal</span><span>${fmt(sub,inv.currency)}</span></div>
       ${hasTax?`<div class="tot-row"><span>Tax (${inv.tax}%)</span><span>${fmt(tax,inv.currency)}</span></div>`:''}
-      ${hasDisc?`<div class="tot-row"><span>Discount (${inv.discount}%)</span><span style="color:#dc2626">− ${fmt(disc,inv.currency)}</span></div>`:''}
+      ${hasDisc?`<div class="tot-row"><span>Discount (${inv.discount}%)</span><span class="tot-discount">− ${fmt(disc,inv.currency)}</span></div>`:''}
       <div class="tot-final">
-        <span class="tot-final-label">Total Due</span>
+        <span class="tot-final-lbl">Total Due</span>
         <span class="tot-final-amt">${fmt(tot,inv.currency)}</span>
       </div>
     </div>
   </div>
 
-  <div class="footer-section">
-    <div>
-      ${inv.notes?`<div class="footer-label">Notes &amp; Terms</div><div class="footer-body">${inv.notes}</div>`:'<div class="footer-body" style="color:#cbd5e1;font-style:italic">No notes added.</div>'}
-    </div>
-    <div>
-      <div class="footer-label">Issued by</div>
-      <div class="sign-name">${inv.from.name||''}</div>
+  ${(inv.notes||inv.from.name)?`
+  <div class="footer-row">
+    <div>${inv.notes?`<div class="footer-lbl">Notes &amp; Terms</div><div class="footer-body">${inv.notes}</div>`:''}</div>
+    <div style="text-align:right">
+      <div class="footer-lbl">Issued by</div>
+      <div style="font-size:14px;font-weight:800;color:#0f172a;margin-bottom:2px">${inv.from.name||''}</div>
       ${inv.from.email?`<div class="footer-body">${inv.from.email}</div>`:''}
     </div>
-  </div>
+  </div>`:''}
 
-  <div class="ty-band">
+  <div class="ty">
     <div class="ty-text">Thank you.</div>
     <div class="ty-contact">
       ${inv.from.phone?`<div class="ty-item"><strong>Tel</strong>${inv.from.phone}</div>`:''}
       ${inv.from.email?`<div class="ty-item"><strong>Email</strong>${inv.from.email}</div>`:''}
     </div>
   </div>
-</div>
-</div></body></html>`;
+
+</div></div></body></html>`;
   }
 
   function downloadPDF(inv) {
@@ -2861,97 +2887,103 @@ td:nth-child(5){text-align:right;font-weight:800;color:#1a1a2e}
     lbl:  { fontSize:11, fontWeight:700, color:'var(--text-3)', letterSpacing:'0.07em', textTransform:'uppercase', marginBottom:6, display:'block' },
     row:  { display:'flex', flexDirection:'column', gap:6 },
   };
-
-  const Btn = ({primary,onClick,children,sm,style={}}) => (
+  const Btn = ({primary,sm,onClick,children,style={}})=>(
     <button onClick={onClick} style={{
       display:'inline-flex',alignItems:'center',gap:7,
-      height:sm?36:42, padding:sm?'0 16px':'0 22px',
+      height:sm?34:42,padding:sm?'0 14px':'0 20px',
       background:primary?'var(--accent)':'transparent',
       color:primary?'#fff':'var(--text-2)',
       border:primary?'none':'1.5px solid var(--border)',
-      borderRadius:999, fontSize:sm?13:14, fontWeight:600,
-      cursor:'pointer', whiteSpace:'nowrap', flexShrink:0,
-      letterSpacing:'-0.01em', transition:'opacity .15s, transform .1s',
-      ...style
+      borderRadius:999,fontSize:sm?12.5:14,fontWeight:600,
+      cursor:'pointer',whiteSpace:'nowrap',flexShrink:0,
+      letterSpacing:'-0.01em',...style
     }}>{children}</button>
   );
-
-  const BackBtn = ({onClick}) => (
-    <button onClick={onClick} style={{
-      width:40,height:40,borderRadius:12,
-      background:'var(--bg-elev-1)',border:'1px solid var(--border)',
-      cursor:'pointer',display:'flex',alignItems:'center',
-      justifyContent:'center',color:'var(--text-2)',flexShrink:0
-    }}><ArrowRight size={16} style={{transform:'rotate(180deg)'}} /></button>
+  const BackBtn = ({onClick})=>(
+    <button onClick={onClick} style={{width:40,height:40,borderRadius:12,background:'var(--bg-elev-1)',border:'1px solid var(--border)',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',color:'var(--text-2)',flexShrink:0}}>
+      <ArrowRight size={16} style={{transform:'rotate(180deg)'}}/>
+    </button>
   );
-
-  const Field = ({label,children}) => (
+  const Field = ({label,children})=>(
     <div style={C.row}><label style={C.lbl}>{label}</label>{children}</div>
   );
 
+  const StatusBadge = ({status, onClick, size='sm'}) => {
+    const s = STATUS_STYLE[status||'unpaid'];
+    return (
+      <button onClick={onClick} title="Click to change status" style={{
+        display:'inline-flex',alignItems:'center',gap:5,
+        padding: size==='lg'?'5px 12px':'3px 9px',
+        background:s.bg, color:s.color, border:`1.5px solid ${s.border}`,
+        borderRadius:999, fontSize:size==='lg'?12:10.5, fontWeight:800,
+        letterSpacing:'0.07em', textTransform:'uppercase', cursor:onClick?'pointer':'default',
+        flexShrink:0, transition:'opacity .15s'
+      }}>
+        <span style={{width:6,height:6,borderRadius:'50%',background:s.color,flexShrink:0}}/>
+        {s.label}
+      </button>
+    );
+  };
+
   /* ═══════════════════════════════════════════════════════════
-     LIST VIEW
+     LIST
   ═══════════════════════════════════════════════════════════ */
-  if (view === 'list') return (
+  if (view==='list') return (
     <div style={{paddingTop:28,paddingBottom:48}}>
       <style>{`
-        .inv-hdr{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:28px;gap:16px;flex-wrap:wrap}
-        .inv-row{display:flex;align-items:center;gap:14px;padding:16px 20px;background:var(--bg);border:1.5px solid var(--border);border-radius:14px;cursor:pointer;transition:border-color .18s,box-shadow .18s;user-select:none}
+        .inv-hdr{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:24px;gap:14px;flex-wrap:wrap}
+        .inv-row{display:flex;align-items:center;gap:12px;padding:14px 18px;background:var(--bg);border:1.5px solid var(--border);border-radius:14px;cursor:pointer;transition:border-color .18s,box-shadow .18s}
         .inv-row:hover{border-color:var(--accent);box-shadow:0 0 0 3px rgba(37,99,235,.07)}
-        .inv-row-icon{width:42px;height:42px;border-radius:11px;background:var(--accent-bg-soft);border:1px solid var(--accent-border-soft);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+        .inv-row-icon{width:40px;height:40px;border-radius:11px;background:var(--accent-bg-soft);border:1px solid var(--accent-border-soft);display:flex;align-items:center;justify-content:center;flex-shrink:0}
         .inv-row-body{flex:1;min-width:0}
         .inv-row-num{font-size:14px;font-weight:700;color:var(--text-1);letter-spacing:-0.01em}
-        .inv-row-client{font-size:13px;color:var(--text-3);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-        .inv-row-meta{font-size:11.5px;color:var(--text-3);margin-top:2px}
-        .inv-row-right{display:flex;align-items:center;gap:10px;flex-shrink:0}
-        .inv-row-amt{font-size:16px;font-weight:800;color:var(--text-1);letter-spacing:-0.03em}
-        .inv-act-btn{width:32px;height:32px;border-radius:9px;background:var(--bg-elev-1);border:1px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-3);transition:color .15s,background .15s}
-        .inv-act-btn:hover{color:var(--text-1);background:var(--bg-elev-2)}
-        .inv-act-btn.danger:hover{color:#dc2626;background:#fee2e2;border-color:#fca5a5}
-        @media(max-width:540px){
-          .inv-row{padding:13px 14px;gap:11px}
-          .inv-row-icon{width:36px;height:36px;border-radius:9px}
-          .inv-row-amt{font-size:14px}
-        }
+        .inv-row-client{font-size:12.5px;color:var(--text-3);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+        .inv-row-meta{font-size:11px;color:var(--text-3);margin-top:2px}
+        .inv-row-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+        .inv-row-amt{font-size:15px;font-weight:800;color:var(--text-1);letter-spacing:-0.03em}
+        .inv-act{width:30px;height:30px;border-radius:8px;background:var(--bg-elev-1);border:1px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-3);transition:color .15s,background .15s}
+        .inv-act:hover{color:var(--text-1);background:var(--bg-elev-2)}
+        .inv-act.del:hover{color:#dc2626;background:#fee2e2;border-color:#fca5a5}
+        @media(max-width:520px){.inv-row{flex-wrap:wrap;gap:10px}.inv-row-right{width:100%;justify-content:flex-end}}
       `}</style>
 
       <div className="inv-hdr">
         <div>
-          <h2 style={{fontSize:22,fontWeight:800,letterSpacing:'-0.03em',color:'var(--text-1)',lineHeight:1.1}}>Invoices</h2>
-          <p style={{fontSize:13,color:'var(--text-3)',marginTop:5}}>Saved locally · {invoices.length} invoice{invoices.length!==1?'s':''} · expires after 15 days</p>
+          <h2 style={{fontSize:21,fontWeight:800,letterSpacing:'-0.03em',color:'var(--text-1)',lineHeight:1.1}}>Invoices</h2>
+          <p style={{fontSize:12.5,color:'var(--text-3)',marginTop:4}}>{invoices.length} invoice{invoices.length!==1?'s':''} · saved 15 days</p>
         </div>
-        <Btn primary onClick={openNew}><Plus size={16}/>New Invoice</Btn>
+        <Btn primary onClick={openNew}><Plus size={15}/>New Invoice</Btn>
       </div>
 
-      {invoices.length===0 ? (
-        <div style={{border:'1.5px dashed var(--border)',borderRadius:18,padding:'72px 24px',textAlign:'center'}}>
-          <div style={{width:60,height:60,borderRadius:18,background:'var(--accent-bg-soft)',border:'1px solid var(--accent-border-soft)',display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 18px'}}>
-            <Receipt size={26} style={{color:'var(--accent)'}}/>
+      {invoices.length===0?(
+        <div style={{border:'1.5px dashed var(--border)',borderRadius:18,padding:'68px 24px',textAlign:'center'}}>
+          <div style={{width:56,height:56,borderRadius:16,background:'var(--accent-bg-soft)',border:'1px solid var(--accent-border-soft)',display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 16px'}}>
+            <Receipt size={24} style={{color:'var(--accent)'}}/>
           </div>
-          <p style={{fontSize:17,fontWeight:800,color:'var(--text-1)',marginBottom:7,letterSpacing:'-0.02em'}}>No invoices yet</p>
-          <p style={{fontSize:14,color:'var(--text-3)',marginBottom:22,maxWidth:280,margin:'0 auto 22px',lineHeight:1.55}}>Create a beautiful, professional invoice in under two minutes</p>
-          <Btn primary onClick={openNew}><Plus size={16}/>New Invoice</Btn>
+          <p style={{fontSize:16,fontWeight:800,color:'var(--text-1)',marginBottom:6,letterSpacing:'-0.02em'}}>No invoices yet</p>
+          <p style={{fontSize:13.5,color:'var(--text-3)',marginBottom:20,maxWidth:260,margin:'0 auto 20px',lineHeight:1.55}}>Create a professional invoice your clients will actually remember</p>
+          <Btn primary onClick={openNew}><Plus size={15}/>New Invoice</Btn>
         </div>
-      ) : (
-        <div style={{display:'flex',flexDirection:'column',gap:8}}>
-          {invoices.map(inv => {
+      ):(
+        <div style={{display:'flex',flexDirection:'column',gap:7}}>
+          {invoices.map(inv=>{
             const expires=INVOICE_RETENTION_DAYS-Math.floor((Date.now()-inv.createdAt)/86400000);
-            const tot=total(inv);
             return (
               <div key={inv.id} className="inv-row" onClick={()=>openPreview(inv)}>
-                <div className="inv-row-icon"><Receipt size={18} style={{color:'var(--accent)'}}/></div>
+                <div className="inv-row-icon"><Receipt size={17} style={{color:'var(--accent)'}}/></div>
                 <div className="inv-row-body">
                   <div className="inv-row-num">{inv.number}</div>
-                  {inv.to.name && <div className="inv-row-client">{inv.to.name}</div>}
-                  <div className="inv-row-meta">Due {inv.dueDate} · expires in {expires}d</div>
+                  {inv.to.name&&<div className="inv-row-client">{inv.to.name}</div>}
+                  <div className="inv-row-meta">Due {inv.dueDate} · {expires}d left</div>
                 </div>
                 <div className="inv-row-right">
-                  <div className="inv-row-amt">{fmt(tot,inv.currency)}</div>
-                  <button className="inv-act-btn" title="Edit" onClick={e=>{e.stopPropagation();openEdit(inv);}}>
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>
+                  <div className="inv-row-amt">{fmt(total(inv),inv.currency)}</div>
+                  <StatusBadge status={inv.status} onClick={e=>{e.stopPropagation();toggleStatus(inv);}}/>
+                  <button className="inv-act" title="Edit" onClick={e=>{e.stopPropagation();openEdit(inv);}}>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>
                   </button>
-                  <button className="inv-act-btn danger" title="Delete" onClick={e=>{e.stopPropagation();deleteInvoice(inv.id);}}>
-                    <X size={13}/>
+                  <button className="inv-act del" title="Delete" onClick={e=>{e.stopPropagation();deleteInvoice(inv.id);}}>
+                    <X size={12}/>
                   </button>
                 </div>
               </div>
@@ -2963,41 +2995,34 @@ td:nth-child(5){text-align:right;font-weight:800;color:#1a1a2e}
   );
 
   /* ═══════════════════════════════════════════════════════════
-     CREATE / EDIT VIEW
+     CREATE / EDIT
   ═══════════════════════════════════════════════════════════ */
-  if (view === 'create') return (
+  if (view==='create') return (
     <div style={{paddingTop:28,paddingBottom:48}}>
       <style>{`
         .inv-g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-        .inv-g2p{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-        .inv-ig{display:grid;grid-template-columns:1fr 72px 110px 100px 30px;gap:8px;align-items:center;margin-bottom:8px}
-        .inv-ih{display:grid;grid-template-columns:1fr 72px 110px 100px 30px;gap:8px;padding-bottom:10px;border-bottom:1px solid var(--border);margin-bottom:10px}
-        @media(max-width:640px){
-          .inv-g2,.inv-g2p{grid-template-columns:1fr}
-          .inv-ig{grid-template-columns:1fr 56px 86px 78px 26px;gap:6px}
-          .inv-ih{grid-template-columns:1fr 56px 86px 78px 26px;gap:6px}
-        }
-        @media(max-width:420px){
-          .inv-ig{grid-template-columns:1fr 48px 72px 66px 24px;gap:4px}
-          .inv-ih{grid-template-columns:1fr 48px 72px 66px 24px;gap:4px}
-        }
+        .inv-ig{display:grid;grid-template-columns:1fr 68px 106px 98px 28px;gap:7px;align-items:center;margin-bottom:8px}
+        .inv-ih{display:grid;grid-template-columns:1fr 68px 106px 98px 28px;gap:7px;padding-bottom:10px;border-bottom:1px solid var(--border);margin-bottom:10px}
+        @media(max-width:640px){.inv-g2{grid-template-columns:1fr}.inv-ig{grid-template-columns:1fr 52px 86px 78px 26px;gap:5px}.inv-ih{grid-template-columns:1fr 52px 86px 78px 26px;gap:5px}}
+        @media(max-width:400px){.inv-ig{grid-template-columns:1fr 44px 72px 66px 22px;gap:4px}.inv-ih{grid-template-columns:1fr 44px 72px 66px 22px;gap:4px}}
       `}</style>
 
-      <div style={{display:'flex',alignItems:'center',gap:14,marginBottom:28}}>
+      <div style={{display:'flex',alignItems:'center',gap:14,marginBottom:26}}>
         <BackBtn onClick={()=>setView('list')}/>
-        <div>
-          <h2 style={{fontSize:19,fontWeight:800,letterSpacing:'-0.025em',color:'var(--text-1)'}}>
+        <div style={{flex:1,minWidth:0}}>
+          <h2 style={{fontSize:18,fontWeight:800,letterSpacing:'-0.025em',color:'var(--text-1)'}}>
             {invoices.find(i=>i.id===current.id)?'Edit Invoice':'New Invoice'}
           </h2>
-          <p style={{fontSize:12.5,color:'var(--text-3)',marginTop:2}}>{current.number}</p>
+          <p style={{fontSize:12,color:'var(--text-3)',marginTop:1}}>{current.number}</p>
         </div>
+        <StatusBadge status={current.status} size="lg" onClick={()=>setCurrent(c=>({...c,status:{unpaid:'paid',paid:'overdue',overdue:'unpaid'}[c.status||'unpaid']}))}/>
       </div>
 
-      <div style={{display:'flex',flexDirection:'column',gap:12}}>
+      <div style={{display:'flex',flexDirection:'column',gap:11}}>
 
-        {/* Details */}
+        {/* Details row */}
         <div style={C.card}>
-          <p style={{...C.lbl,marginBottom:18}}>Invoice Details</p>
+          <p style={{...C.lbl,marginBottom:16}}>Invoice Details</p>
           <div className="inv-g2">
             <Field label="Invoice #"><input className="ff-input" value={current.number} onChange={e=>setCurrent(c=>({...c,number:e.target.value}))}/></Field>
             <Field label="Currency">
@@ -3010,16 +3035,35 @@ td:nth-child(5){text-align:right;font-weight:800;color:#1a1a2e}
           </div>
         </div>
 
-        {/* From / To */}
-        <div className="inv-g2p">
+        {/* From / To side by side */}
+        <div className="inv-g2">
           {[['from','From — You'],['to','Bill To — Client']].map(([key,title])=>(
             <div key={key} style={C.card}>
-              <p style={{...C.lbl,marginBottom:16}}>{title}</p>
+              <p style={{...C.lbl,marginBottom:14}}>{title}</p>
+              {key==='from'&&(
+                <div style={{marginBottom:12}}>
+                  <label style={C.lbl}>Logo</label>
+                  <div style={{display:'flex',alignItems:'center',gap:10}}>
+                    {current.logo?(
+                      <div style={{position:'relative',flexShrink:0}}>
+                        <img src={current.logo} alt="Logo" style={{width:52,height:32,objectFit:'contain',borderRadius:7,border:'1px solid var(--border)',background:'var(--bg-elev-1)',padding:3}}/>
+                        <button onClick={()=>setCurrent(c=>({...c,logo:null}))} style={{position:'absolute',top:-6,right:-6,width:18,height:18,borderRadius:'50%',background:'var(--text-1)',color:'var(--bg)',border:'none',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center'}}><X size={9}/></button>
+                      </div>
+                    ):(
+                      <label style={{display:'flex',alignItems:'center',gap:7,padding:'7px 12px',border:'1.5px dashed var(--border)',borderRadius:9,cursor:'pointer',fontSize:12.5,color:'var(--text-3)',fontWeight:500,transition:'border-color .15s',flexShrink:0}}>
+                        <Plus size={13}/>Upload logo
+                        <input type="file" accept="image/*" style={{display:'none'}} onChange={e=>handleLogo(e.target.files?.[0], logo=>setCurrent(c=>({...c,logo})))}/>
+                      </label>
+                    )}
+                    <span style={{fontSize:11,color:'var(--text-3)'}}>PNG, SVG, JPG · max 2MB</span>
+                  </div>
+                </div>
+              )}
               <div style={{display:'flex',flexDirection:'column',gap:8}}>
                 <input className="ff-input" placeholder="Full name or company" value={current[key].name} onChange={e=>setCurrent(c=>({...c,[key]:{...c[key],name:e.target.value}}))}/>
                 <input className="ff-input" placeholder="Email" value={current[key].email} onChange={e=>setCurrent(c=>({...c,[key]:{...c[key],email:e.target.value}}))}/>
                 <input className="ff-input" placeholder="Phone" value={current[key].phone||''} onChange={e=>setCurrent(c=>({...c,[key]:{...c[key],phone:e.target.value}}))}/>
-                <textarea className="ff-textarea" placeholder="Address" rows={2} value={current[key].address} onChange={e=>setCurrent(c=>({...c,[key]:{...c[key],address:e.target.value}}))} style={{minHeight:48,resize:'none',fontSize:14}}/>
+                <textarea className="ff-textarea" placeholder="Address" rows={2} value={current[key].address} onChange={e=>setCurrent(c=>({...c,[key]:{...c[key],address:e.target.value}}))} style={{minHeight:48,resize:'none',fontSize:13.5}}/>
               </div>
             </div>
           ))}
@@ -3027,10 +3071,10 @@ td:nth-child(5){text-align:right;font-weight:800;color:#1a1a2e}
 
         {/* Items */}
         <div style={C.card}>
-          <p style={{...C.lbl,marginBottom:16}}>Line Items</p>
+          <p style={{...C.lbl,marginBottom:14}}>Line Items</p>
           <div className="inv-ih">
             {['Description','Qty','Rate','Amount',''].map((h,i)=>(
-              <span key={i} style={{fontSize:10.5,fontWeight:700,color:'var(--text-3)',letterSpacing:'0.07em',textTransform:'uppercase',textAlign:i>=2&&i<4?'right':'left'}}>{h}</span>
+              <span key={i} style={{fontSize:10,fontWeight:700,color:'var(--text-3)',letterSpacing:'.07em',textTransform:'uppercase',textAlign:i>=2&&i<4?'right':'left'}}>{h}</span>
             ))}
           </div>
           {current.items.map(it=>{
@@ -3038,38 +3082,37 @@ td:nth-child(5){text-align:right;font-weight:800;color:#1a1a2e}
             return (
               <div key={it.id} className="inv-ig">
                 <input className="ff-input" placeholder="Service or deliverable" value={it.description} onChange={e=>updateItem(it.id,'description',e.target.value)} style={{fontSize:13.5}}/>
-                <input className="ff-input" type="number" min="1" value={it.qty} onChange={e=>updateItem(it.id,'qty',e.target.value)} style={{fontSize:13.5,textAlign:'center',padding:'10px 4px'}}/>
-                <input className="ff-input" type="number" min="0" step="0.01" placeholder="0.00" value={it.rate} onChange={e=>updateItem(it.id,'rate',e.target.value)} style={{fontSize:13.5,textAlign:'right',padding:'10px 8px'}}/>
-                <span style={{fontSize:14,fontWeight:700,color:'var(--text-1)',textAlign:'right',letterSpacing:'-0.01em'}}>{fmt(amt,current.currency)}</span>
-                <button onClick={()=>removeItem(it.id)} disabled={current.items.length===1} style={{width:28,height:28,borderRadius:8,background:'var(--bg-elev-1)',border:'1px solid var(--border)',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',color:'var(--text-3)',opacity:current.items.length===1?0.2:1}}>
-                  <X size={11}/>
+                <input className="ff-input" type="number" min="1" value={it.qty} onChange={e=>updateItem(it.id,'qty',e.target.value)} style={{fontSize:13.5,textAlign:'center',padding:'9px 4px'}}/>
+                <input className="ff-input" type="number" min="0" step="0.01" placeholder="0.00" value={it.rate} onChange={e=>updateItem(it.id,'rate',e.target.value)} style={{fontSize:13.5,textAlign:'right',padding:'9px 8px'}}/>
+                <span style={{fontSize:13.5,fontWeight:700,color:'var(--text-1)',textAlign:'right',letterSpacing:'-0.01em'}}>{fmt(amt,current.currency)}</span>
+                <button onClick={()=>removeItem(it.id)} disabled={current.items.length===1} style={{width:26,height:26,borderRadius:8,background:'var(--bg-elev-1)',border:'1px solid var(--border)',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',color:'var(--text-3)',opacity:current.items.length===1?0.2:1}}>
+                  <X size={10}/>
                 </button>
               </div>
             );
           })}
-          <button onClick={addItem} style={{display:'inline-flex',alignItems:'center',gap:6,fontSize:13.5,fontWeight:600,color:'var(--accent)',background:'none',border:'none',cursor:'pointer',padding:'8px 0 16px'}}>
-            <Plus size={15}/>Add line item
+          <button onClick={addItem} style={{display:'inline-flex',alignItems:'center',gap:5,fontSize:13,fontWeight:600,color:'var(--accent)',background:'none',border:'none',cursor:'pointer',padding:'8px 0 16px'}}>
+            <Plus size={14}/>Add line item
           </button>
 
-          {/* Tax / Discount / Total */}
-          <div style={{borderTop:'1px solid var(--border)',paddingTop:16}}>
-            <div className="inv-g2" style={{gap:10,marginBottom:16}}>
+          <div style={{borderTop:'1px solid var(--border)',paddingTop:14}}>
+            <div className="inv-g2" style={{gap:10,marginBottom:14}}>
               <Field label="Tax %"><input className="ff-input" type="number" min="0" max="100" placeholder="0" value={current.tax||''} onChange={e=>setCurrent(c=>({...c,tax:e.target.value}))}/></Field>
               <Field label="Discount %"><input className="ff-input" type="number" min="0" max="100" placeholder="0" value={current.discount||''} onChange={e=>setCurrent(c=>({...c,discount:e.target.value}))}/></Field>
             </div>
-            <div style={{background:'var(--bg-elev-1)',borderRadius:12,padding:'14px 18px',display:'flex',flexDirection:'column',gap:8}}>
-              <div style={{display:'flex',justifyContent:'space-between',fontSize:13.5,color:'var(--text-3)'}}>
-                <span>Subtotal</span><span style={{fontWeight:600,color:'var(--text-2)'}}>{fmt(subtotal(current),current.currency)}</span>
-              </div>
-              {parseFloat(current.tax)>0&&<div style={{display:'flex',justifyContent:'space-between',fontSize:13.5,color:'var(--text-3)'}}>
-                <span>Tax ({current.tax}%)</span><span style={{fontWeight:600,color:'var(--text-2)'}}>{fmt(taxAmt(current),current.currency)}</span>
-              </div>}
-              {parseFloat(current.discount)>0&&<div style={{display:'flex',justifyContent:'space-between',fontSize:13.5,color:'var(--text-3)'}}>
-                <span>Discount ({current.discount}%)</span><span style={{fontWeight:600,color:'#dc2626'}}>− {fmt(discAmt(current),current.currency)}</span>
-              </div>}
+            <div style={{background:'var(--bg-elev-1)',borderRadius:12,padding:'12px 16px'}}>
+              {[
+                ['Subtotal', fmt(subtotal(current),current.currency), false],
+                parseFloat(current.tax)>0 && [`Tax (${current.tax}%)`, fmt(taxAmt(current),current.currency), false],
+                parseFloat(current.discount)>0 && [`Discount (${current.discount}%)`, `− ${fmt(discAmt(current),current.currency)}`, true],
+              ].filter(Boolean).map(([l,v,red])=>(
+                <div key={l} style={{display:'flex',justifyContent:'space-between',fontSize:13,color:'var(--text-3)',marginBottom:7}}>
+                  <span>{l}</span><span style={{fontWeight:600,color:red?'#dc2626':'var(--text-2)'}}>{v}</span>
+                </div>
+              ))}
               <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',paddingTop:10,borderTop:'1px solid var(--border)',marginTop:4}}>
-                <span style={{fontSize:15,fontWeight:700,color:'var(--text-1)',letterSpacing:'-0.01em'}}>Total</span>
-                <span style={{fontSize:22,fontWeight:900,color:'var(--text-1)',letterSpacing:'-0.04em'}}>{fmt(total(current),current.currency)}</span>
+                <span style={{fontSize:14,fontWeight:700,color:'var(--text-1)',letterSpacing:'-0.01em'}}>Total</span>
+                <span style={{fontSize:21,fontWeight:900,color:'var(--text-1)',letterSpacing:'-0.04em'}}>{fmt(total(current),current.currency)}</span>
               </div>
             </div>
           </div>
@@ -3077,170 +3120,167 @@ td:nth-child(5){text-align:right;font-weight:800;color:#1a1a2e}
 
         {/* Notes */}
         <div style={C.card}>
-          <label style={{...C.lbl,marginBottom:10}}>Notes &amp; Terms <span style={{fontWeight:400,textTransform:'none',letterSpacing:0}}>— optional</span></label>
-          <textarea className="ff-textarea" placeholder="Payment terms, bank details, a personal thank you…" rows={3} value={current.notes} onChange={e=>setCurrent(c=>({...c,notes:e.target.value}))} style={{minHeight:80,resize:'vertical'}}/>
+          <label style={{...C.lbl,marginBottom:10}}>Notes &amp; Terms<span style={{fontWeight:400,textTransform:'none',letterSpacing:0,marginLeft:6}}>— optional</span></label>
+          <textarea className="ff-textarea" placeholder="Payment terms, bank details, a personal thank you…" rows={3} value={current.notes} onChange={e=>setCurrent(c=>({...c,notes:e.target.value}))} style={{minHeight:72,resize:'vertical'}}/>
         </div>
 
-        <div style={{display:'flex',gap:10,justifyContent:'flex-end',paddingTop:4,flexWrap:'wrap'}}>
+        <div style={{display:'flex',gap:8,justifyContent:'flex-end',paddingTop:4,flexWrap:'wrap'}}>
           <Btn onClick={()=>setView('list')}>Cancel</Btn>
-          <Btn primary onClick={saveInvoice}><Check size={16}/>Save Invoice</Btn>
+          <Btn primary onClick={saveInvoice}><Check size={15}/>Save Invoice</Btn>
         </div>
       </div>
     </div>
   );
 
   /* ═══════════════════════════════════════════════════════════
-     PREVIEW VIEW
+     PREVIEW
   ═══════════════════════════════════════════════════════════ */
-  if (view === 'preview') {
+  if (view==='preview') {
     const sub=subtotal(current),tax=taxAmt(current),disc=discAmt(current),tot=total(current);
-    const hasTax=parseFloat(current.tax)>0, hasDisc=parseFloat(current.discount)>0;
-
-    const accent='#1a1a2e', accentBlue='#2563EB';
+    const hasTax=parseFloat(current.tax)>0,hasDisc=parseFloat(current.discount)>0;
+    const DARK='#1a1a2e',DARK2='#16213e',BLUE='#2563EB';
+    const st=STATUS_STYLE[current.status||'unpaid'];
 
     return (
       <div style={{paddingTop:28,paddingBottom:48}}>
         <style>{`
-          .inv-p-parties{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--border)}
-          .inv-p-ih{display:grid;grid-template-columns:44px 1fr 100px 60px 110px;gap:10px}
-          .inv-p-ir{display:grid;grid-template-columns:44px 1fr 100px 60px 110px;gap:10px}
-          @media(max-width:640px){
-            .inv-p-parties{grid-template-columns:1fr}
-            .inv-p-ih{grid-template-columns:36px 1fr 80px 44px 90px;gap:6px;font-size:10px}
-            .inv-p-ir{grid-template-columns:36px 1fr 80px 44px 90px;gap:6px}
-          }
-          @media(max-width:480px){
-            .inv-p-ih{display:none}
-            .inv-p-ir{grid-template-columns:1fr auto;gap:8px}
-            .inv-p-ir .inv-hide{display:none}
-          }
+          .inv-pp{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--border)}
+          .inv-th{display:grid;grid-template-columns:38px 1fr 96px 56px 106px;gap:9px;padding-bottom:10px;border-bottom:2px solid var(--text-1);margin-bottom:2px}
+          .inv-tr{display:grid;grid-template-columns:38px 1fr 96px 56px 106px;gap:9px;align-items:center}
+          @media(max-width:600px){.inv-pp{grid-template-columns:1fr}.inv-th{grid-template-columns:32px 1fr 80px 44px 88px;gap:6px}.inv-tr{grid-template-columns:32px 1fr 80px 44px 88px;gap:6px}}
+          @media(max-width:440px){.inv-th{display:none}.inv-tr{grid-template-columns:1fr auto;gap:8px}.inv-hide{display:none}}
         `}</style>
 
         {/* Toolbar */}
-        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:24,gap:12,flexWrap:'wrap'}}>
-          <div style={{display:'flex',alignItems:'center',gap:14}}>
+        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:22,gap:12,flexWrap:'wrap'}}>
+          <div style={{display:'flex',alignItems:'center',gap:12}}>
             <BackBtn onClick={()=>setView('list')}/>
             <div>
-              <h2 style={{fontSize:18,fontWeight:800,letterSpacing:'-0.025em',color:'var(--text-1)'}}>{current.number}</h2>
-              <p style={{fontSize:13,color:'var(--text-3)',marginTop:2}}>{current.to.name&&`${current.to.name} · `}Due {current.dueDate}</p>
+              <div style={{display:'flex',alignItems:'center',gap:10}}>
+                <h2 style={{fontSize:17,fontWeight:800,letterSpacing:'-0.025em',color:'var(--text-1)'}}>{current.number}</h2>
+                <StatusBadge status={current.status} size="lg" onClick={()=>setCurrent(c=>{const updated={...c,status:{unpaid:'paid',paid:'overdue',overdue:'unpaid'}[c.status||'unpaid']};const u=invoices.map(i=>i.id===updated.id?updated:i);setInvoices(u);saveInvoices(u);return updated;})}/>
+              </div>
+              <p style={{fontSize:12,color:'var(--text-3)',marginTop:2}}>{current.to.name&&`${current.to.name} · `}Due {current.dueDate}</p>
             </div>
           </div>
-          <div style={{display:'flex',gap:8}}>
+          <div style={{display:'flex',gap:7}}>
             <Btn sm onClick={()=>openEdit(current)}>Edit</Btn>
-            <Btn sm primary onClick={()=>downloadPDF(current)}><ArrowRight size={15}/>Download PDF</Btn>
+            <Btn sm primary onClick={()=>downloadPDF(current)}><ArrowRight size={14}/>Download PDF</Btn>
           </div>
         </div>
 
-        {/* Invoice document */}
-        <div style={{background:'var(--bg)',border:'1px solid var(--border)',borderRadius:18,overflow:'hidden',boxShadow:'0 4px 24px rgba(0,0,0,.06)'}}>
+        {/* Document */}
+        <div style={{background:'var(--bg)',border:'1px solid var(--border)',borderRadius:18,overflow:'hidden',boxShadow:'0 4px 28px rgba(0,0,0,.07)'}}>
 
-          {/* Dark gradient header */}
-          <div style={{background:'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',padding:'32px 36px',position:'relative',overflow:'hidden'}}>
-            <div style={{position:'absolute',top:-50,right:-50,width:180,height:180,borderRadius:'50%',background:'rgba(255,255,255,.03)'}}/>
-            <div style={{position:'absolute',bottom:-60,left:'35%',width:220,height:220,borderRadius:'50%',background:'rgba(37,99,235,.07)'}}/>
-            <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',flexWrap:'wrap',gap:20,position:'relative',zIndex:1}}>
+          {/* Header */}
+          <div style={{background:`linear-gradient(135deg,${DARK},${DARK2})`,padding:'30px 34px',position:'relative',overflow:'hidden'}}>
+            <div style={{position:'absolute',top:-44,right:-44,width:160,height:160,borderRadius:'50%',background:'rgba(255,255,255,.03)'}}/>
+            <div style={{position:'absolute',bottom:-64,left:'40%',width:200,height:200,borderRadius:'50%',background:'rgba(37,99,235,.06)'}}/>
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',flexWrap:'wrap',gap:18,position:'relative',zIndex:1}}>
               <div>
-                <div style={{fontSize:10,fontWeight:800,color:'rgba(255,255,255,.4)',letterSpacing:'0.18em',textTransform:'uppercase',marginBottom:10}}>Invoice</div>
-                <div style={{fontSize:34,fontWeight:900,color:'#fff',letterSpacing:'-0.05em',lineHeight:1}}>{current.number}</div>
-                <div style={{display:'flex',gap:20,marginTop:14,flexWrap:'wrap'}}>
-                  {[['Issue Date',current.date],['Due Date',current.dueDate]].map(([l,v])=>v&&(
-                    <div key={l}>
-                      <div style={{fontSize:9,fontWeight:700,color:'rgba(255,255,255,.38)',letterSpacing:'.1em',textTransform:'uppercase',marginBottom:3}}>{l}</div>
-                      <div style={{fontSize:13,fontWeight:600,color:'rgba(255,255,255,.8)'}}>{v}</div>
-                    </div>
+                <div style={{fontSize:9,fontWeight:800,color:'rgba(255,255,255,.35)',letterSpacing:'.2em',textTransform:'uppercase',marginBottom:8}}>Invoice</div>
+                <div style={{fontSize:30,fontWeight:900,color:'#fff',letterSpacing:'-0.05em',lineHeight:1}}>{current.number}</div>
+                <div style={{display:'flex',gap:18,marginTop:14,flexWrap:'wrap'}}>
+                  {[['Issue Date',current.date],['Due Date',current.dueDate]].filter(([,v])=>v).map(([l,v])=>(
+                    <div key={l}><div style={{fontSize:8.5,fontWeight:700,color:'rgba(255,255,255,.35)',letterSpacing:'.1em',textTransform:'uppercase',marginBottom:2}}>{l}</div><div style={{fontSize:12.5,fontWeight:600,color:'rgba(255,255,255,.78)'}}>{v}</div></div>
                   ))}
                 </div>
               </div>
               <div style={{textAlign:'right'}}>
-                <div style={{fontSize:19,fontWeight:800,color:'#fff',letterSpacing:'-0.02em',marginBottom:4}}>{current.from.name||'Your Name'}</div>
-                {current.from.email&&<div style={{fontSize:12.5,color:'rgba(255,255,255,.6)'}}>{current.from.email}</div>}
-                {current.from.phone&&<div style={{fontSize:12.5,color:'rgba(255,255,255,.6)'}}>{current.from.phone}</div>}
+                {current.logo?(
+                  <img src={current.logo} alt="Logo" style={{maxWidth:90,maxHeight:40,objectFit:'contain',marginBottom:8,display:'block',marginLeft:'auto',filter:'brightness(0) invert(1) opacity(.85)'}}/>
+                ):(
+                  <div style={{fontSize:17,fontWeight:800,color:'#fff',letterSpacing:'-0.02em',marginBottom:4}}>{current.from.name||'Your Name'}</div>
+                )}
+                {current.from.email&&<div style={{fontSize:12,color:'rgba(255,255,255,.55)'}}>{current.from.email}</div>}
+                {current.from.phone&&<div style={{fontSize:12,color:'rgba(255,255,255,.55)'}}>{current.from.phone}</div>}
               </div>
             </div>
           </div>
 
-          {/* Blue status bar */}
-          <div style={{background:accentBlue,padding:'10px 28px',display:'flex',justifyContent:'space-between',alignItems:'center',flexWrap:'wrap',gap:8}}>
-            <div style={{display:'flex',gap:6,alignItems:'center'}}>
-              <div style={{fontSize:9.5,fontWeight:800,color:'rgba(255,255,255,.6)',letterSpacing:'.12em',textTransform:'uppercase'}}>Billed to</div>
-              <div style={{fontSize:13.5,fontWeight:700,color:'#fff',marginLeft:8}}>{current.to.name||'—'}</div>
+          {/* Blue status bar with stamp */}
+          <div style={{background:BLUE,padding:'10px 24px',display:'flex',justifyContent:'space-between',alignItems:'center',flexWrap:'wrap',gap:8,position:'relative',overflow:'hidden'}}>
+            {/* Stamp watermark */}
+            <div style={{position:'absolute',right:16,top:'50%',transform:'translateY(-50%) rotate(-22deg)',opacity:0.18,pointerEvents:'none'}}>
+              <svg viewBox="0 0 130 130" width="80" height="80">
+                <circle cx="65" cy="65" r="58" fill="none" stroke={st.color} strokeWidth="6"/>
+                <circle cx="65" cy="65" r="50" fill="none" stroke={st.color} strokeWidth="1.5"/>
+                <text x="65" y="71" textAnchor="middle" fontFamily="Inter,sans-serif" fontSize="18" fontWeight="900" fill={st.color} letterSpacing="4">{st.label}</text>
+              </svg>
             </div>
-            <div style={{textAlign:'right'}}>
-              <div style={{fontSize:9.5,fontWeight:800,color:'rgba(255,255,255,.6)',letterSpacing:'.12em',textTransform:'uppercase'}}>Amount Due</div>
+            <div>
+              <div style={{fontSize:8.5,fontWeight:800,color:'rgba(255,255,255,.55)',letterSpacing:'.12em',textTransform:'uppercase',marginBottom:1}}>Billed to</div>
+              <div style={{fontSize:14,fontWeight:700,color:'#fff'}}>{current.to.name||'—'}</div>
+            </div>
+            <div style={{textAlign:'right',position:'relative',zIndex:1}}>
+              <div style={{fontSize:8.5,fontWeight:800,color:'rgba(255,255,255,.55)',letterSpacing:'.12em',textTransform:'uppercase',marginBottom:1}}>Total Due</div>
               <div style={{fontSize:18,fontWeight:900,color:'#fff',letterSpacing:'-0.03em'}}>{fmt(tot,current.currency)}</div>
             </div>
           </div>
 
-          {/* Parties */}
-          <div className="inv-p-parties">
+          {/* Parties — no repetition: only contact details unique to each side */}
+          <div className="inv-pp">
             {[['Bill To',current.to],['From',current.from]].map(([label,party],i)=>(
-              <div key={label} style={{padding:'22px 28px',borderRight:i===0?'1px solid var(--border)':'none'}}>
-                <div style={{display:'inline-block',background:'var(--accent-bg-soft)',border:'1px solid var(--accent-border-soft)',borderRadius:6,padding:'3px 9px',fontSize:9.5,fontWeight:800,color:accentBlue,letterSpacing:'.1em',textTransform:'uppercase',marginBottom:11}}>{label}</div>
-                <div style={{fontSize:15.5,fontWeight:800,color:'var(--text-1)',marginBottom:3,letterSpacing:'-0.01em'}}>{party.name||'—'}</div>
-                {party.email&&<div style={{fontSize:13,color:'var(--text-3)'}}>{party.email}</div>}
-                {party.phone&&<div style={{fontSize:13,color:'var(--text-3)'}}>{party.phone}</div>}
-                {party.address&&<div style={{fontSize:12.5,color:'var(--text-3)',whiteSpace:'pre-line',marginTop:3,lineHeight:1.6}}>{party.address}</div>}
+              <div key={label} style={{padding:'20px 26px',borderRight:i===0?'1px solid var(--border)':'none'}}>
+                <div style={{display:'inline-flex',alignItems:'center',gap:4,background:'var(--accent-bg-soft)',border:'1px solid var(--accent-border-soft)',borderRadius:5,padding:'2px 8px',fontSize:9,fontWeight:800,color:BLUE,letterSpacing:'.1em',textTransform:'uppercase',marginBottom:10}}>{label}</div>
+                <div style={{fontSize:15,fontWeight:800,color:'var(--text-1)',marginBottom:3,letterSpacing:'-0.01em'}}>{party.name||'—'}</div>
+                {party.email&&<div style={{fontSize:12.5,color:'var(--text-3)'}}>{party.email}</div>}
+                {party.phone&&<div style={{fontSize:12.5,color:'var(--text-3)'}}>{party.phone}</div>}
+                {party.address&&<div style={{fontSize:12,color:'var(--text-3)',whiteSpace:'pre-line',marginTop:3,lineHeight:1.6}}>{party.address}</div>}
               </div>
             ))}
           </div>
 
           {/* Items */}
-          <div style={{padding:'24px 28px'}}>
-            <div style={{fontSize:10,fontWeight:800,color:'var(--text-3)',letterSpacing:'.12em',textTransform:'uppercase',marginBottom:14}}>Services &amp; Deliverables</div>
-
-            <div className="inv-p-ih" style={{paddingBottom:10,borderBottom:'2px solid var(--text-1)',marginBottom:2}}>
+          <div style={{padding:'22px 26px'}}>
+            <div style={{fontSize:9.5,fontWeight:800,color:'var(--text-3)',letterSpacing:'.13em',textTransform:'uppercase',marginBottom:12}}>Services &amp; Deliverables</div>
+            <div className="inv-th">
               {['#','Description','Rate','Qty','Total'].map((h,i)=>(
-                <span key={h} style={{fontSize:10.5,fontWeight:800,color:'var(--text-3)',letterSpacing:'.08em',textTransform:'uppercase',textAlign:i===0?'center':i>1?'right':'left'}}>{h}</span>
+                <span key={h} style={{fontSize:10,fontWeight:800,color:'var(--text-3)',letterSpacing:'.07em',textTransform:'uppercase',textAlign:i===0?'center':i>1?'right':'left'}}>{h}</span>
               ))}
             </div>
-
             {current.items.map((it,idx)=>{
               const amt=(parseFloat(it.qty)||0)*(parseFloat(it.rate)||0);
               return (
-                <div key={it.id} className="inv-p-ir" style={{padding:'13px 0',borderBottom:'1px solid var(--border)',alignItems:'center'}}>
-                  <span style={{fontSize:11,fontWeight:800,color:'var(--text-3)',textAlign:'center'}}>{String(idx+1).padStart(2,'0')}</span>
-                  <span style={{fontSize:15,fontWeight:600,color:'var(--text-1)',letterSpacing:'-0.005em'}}>{it.description||'—'}</span>
-                  <span className="inv-hide" style={{fontSize:13.5,color:'var(--text-2)',textAlign:'right'}}>{fmt(it.rate||0,current.currency)}</span>
-                  <span className="inv-hide" style={{fontSize:13.5,color:'var(--text-2)',textAlign:'right'}}>{it.qty}</span>
-                  <span style={{fontSize:15,fontWeight:800,color:'var(--text-1)',textAlign:'right',letterSpacing:'-0.02em'}}>{fmt(amt,current.currency)}</span>
+                <div key={it.id} className="inv-tr" style={{padding:'12px 0',borderBottom:'1px solid var(--border)'}}>
+                  <span style={{fontSize:10,fontWeight:800,color:'var(--text-3)',textAlign:'center'}}>{String(idx+1).padStart(2,'0')}</span>
+                  <span style={{fontSize:14.5,fontWeight:600,color:'var(--text-1)',letterSpacing:'-0.005em'}}>{it.description||'—'}</span>
+                  <span className="inv-hide" style={{fontSize:13,color:'var(--text-2)',textAlign:'right'}}>{fmt(it.rate||0,current.currency)}</span>
+                  <span className="inv-hide" style={{fontSize:13,color:'var(--text-2)',textAlign:'right'}}>{it.qty}</span>
+                  <span style={{fontSize:14.5,fontWeight:800,color:'var(--text-1)',textAlign:'right',letterSpacing:'-0.02em'}}>{fmt(amt,current.currency)}</span>
                 </div>
               );
             })}
 
             {/* Totals */}
-            <div style={{display:'flex',justifyContent:'flex-end',paddingTop:22}}>
-              <div style={{minWidth:280,background:'var(--bg-elev-1)',border:'1px solid var(--border)',borderRadius:14,overflow:'hidden'}}>
-                <div style={{display:'flex',justifyContent:'space-between',padding:'10px 18px',fontSize:13.5,color:'var(--text-3)',borderBottom:'1px solid var(--border)'}}>
-                  <span>Subtotal</span><span style={{fontWeight:600,color:'var(--text-2)'}}>{fmt(sub,current.currency)}</span>
-                </div>
-                {hasTax&&<div style={{display:'flex',justifyContent:'space-between',padding:'10px 18px',fontSize:13.5,color:'var(--text-3)',borderBottom:'1px solid var(--border)'}}>
-                  <span>Tax ({current.tax}%)</span><span style={{fontWeight:600,color:'var(--text-2)'}}>{fmt(tax,current.currency)}</span>
-                </div>}
-                {hasDisc&&<div style={{display:'flex',justifyContent:'space-between',padding:'10px 18px',fontSize:13.5,color:'var(--text-3)',borderBottom:'1px solid var(--border)'}}>
-                  <span>Discount ({current.discount}%)</span><span style={{fontWeight:600,color:'#dc2626'}}>− {fmt(disc,current.currency)}</span>
-                </div>}
-                <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'16px 18px',background:'linear-gradient(135deg,#1a1a2e,#16213e)'}}>
-                  <span style={{fontSize:11,fontWeight:800,color:'rgba(255,255,255,.6)',letterSpacing:'.08em',textTransform:'uppercase'}}>Total Due</span>
-                  <span style={{fontSize:24,fontWeight:900,color:'#fff',letterSpacing:'-0.04em'}}>{fmt(tot,current.currency)}</span>
+            <div style={{display:'flex',justifyContent:'flex-end',paddingTop:20}}>
+              <div style={{minWidth:270,background:'var(--bg-elev-1)',border:'1px solid var(--border)',borderRadius:13,overflow:'hidden'}}>
+                {[['Subtotal',fmt(sub,current.currency),false],hasTax&&[`Tax (${current.tax}%)`,fmt(tax,current.currency),false],hasDisc&&[`Discount (${current.discount}%)`,`− ${fmt(disc,current.currency)}`,true]].filter(Boolean).map(([l,v,red])=>(
+                  <div key={l} style={{display:'flex',justifyContent:'space-between',padding:'9px 16px',fontSize:13,color:'var(--text-3)',borderBottom:'1px solid var(--border)'}}>
+                    <span>{l}</span><span style={{fontWeight:600,color:red?'#dc2626':'var(--text-2)'}}>{v}</span>
+                  </div>
+                ))}
+                <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'14px 16px',background:`linear-gradient(135deg,${DARK},${DARK2})`}}>
+                  <span style={{fontSize:9.5,fontWeight:800,color:'rgba(255,255,255,.55)',letterSpacing:'.1em',textTransform:'uppercase'}}>Total Due</span>
+                  <span style={{fontSize:22,fontWeight:900,color:'#fff',letterSpacing:'-0.04em'}}>{fmt(tot,current.currency)}</span>
                 </div>
               </div>
             </div>
 
-            {/* Notes */}
             {current.notes&&(
-              <div style={{marginTop:24,padding:'16px 20px',background:'var(--bg-elev-1)',borderRadius:12,border:'1px solid var(--border)'}}>
-                <p style={{fontSize:10.5,fontWeight:800,color:'var(--text-3)',letterSpacing:'.08em',textTransform:'uppercase',marginBottom:8}}>Notes &amp; Terms</p>
-                <p style={{fontSize:14,color:'var(--text-2)',lineHeight:1.75,whiteSpace:'pre-line'}}>{current.notes}</p>
+              <div style={{marginTop:22,padding:'14px 18px',background:'var(--bg-elev-1)',borderRadius:11,border:'1px solid var(--border)'}}>
+                <p style={{fontSize:9.5,fontWeight:800,color:'var(--text-3)',letterSpacing:'.08em',textTransform:'uppercase',marginBottom:7}}>Notes &amp; Terms</p>
+                <p style={{fontSize:13.5,color:'var(--text-2)',lineHeight:1.75,whiteSpace:'pre-line'}}>{current.notes}</p>
               </div>
             )}
           </div>
 
-          {/* Thank you footer */}
-          <div style={{background:'linear-gradient(135deg,#1a1a2e,#16213e)',padding:'22px 28px',display:'flex',alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',gap:12}}>
-            <p style={{fontSize:22,fontWeight:900,color:'#fff',letterSpacing:'-0.04em'}}>Thank you.</p>
-            <div style={{display:'flex',gap:20,flexWrap:'wrap'}}>
-              {current.from.phone&&<span style={{fontSize:12,color:'rgba(255,255,255,.6)'}}><strong style={{color:'rgba(255,255,255,.85)',marginRight:4}}>Tel</strong>{current.from.phone}</span>}
-              {current.from.email&&<span style={{fontSize:12,color:'rgba(255,255,255,.6)'}}><strong style={{color:'rgba(255,255,255,.85)',marginRight:4}}>Email</strong>{current.from.email}</span>}
+          {/* Thank you */}
+          <div style={{background:`linear-gradient(135deg,${DARK},${DARK2})`,padding:'20px 26px',display:'flex',alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',gap:10}}>
+            <p style={{fontSize:20,fontWeight:900,color:'#fff',letterSpacing:'-0.04em'}}>Thank you.</p>
+            <div style={{display:'flex',gap:18,flexWrap:'wrap'}}>
+              {current.from.phone&&<span style={{fontSize:12,color:'rgba(255,255,255,.6)'}}><strong style={{color:'rgba(255,255,255,.88)',marginRight:3}}>Tel</strong>{current.from.phone}</span>}
+              {current.from.email&&<span style={{fontSize:12,color:'rgba(255,255,255,.6)'}}><strong style={{color:'rgba(255,255,255,.88)',marginRight:3}}>Email</strong>{current.from.email}</span>}
             </div>
           </div>
         </div>
