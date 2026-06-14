@@ -2704,6 +2704,7 @@ function InvoiceTab() {
   /* ── Status dropdown component ──────────────────────────────── */
   function StatusDropdown({ status, onChange, size='sm' }) {
     const [open, setOpen] = useState(false);
+    const [pos, setPos] = useState({top:0, right:0});
     const ref = useRef(null);
     const s = ST[status] || ST.unpaid;
 
@@ -2713,30 +2714,42 @@ function InvoiceTab() {
       return () => document.removeEventListener('mousedown', close);
     }, []);
 
+    const handleOpen = (e) => {
+      e.stopPropagation();
+      if (ref.current) {
+        const r = ref.current.getBoundingClientRect();
+        setPos({ top: r.bottom + window.scrollY + 6, right: window.innerWidth - r.right });
+      }
+      setOpen(o => !o);
+    };
+
     const sz = size === 'lg'
-      ? {height:30, px:'10px 14px', fs:11.5, dot:7}
-      : {height:24, px:'5px 10px', fs:10.5, dot:6};
+      ? {height:38, px:'12px 18px', fs:13, dot:8}
+      : {height:32, px:'8px 14px', fs:12, dot:7};
 
     return (
       <div ref={ref} style={{position:'relative',flexShrink:0}}>
-        <button onClick={e => {e.stopPropagation(); setOpen(o => !o);}} style={{
-          display:'inline-flex', alignItems:'center', gap:6,
+        <button onClick={handleOpen} style={{
+          display:'inline-flex', alignItems:'center', gap:7,
           height:sz.height, padding:sz.px,
           background:s.bg, color:s.color, border:`1.5px solid ${s.border}`,
           borderRadius:999, fontSize:sz.fs, fontWeight:700,
-          letterSpacing:'0.03em', cursor:'pointer', whiteSpace:'nowrap',
-          transition:'opacity .15s',
+          letterSpacing:'0.02em', cursor:'pointer', whiteSpace:'nowrap',
+          transition:'box-shadow .15s',
+          boxShadow: open ? `0 0 0 3px ${s.border}` : 'none',
         }}>
           <span style={{width:sz.dot, height:sz.dot, borderRadius:'50%', background:s.dot, flexShrink:0}}/>
           {s.label}
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{opacity:.5}}><polyline points="6 9 12 15 18 9"/></svg>
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{opacity:.55, transform: open?'rotate(180deg)':'none', transition:'transform .2s'}}><polyline points="6 9 12 15 18 9"/></svg>
         </button>
         {open && (
           <div style={{
-            position:'absolute', top:'calc(100% + 6px)', right:0, zIndex:50,
+            position:'fixed', zIndex:9999,
             background:'var(--bg)', border:'1px solid var(--border)',
-            borderRadius:12, padding:5, minWidth:130,
-            boxShadow:'0 8px 24px rgba(0,0,0,.12)',
+            borderRadius:13, padding:6, minWidth:148,
+            boxShadow:'0 12px 40px rgba(0,0,0,.18), 0 2px 8px rgba(0,0,0,.08)',
+            top: pos.top,
+            right: pos.right,
           }}>
             {Object.entries(ST).map(([key, st]) => (
               <button key={key} onClick={e => {e.stopPropagation(); onChange(key); setOpen(false);}} style={{
@@ -2767,9 +2780,9 @@ function InvoiceTab() {
     const DARK='#0f172a', BLUE='#2563EB';
 
     const stampSVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="180" height="180">
-      <circle cx="100" cy="100" r="90" fill="none" stroke="${st.color}" stroke-width="7"/>
-      <circle cx="100" cy="100" r="78" fill="none" stroke="${st.color}" stroke-width="2"/>
-      <text x="100" y="110" text-anchor="middle" font-family="system-ui,sans-serif" font-size="32" font-weight="900" fill="${st.color}" letter-spacing="6">${st.label.toUpperCase()}</text>
+      <circle cx="100" cy="100" r="92" fill="none" stroke="${st.color}" stroke-width="8"/>
+      <circle cx="100" cy="100" r="80" fill="none" stroke="${st.color}" stroke-width="2.5"/>
+      <text x="100" y="110" text-anchor="middle" font-family="system-ui,sans-serif" font-size="28" font-weight="900" fill="${st.color}" letter-spacing="6">${st.label.toUpperCase()}</text>
     </svg>`;
 
     return `<!DOCTYPE html><html><head><meta charset="utf-8"/><title>${inv.number}</title>
@@ -2795,7 +2808,7 @@ body{font-family:system-ui,-apple-system,'Helvetica Neue',sans-serif;color:#0f17
 .brand-sub{font-size:11px;color:rgba(255,255,255,.45);line-height:1.65}
 /* status bar */
 .bar{background:${BLUE};padding:8px 28px;display:flex;justify-content:space-between;align-items:center;gap:12px;position:relative;overflow:hidden}
-.stamp-wm{position:absolute;right:-16px;top:50%;transform:translateY(-50%) rotate(-18deg);opacity:0.14;pointer-events:none}
+.stamp-wm{position:absolute;right:-16px;top:50%;transform:translateY(-50%) rotate(-18deg);opacity:0.25;pointer-events:none}
 .bar-to{font-size:13px;font-weight:700;color:#fff}
 .bar-to-label{font-size:8px;font-weight:700;color:rgba(255,255,255,.5);letter-spacing:.1em;text-transform:uppercase;margin-bottom:1px}
 .bar-amt{text-align:right;position:relative;z-index:1}
@@ -2951,11 +2964,11 @@ td:last-child{text-align:right;font-weight:800;color:#0f172a;padding-right:0}
   const Btn = ({primary,sm,onClick,children,style={}}) => (
     <button onClick={onClick} style={{
       display:'inline-flex', alignItems:'center', gap:6,
-      height:sm?34:40, padding:sm?'0 14px':'0 20px',
+      height:sm?38:44, padding:sm?'0 16px':'0 22px',
       background:primary?'var(--accent)':'transparent',
       color:primary?'#fff':'var(--text-2)',
       border:primary?'none':'1.5px solid var(--border)',
-      borderRadius:999, fontSize:sm?12.5:13.5, fontWeight:600,
+      borderRadius:999, fontSize:sm?13:14, fontWeight:600,
       cursor:'pointer', whiteSpace:'nowrap', flexShrink:0,
       letterSpacing:'-0.01em', ...style
     }}>{children}</button>
@@ -2978,7 +2991,7 @@ td:last-child{text-align:right;font-weight:800;color:#0f172a;padding-right:0}
   if (view === 'list') return (
     <div style={{padding:'36px 0 64px'}}>
       <style>{`
-        .il-row{display:flex;align-items:center;gap:14px;padding:16px 20px;background:var(--bg);border:1px solid var(--border);border-radius:14px;cursor:pointer;transition:border-color .18s,box-shadow .18s;position:relative;overflow:hidden}
+        .il-row{display:flex;align-items:center;gap:14px;padding:16px 20px;background:var(--bg);border:1px solid var(--border);border-radius:14px;cursor:pointer;transition:border-color .18s,box-shadow .18s;position:relative}
         .il-row:hover{border-color:var(--accent);box-shadow:0 0 0 3px rgba(37,99,235,.06)}
         .il-icon{width:40px;height:40px;border-radius:11px;background:var(--accent-bg-soft);border:1px solid var(--accent-border-soft);display:flex;align-items:center;justify-content:center;flex-shrink:0}
         .il-body{flex:1;min-width:0}
@@ -2987,18 +3000,20 @@ td:last-child{text-align:right;font-weight:800;color:#0f172a;padding-right:0}
         .il-meta{font-size:11.5px;color:var(--text-3)}
         .il-right{display:flex;align-items:center;gap:10px;flex-shrink:0}
         .il-amt{font-size:15px;font-weight:800;color:var(--text-1);letter-spacing:-0.03em}
-        .il-btn{width:30px;height:30px;border-radius:8px;background:var(--bg-elev-1);border:1px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-3);transition:all .15s;flex-shrink:0}
+        .il-btn{width:38px;height:38px;border-radius:10px;background:var(--bg-elev-1);border:1px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-3);transition:all .15s;flex-shrink:0}
         .il-btn:hover{color:var(--text-1);background:var(--bg-elev-2)}
         .il-btn.del:hover{color:#dc2626;background:#fef2f2;border-color:#fecaca}
-        @media(max-width:600px){
-          .il-row{padding:14px 16px;gap:12px}
-          .il-icon{width:36px;height:36px;border-radius:10px}
-          .il-right{gap:8px}
-          .il-amt{font-size:14px}
-          .il-btn{width:28px;height:28px}
+        @media(max-width:760px){
+          .il-row{padding:14px 16px;gap:10px;flex-wrap:wrap}
+          .il-icon{width:36px;height:36px;border-radius:10px;flex-shrink:0}
+          .il-body{min-width:0;flex:1}
+          .il-right{width:100%;justify-content:space-between;padding-top:8px;border-top:1px solid var(--border)}
+          .il-amt{font-size:15px}
+          .il-btn{width:32px;height:32px}
         }
-        @media(max-width:440px){
-          .il-right{flex-wrap:wrap;justify-content:flex-end;max-width:120px}
+        @media(max-width:360px){
+          .il-row{padding:12px 14px}
+          .il-right{gap:6px}
         }
       `}</style>
 
@@ -3067,16 +3082,16 @@ td:last-child{text-align:right;font-weight:800;color:#0f172a;padding-right:0}
     <div style={{padding:'36px 0 64px'}}>
       <style>{`
         .if-g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-        .if-ig{display:grid;grid-template-columns:1fr 64px 104px 96px 28px;gap:7px;align-items:center;margin-bottom:9px}
-        .if-ih{display:grid;grid-template-columns:1fr 64px 104px 96px 28px;gap:7px;padding-bottom:10px;border-bottom:1px solid var(--border);margin-bottom:10px}
-        @media(max-width:680px){
-          .if-g2{grid-template-columns:1fr}
-          .if-ig{grid-template-columns:1fr 54px 88px 80px 26px;gap:5px}
-          .if-ih{grid-template-columns:1fr 54px 88px 80px 26px;gap:5px}
+        .if-ig{display:grid;grid-template-columns:1fr 60px 100px 92px 28px;gap:7px;align-items:center;margin-bottom:9px}
+        .if-ih{display:grid;grid-template-columns:1fr 60px 100px 92px 28px;gap:7px;padding-bottom:10px;border-bottom:1px solid var(--border);margin-bottom:10px}
+        @media(max-width:700px){.if-g2{grid-template-columns:1fr}
+        @media(max-width:640px){
+          .if-ig{grid-template-columns:1fr 50px 84px 74px 26px;gap:5px}
+          .if-ih{grid-template-columns:1fr 50px 84px 74px 26px;gap:5px}
         }
-        @media(max-width:440px){
-          .if-ig{grid-template-columns:1fr 46px 74px 68px 24px;gap:4px}
-          .if-ih{grid-template-columns:1fr 46px 74px 68px 24px;gap:4px}
+        @media(max-width:420px){
+          .if-ig{grid-template-columns:1fr 44px 72px 64px 24px;gap:4px}
+          .if-ih{grid-template-columns:1fr 44px 72px 64px 24px;gap:4px}
         }
       `}</style>
 
@@ -3248,20 +3263,20 @@ td:last-child{text-align:right;font-weight:800;color:#0f172a;padding-right:0}
           .ip-parties{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--border)}
           .ip-th{display:grid;grid-template-columns:34px 1fr 96px 52px 104px;gap:8px}
           .ip-tr{display:grid;grid-template-columns:34px 1fr 96px 52px 104px;gap:8px;align-items:center}
-          @media(max-width:620px){
-            .ip-parties{grid-template-columns:1fr}
-            .ip-th{grid-template-columns:28px 1fr 78px 40px 86px;gap:5px}
-            .ip-tr{grid-template-columns:28px 1fr 78px 40px 86px;gap:5px}
+          @media(max-width:600px){
+            .ip-parties{grid-template-columns:1fr;border-bottom:none}
+            .ip-th{grid-template-columns:28px 1fr 76px 38px 84px;gap:5px;font-size:9px}
+            .ip-tr{grid-template-columns:28px 1fr 76px 38px 84px;gap:5px}
           }
-          @media(max-width:420px){
+          @media(max-width:400px){
             .ip-th{display:none}
-            .ip-tr{grid-template-columns:1fr auto;gap:8px}
+            .ip-tr{grid-template-columns:1fr auto;gap:10px}
             .ip-hide{display:none}
           }
         `}</style>
 
         {/* Toolbar */}
-        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:28,gap:12,flexWrap:'wrap'}}>
+        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:28,gap:10,flexWrap:'wrap',rowGap:14}}>
           <div style={{display:'flex',alignItems:'center',gap:12}}>
             <BackBtn onClick={()=>setView('list')}/>
             <div>
@@ -3272,17 +3287,17 @@ td:last-child{text-align:right;font-weight:800;color:#0f172a;padding-right:0}
               <p style={{fontSize:12,color:'var(--text-3)',marginTop:3}}>{current.to.name&&`${current.to.name} · `}Due {current.dueDate}</p>
             </div>
           </div>
-          <div style={{display:'flex',gap:7}}>
-            <Btn sm onClick={()=>openEdit(current)}>Edit</Btn>
-            <Btn sm primary onClick={()=>downloadPDF(current)}><ArrowRight size={13}/>Download PDF</Btn>
+          <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+            <Btn onClick={()=>openEdit(current)}>Edit</Btn>
+            <Btn primary onClick={()=>downloadPDF(current)}><ArrowRight size={15}/>Download PDF</Btn>
           </div>
         </div>
 
         {/* Document card */}
-        <div style={{background:'var(--bg)',border:'1px solid var(--border)',borderRadius:18,overflow:'hidden',boxShadow:'0 2px 20px rgba(0,0,0,.06)'}}>
+        <div style={{background:'var(--bg)',border:'1px solid var(--border)',borderRadius:18,overflow:'visible',boxShadow:'0 2px 20px rgba(0,0,0,.06)'}}>
 
           {/* Dark header */}
-          <div style={{background:DARK,padding:'28px 30px 24px',position:'relative',overflow:'hidden'}}>
+          <div style={{background:DARK,padding:'28px 30px 24px',position:'relative',overflow:'hidden',borderRadius:'18px 18px 0 0'}}>
             <div style={{position:'absolute',top:-44,right:-44,width:150,height:150,borderRadius:'50%',background:'rgba(255,255,255,.025)'}}/>
             <div style={{position:'absolute',bottom:-60,left:'38%',width:190,height:190,borderRadius:'50%',background:'rgba(37,99,235,.05)'}}/>
             <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',flexWrap:'wrap',gap:16,position:'relative',zIndex:1}}>
@@ -3310,13 +3325,13 @@ td:last-child{text-align:right;font-weight:800;color:#0f172a;padding-right:0}
           </div>
 
           {/* Blue status bar — stamp watermark */}
-          <div style={{background:BLUE,padding:'9px 24px',display:'flex',justifyContent:'space-between',alignItems:'center',gap:12,position:'relative',overflow:'hidden'}}>
+          <div style={{background:BLUE,padding:'9px 24px',display:'flex',justifyContent:'space-between',alignItems:'center',gap:12,position:'relative',overflow:'hidden',zIndex:0}}>
             {/* Watermark stamp — large, centered, very subtle */}
-            <div style={{position:'absolute',left:'50%',top:'50%',transform:'translate(-50%,-50%) rotate(-18deg)',opacity:0.12,pointerEvents:'none',zIndex:0}}>
-              <svg viewBox="0 0 180 180" width="120" height="120">
-                <circle cx="90" cy="90" r="82" fill="none" stroke={st.color} strokeWidth="7"/>
-                <circle cx="90" cy="90" r="71" fill="none" stroke={st.color} strokeWidth="2"/>
-                <text x="90" y="98" textAnchor="middle" fontFamily="system-ui,sans-serif" fontSize="24" fontWeight="900" fill={st.color} letterSpacing="5">{st.label.toUpperCase()}</text>
+            <div style={{position:'absolute',left:'50%',top:'50%',transform:'translate(-50%,-50%) rotate(-20deg)',opacity:0.32,pointerEvents:'none',zIndex:0}}>
+              <svg viewBox="0 0 200 200" width="160" height="160">
+                <circle cx="100" cy="100" r="92" fill="none" stroke={st.color} strokeWidth="8"/>
+                <circle cx="100" cy="100" r="80" fill="none" stroke={st.color} strokeWidth="2.5"/>
+                <text x="100" y="110" textAnchor="middle" fontFamily="system-ui,sans-serif" fontSize="28" fontWeight="900" fill={st.color} letterSpacing="6">{st.label.toUpperCase()}</text>
               </svg>
             </div>
             <div style={{position:'relative',zIndex:1}}>
@@ -3394,7 +3409,7 @@ td:last-child{text-align:right;font-weight:800;color:#0f172a;padding-right:0}
           </div>
 
           {/* Thank you footer */}
-          <div style={{background:DARK,padding:'18px 22px',display:'flex',alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',gap:10}}>
+          <div style={{background:DARK,padding:'18px 22px',display:'flex',alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',gap:10,borderRadius:'0 0 18px 18px'}}>
             <p style={{fontSize:18,fontWeight:900,color:'#fff',letterSpacing:'-0.04em'}}>Thank you.</p>
             <div style={{display:'flex',gap:16,flexWrap:'wrap'}}>
               {current.from.phone&&<span style={{fontSize:11.5,color:'rgba(255,255,255,.5)'}}><strong style={{color:'rgba(255,255,255,.82)',marginRight:3}}>Tel</strong>{current.from.phone}</span>}
