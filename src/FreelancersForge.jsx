@@ -4947,7 +4947,7 @@ function CloseTab() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           model: "claude-sonnet-4-5",
-          max_tokens: 3000,
+          max_tokens: 1600,
           system: "You are a JSON-only API. You MUST respond with valid, complete JSON only. No prose, no markdown, no commentary, no code fences. Start your response with { and end with }. Every string must be properly escaped.",
           messages: [{ role: "user", content }]
         })
@@ -6282,7 +6282,7 @@ function ProposalOutput({ result, pillClass, copied, copyText, selectAllText }) 
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           model: 'claude-sonnet-4-5',
-          max_tokens: 1200,
+          max_tokens: 900,
           system: 'You are a JSON-only API. Respond with valid JSON only. No prose, no markdown fences.',
           messages: [{
             role: 'user',
@@ -6456,11 +6456,11 @@ Return ONLY valid JSON:
           <div style={{ display:'flex', alignItems:'center', gap:8, flexWrap:'wrap' }}>
             <span style={{ fontSize:11.5, fontWeight:600, color:'var(--text-3)', letterSpacing:'.02em', flexShrink:0 }}>Regenerate as:</span>
             {[
-              { label:'⚡ Sharper', instruction:'Make every sentence more direct and punchy. Cut anything that doesn't add to the argument. No softening language.' },
+              { label:'⚡ Sharper', instruction:'Make every sentence more direct and punchy. Cut anything that does not add to the argument. No softening language.' },
               { label:'🔥 Bolder', instruction:'Make stronger, more confident claims. Take a clearer position. Sound like someone who has done this 100 times.' },
-              { label:'💬 More conversational', instruction:'Sound more human and less like a proposal template. Write how you'd talk to this client at a coffee meeting.' },
+              { label:'💬 More human', instruction:'Sound more human and less like a proposal template. Write how you would talk to this client at a coffee meeting.' },
               { label:'📊 More proof', instruction:'Strengthen the proof section with more specific evidence and sharper numbers. Make the results feel undeniable.' },
-              { label:'✂️ Shorter', instruction:'Cut this proposal by 30%. Remove every sentence that doesn't earn its place. Same impact, fewer words.' },
+              { label:'✂️ Shorter', instruction:'Cut this proposal by 30%. Remove every sentence that does not earn its place. Same impact, fewer words.' },
             ].map(({ label, instruction }) => (
               <button key={label} onClick={() => {
                 const el = document.querySelector('[data-regen-input]');
