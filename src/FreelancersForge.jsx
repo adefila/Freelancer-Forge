@@ -3551,6 +3551,119 @@ td:last-child{text-align:right;font-weight:800;color:#0f172a;padding-right:0}
 
 
 
+/* ====================================================================== */
+/* AUTH GATE                                                              */
+/* ====================================================================== */
+
+// Change this to your own password
+const FORGE_PASSWORD = 'forge2024';
+const AUTH_KEY = 'ff_auth_v1';
+
+function isAuthed() {
+  try { return localStorage.getItem(AUTH_KEY) === btoa(FORGE_PASSWORD); } catch { return false; }
+}
+function setAuthed() {
+  try { localStorage.setItem(AUTH_KEY, btoa(FORGE_PASSWORD)); } catch {}
+}
+function clearAuth() {
+  try { localStorage.removeItem(AUTH_KEY); } catch {}
+}
+
+function AuthGate({ children }) {
+  const [authed, setAuthed2] = useState(isAuthed);
+  const [pwd, setPwd] = useState('');
+  const [error, setError] = useState(false);
+  const [shake, setShake] = useState(false);
+  const inputRef = useRef(null);
+
+  useEffect(() => { if (!authed && inputRef.current) inputRef.current.focus(); }, [authed]);
+
+  const attempt = () => {
+    if (pwd === FORGE_PASSWORD) {
+      setAuthed(); setAuthed2(true);
+    } else {
+      setError(true); setShake(true); setPwd('');
+      setTimeout(() => setShake(false), 500);
+      setTimeout(() => setError(false), 2500);
+      if (inputRef.current) inputRef.current.focus();
+    }
+  };
+
+  if (authed) return <>{children}</>;
+
+  return (
+    <div style={{
+      minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center',
+      background:'#f8f8f9', padding:24, fontFamily:"'Inter', system-ui, sans-serif",
+    }}>
+      <style>{`
+        @keyframes shake {
+          0%,100%{transform:translateX(0)}
+          20%{transform:translateX(-8px)}
+          40%{transform:translateX(8px)}
+          60%{transform:translateX(-5px)}
+          80%{transform:translateX(5px)}
+        }
+        .auth-shake { animation: shake 0.45s ease; }
+        .auth-box { transition: box-shadow .2s; }
+        .auth-box:focus-within { box-shadow: 0 0 0 3px rgba(37,99,235,.15) !important; }
+      `}</style>
+      <div style={{ width:'100%', maxWidth:360, textAlign:'center' }}>
+        {/* Logo mark */}
+        <div style={{ width:52, height:52, borderRadius:16, background:'#0a0a0c', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 28px', boxShadow:'0 8px 24px rgba(0,0,0,.18)' }}>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="white" stroke="white" strokeWidth="1.5" strokeLinejoin="round"/>
+          </svg>
+        </div>
+
+        <h1 style={{ fontSize:22, fontWeight:800, color:'#0a0a0c', letterSpacing:'-0.03em', marginBottom:6 }}>Freelancer's Forge</h1>
+        <p style={{ fontSize:14, color:'#6b6b74', marginBottom:32, lineHeight:1.5 }}>Enter your access code to continue</p>
+
+        <div className={`auth-box${shake ? ' auth-shake' : ''}`} style={{
+          background:'#fff', border:`1.5px solid ${error ? '#fca5a5' : 'rgba(0,0,0,.12)'}`,
+          borderRadius:14, overflow:'hidden',
+          boxShadow:'0 2px 12px rgba(0,0,0,.06)',
+          transition:'border-color .2s',
+        }}>
+          <input
+            ref={inputRef}
+            type="password"
+            value={pwd}
+            onChange={e => { setPwd(e.target.value); setError(false); }}
+            onKeyDown={e => e.key === 'Enter' && attempt()}
+            placeholder="Access code"
+            autoComplete="current-password"
+            style={{
+              width:'100%', border:'none', outline:'none',
+              padding:'14px 18px', fontSize:16, fontFamily:'inherit',
+              background:'transparent', color:'#0a0a0c',
+              letterSpacing: pwd ? '0.15em' : '0',
+            }}
+          />
+          <div style={{ height:1, background: error ? '#fca5a5' : 'rgba(0,0,0,.08)' }}/>
+          <button
+            onClick={attempt}
+            style={{
+              width:'100%', padding:'13px 18px', border:'none',
+              background: error ? '#fef2f2' : '#0a0a0c',
+              color: error ? '#dc2626' : '#fff',
+              fontSize:14, fontWeight:600, cursor:'pointer',
+              fontFamily:'inherit', letterSpacing:'-0.01em',
+              transition:'background .2s, color .2s',
+            }}
+          >
+            {error ? 'Wrong code — try again' : 'Enter Forge →'}
+          </button>
+        </div>
+
+        <p style={{ fontSize:12, color:'#9898a2', marginTop:20, lineHeight:1.6 }}>
+          This tool is private.<br/>If you think you should have access, reach out.
+        </p>
+      </div>
+    </div>
+  );
+}
+
 export default function FreelancersForge() {
   const [themeMode, setThemeMode] = useState('system'); // 'light' | 'dark' | 'system'
   const [systemTheme, setSystemTheme] = useState(getSystemTheme);
@@ -3589,6 +3702,7 @@ export default function FreelancersForge() {
   const activeOption = themeOptions.find(o => o.id === themeMode);
 
   return (
+    <AuthGate>
     <div className={`ff-root ${theme}`}>
       <style>{CSS}</style>
 
@@ -3728,11 +3842,9 @@ export default function FreelancersForge() {
 
       </div>
     </div>
+    </AuthGate>
   );
 }
-
-/* ====================================================================== */
-/* ASK ANYTHING TAB                                                       */
 /* ====================================================================== */
 
 function formatMessageText(text) {
