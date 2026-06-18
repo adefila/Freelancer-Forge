@@ -350,7 +350,8 @@ Return ONLY valid JSON:
      PROPOSAL MODE (DEFAULT)
   ================================================================ */
   const portfolioBlock = portfolio.length > 0
-    ? 'PORTFOLIO (match the most relevant 1-2 pieces to this specific job):\n' + portfolio.map((p, i) => '[' + (i+1) + '] ' + (p.label || p.url) + (p.tag ? ' [' + p.tag + ']' : '') + ' - ' + p.url).join('\n')
+    ? 'PORTFOLIO LIBRARY (pick by category match, not recency or order):\n' + portfolio.map((p, i) => '[' + (i+1) + '] ' + (p.label || p.url) + (p.tag ? ' — category: ' + p.tag : ' — no category tag, infer from label/URL') + ' - ' + p.url).join('\n') +
+      '\n\nPORTFOLIO MATCHING RULE: Before writing the proof section, identify which portfolio item shares the closest category/skill match with what this specific client needs (same platform, same industry, same type of problem). Do not default to item [1] or the most recent one out of convenience. If two items are close, pick the one with the more specific, comparable outcome. If none genuinely match, say so in portfolioMatch.reason and write proof without forcing a weak reference.'
     : '';
 
   return `You are both the freelancer writing this proposal AND the client reading it. You know exactly what makes a client stop scrolling, read carefully, and think "finally, someone who actually gets what I need."
@@ -454,6 +455,10 @@ Return ONLY valid JSON. No markdown. No preamble:
     "whyMe": "1 sentence. One specific differentiator earned by reading this exact post.",
     "process": "1 sentence. How you start and what they get first. Human, not corporate.",
     "cta": "1 sentence. Easiest possible yes. Specific to this client and what they said."
+  },
+  "portfolioMatch": {
+    "picked": "Label or URL of the portfolio item used, or null if none was used.",
+    "reason": "1 sentence. Why this item, specifically, matches this client's category/skill need over the others. If no portfolio was provided or none matched, say so plainly."
   },
   "clientPsychology": {
     "buyerType": "5-8 words. The type of buyer this person is.",
