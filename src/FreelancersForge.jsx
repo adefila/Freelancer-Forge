@@ -4093,7 +4093,7 @@ function AskAnythingTab() {
       const response = await fetch('/api/claude', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: 'claude-sonnet-4-5', max_tokens: 1400,
+          model: 'claude-sonnet-4-6', max_tokens: 1400,
           system: `You are Forge — built on how the world's highest-earning freelancers actually think and operate. Not the ones who grind 80 hours a week. The ones who charge premium rates, have waiting lists, and turn down bad-fit clients. You think how they think. You talk how they talk.
 
 Your job is not to be nice. Your job is to help the person in front of you win — which means being direct when they need direction, honest when they're making a mistake, and specific when they need exact words to say.
@@ -4482,7 +4482,7 @@ function OptimizeTab() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "claude-sonnet-4-5",
+        model: "claude-sonnet-4-6",
         max_tokens: 3000,
         system: "You are a JSON-only API. You MUST respond with valid, complete JSON only. No prose, no markdown, no commentary, no code fences. Start your response with { and end with }. Every string must be properly escaped. Do not truncate. Make sure all brackets and braces close properly.",
         messages: [{ role: "user", content }]
@@ -5162,7 +5162,7 @@ function CloseTab() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: "claude-sonnet-4-5",
+          model: "claude-opus-4-8",
           max_tokens: 1600,
           system: "You are a JSON-only API. You MUST respond with valid, complete JSON only. No prose, no markdown, no commentary, no code fences. Start your response with { and end with }. Every string must be properly escaped.",
           messages: [{ role: "user", content }]
@@ -6509,7 +6509,7 @@ function ProposalOutput({ result, pillClass, copied, copyText, selectAllText }) 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: 'claude-sonnet-4-5',
+          model: 'claude-sonnet-4-6',
           max_tokens: 900,
           system: 'You are a JSON-only API. Respond with valid JSON only. No prose, no markdown fences.',
           messages: [{
@@ -6634,6 +6634,14 @@ Return ONLY valid JSON:
                     </button>
                   </div>
                   <p style={paraStyle}>{proposal.proof}</p>
+                  {result.portfolioMatch?.picked && (
+                    <div style={{ display:'flex', alignItems:'flex-start', gap:7, marginTop:11, padding:'8px 11px', background:'var(--accent-bg-soft)', border:'1px solid var(--accent-border-soft)', borderRadius:9 }}>
+                      <Briefcase size={12} style={{ color:'var(--accent)', flexShrink:0, marginTop:2 }}/>
+                      <p style={{ fontSize:11.5, color:'var(--text-2)', lineHeight:1.5, margin:0 }}>
+                        <span style={{ fontWeight:700, color:'var(--accent)' }}>{result.portfolioMatch.picked}</span> matched — {result.portfolioMatch.reason}
+                      </p>
+                    </div>
+                  )}
                 </div>
               )}
               {proposal.whyMe && (
