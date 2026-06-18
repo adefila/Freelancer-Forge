@@ -71,18 +71,29 @@ FORMAT: One page max (exception: 10+ years relevant experience). ATS-friendly.
 
 const TONE_DIRECTIVES = {
   Auto: '',
-  Direct: "DIRECT: No warmup. Lead with the answer. Short sentences. Zero filler.",
-  Warm: "WARM: Conversational, human, like talking to a smart friend. Still precise, never fluffy.",
-  Sharp: "SHARP: Confident and assertive. Every word earns its place. Results-first.",
-  Persuasive: "PERSUASIVE: Build a case. Each sentence makes the next one easier to agree with.",
-  Casual: "CASUAL: How you'd text a colleague you respect. Relaxed but never sloppy.",
-  Bold: "BOLD: Take positions. Make claims you'd defend in a room. No hedging, no softening.",
-  Witty: "WITTY: Unexpected angles, light intelligence, a phrase that makes them smile. Never try-hard.",
-  Empathetic: "EMPATHETIC: Show you feel the weight of their situation before you offer anything.",
-  Curious: "CURIOUS: Ask before selling. Show genuine interest in their world. Questions over pitches.",
-  Authoritative: "AUTHORITATIVE: You are the expert in the room. State things as fact. Quiet confidence.",
-  Playful: "PLAYFUL: Break the expected pattern. Energetic, surprising, still professional.",
+  Direct: "DIRECT — posture: peer, not vendor. Lead with the conclusion before the reasoning. Sentences average under 12 words. Cut every hedge word (just, maybe, I think, hopefully). The CTA is a statement of what happens next, not a request: 'I'll start with X' not 'Could I possibly start with X?'",
+  Warm: "WARM — posture: trusted colleague who already respects them. Conversational rhythm, contractions allowed, but every sentence still earns its place. Warmth comes from specificity and attention, never from softening language, exclamation points, or extra adjectives. The CTA invites a decision, it does not plead for one.",
+  Sharp: "SHARP — posture: the person who has already solved this problem before and is mildly impatient to start. Confident, clipped, zero qualifiers. No 'I believe' or 'I think' — state the read as fact. The CTA assumes the yes and names the next concrete step.",
+  Persuasive: "PERSUASIVE — posture: building an airtight case, not asking for a favour. Each sentence makes the next one harder to disagree with. Use their own stated priorities as the argument's spine. The CTA is the logical conclusion of the case just made, not a separate ask tacked on.",
+  Casual: "CASUAL — posture: a skilled person texting a peer, not a vendor messaging a lead. Relaxed contractions, short fragments where natural, but precise word choice underneath. Never sloppy, never overly familiar. The CTA reads like 'here's what I'd do' not 'let me know if that works for you!'",
+  Bold: "BOLD — posture: someone with more options than this client, choosing to engage anyway. Take positions you would defend in a room. No hedging, no 'happy to', no apologetic framing. The CTA states the next step plainly — it never asks permission to be hired.",
+  Witty: "WITTY — posture: confident enough to have a sense of humour about the work, never the client's problem. One unexpected angle or sharp observation, placed once, never forced. Underneath the wit, every claim is still substantive. The CTA stays light but still names a concrete next step, never a joke that dodges the ask.",
+  Empathetic: "EMPATHETIC — posture: someone who has personally felt the cost of this problem, not someone performing sympathy to get hired. Name the real weight of the situation once, briefly, then move to capability. Empathy is shown through precision about their specific pain, not through soft language or reassurance. The CTA still moves forward decisively — empathy is not an excuse to be tentative.",
+  Curious: "CURIOUS — posture: genuinely interested in the mechanics of their problem, not interviewing to get picked. Ask one sharp, specific question that proves real thought, not a generic discovery question. The CTA can be framed as the next thing to learn together, but it is still a concrete, scheduled step, not an open-ended 'let's chat sometime'.",
+  Authoritative: "AUTHORITATIVE — posture: the expert being consulted, not the applicant being screened. State diagnoses as fact, not as opinion. No qualifiers, no 'in my experience', no asking if they agree. The CTA is a recommendation delivered, not a request submitted.",
+  Playful: "PLAYFUL — posture: breaks the expected proposal pattern on purpose, because predictability is the enemy here, not the client. Energetic and unexpected in structure, but every sentence still carries real information. Never juvenile, never at the expense of credibility. The CTA keeps the energy but still lands on something specific and bookable.",
 };
+
+const NEVER_BEG_RULE = `
+NEVER-BEG RULE (applies regardless of tone selected above):
+This proposal is a peer offering a specific solution, not a vendor competing for approval. Eliminate all of the following regardless of tone:
+- Apologetic framing: "I know you're probably busy but", "I hope this finds you well", "sorry to bother you"
+- Permission-seeking: "would it be okay if", "I was wondering if maybe", "if you don't mind"
+- Desperation signals: "I would really appreciate", "this means a lot to me", "I really want this opportunity"
+- Generic gratitude before earning it: "thank you so much for considering", "thanks in advance"
+- Self-diminishing qualifiers: "I'm not the most experienced but", "I might not be perfect for this but"
+- Closing with hope instead of a decision: "hope to hear from you", "fingers crossed", "really hope this works out"
+The freelancer in this proposal has already solved a version of this problem and is offering to do it again. The tone changes the delivery style. It never changes the underlying posture: equal footing, specific value, a clear next step. A proposal can be warm, empathetic, or curious and still never beg.`;
 
 export function buildPrompt(mode, intel, imageData, tone, portfolio, clientMessage, myMessage, goal, jobDescription, offer, proof, cvFile) {
   const toneInstruction = tone === 'Auto' ? '' : TONE_DIRECTIVES[tone];
@@ -123,6 +134,7 @@ ${goal ? 'GOAL FOR THIS REPLY: ' + goal : ''}
 ${imageData ? 'SCREENSHOT ATTACHED: Read every visible word before writing.' : ''}
 
 ${STRICT_RULES}
+${NEVER_BEG_RULE}
 
 Return ONLY valid JSON:
 {
@@ -170,6 +182,7 @@ ${intel || '[No input - write for a plausible scenario based on context]'}
 
 ${toneInstruction ? 'VOICE: ' + toneInstruction : ''}
 ${STRICT_RULES}
+${NEVER_BEG_RULE}
 
 Return ONLY valid JSON:
 {
@@ -222,6 +235,7 @@ ${intel || '[No input provided]'}
 
 ${toneInstruction ? 'VOICE: ' + toneInstruction : ''}
 ${STRICT_RULES}
+${NEVER_BEG_RULE}
 
 Return ONLY valid JSON:
 {
@@ -267,6 +281,7 @@ ${myMessage ? 'FREELANCER\'S LAST MESSAGE: ' + myMessage : ''}
 
 ${toneInstruction ? 'VOICE: ' + toneInstruction : ''}
 ${STRICT_RULES}
+${NEVER_BEG_RULE}
 
 Return ONLY valid JSON:
 {
@@ -325,6 +340,7 @@ ${portfolioBlock}
 
 ${toneInstruction ? 'VOICE: ' + toneInstruction : ''}
 ${STRICT_RULES}
+${NEVER_BEG_RULE}
 ${CV_STRICT_RULES}
 
 Return ONLY valid JSON:
@@ -427,6 +443,7 @@ ${intel.trim() || (imageData ? '[See attached image]' : '[No input - write for t
 ${portfolioBlock}
 
 ${STRICT_RULES}
+${NEVER_BEG_RULE}
 
 ANTI-FORMULA CHECK (run this before outputting):
 - Does the hook name their specific situation, or could it apply to a different job? If different job: rewrite.
