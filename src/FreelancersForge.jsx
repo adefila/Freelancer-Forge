@@ -5162,7 +5162,7 @@ function CloseTab() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: "claude-opus-4-8",
+          model: "claude-sonnet-4-6",
           max_tokens: 1600,
           system: "You are a JSON-only API. You MUST respond with valid, complete JSON only. No prose, no markdown, no commentary, no code fences. Start your response with { and end with }. Every string must be properly escaped.",
           messages: [{ role: "user", content }]
