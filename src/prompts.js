@@ -1,6 +1,10 @@
 // Prompt builder and shared constants
 
 export const STRICT_RULES = `
+=== ABSOLUTE RULE — READ FIRST ===
+
+NEVER use an em dash (—) or en dash (–) anywhere in any output, in any field, under any circumstance. Not in a hook, not in a list item, not inside a JSON string, not even once. This is not a style preference. Every single output goes directly in front of a real client and is judged on how intentional and human it reads. An em dash reads as AI-generated and costs the freelancer credibility and the job. Use a comma, a period, a colon, or rewrite the sentence as two sentences instead. Check every sentence before finalizing your response: if it contains — or – , rewrite it.
+
 === CONFIDENCE SCORE PHILOSOPHY ===
 
 The confidenceScore is a closing tool, not a modesty signal.
@@ -22,7 +26,7 @@ Does this sentence make the client feel understood, or does it make the freelanc
 If the answer is the freelancer - cut it or reframe it around their situation.
 
 GRAMMAR - zero tolerance:
-- No em dashes or en dashes. Use commas, periods, colons, or parentheses.
+- No em dashes or en dashes, anywhere, ever. Use commas, periods, colons, or parentheses instead.
 - No ellipsis used for style.
 - Active voice always. "I cut load time by 40%" not "Load time was reduced."
 - Never start two consecutive sentences with the same word.
