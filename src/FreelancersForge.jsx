@@ -197,6 +197,20 @@ const stripEmDashes = (s) => {
     .replace(/,\s*,/g, ',').replace(/,\s*\./g, '.');
 };
 
+// Recursively strips em/en dashes from every string in any object/array shape.
+// This is the safety net: even if a JSON field is added later and the model
+// slips an em dash into it, this catches it without needing a manual update.
+const deepStripEmDashes = (val) => {
+  if (typeof val === 'string') return stripEmDashes(val);
+  if (Array.isArray(val)) return val.map(deepStripEmDashes);
+  if (val && typeof val === 'object') {
+    const out = {};
+    for (const k in val) out[k] = deepStripEmDashes(val[k]);
+    return out;
+  }
+  return val;
+};
+
 /* ====================================================================== */
 /* ASK ANYTHING — SUGGESTED PROMPTS                                       */
 /* ====================================================================== */
@@ -4135,7 +4149,7 @@ FORMAT: Short paragraphs, one point each. Bold the single most important thing p
         throw new Error(`Request failed (${response.status}). ${errBody.slice(0, 200)}`);
       }
       const data = await response.json();
-      const replyText = data.content.filter(b => b.type === 'text').map(b => b.text).join('').trim();
+      const replyText = stripEmDashes(data.content.filter(b => b.type === 'text').map(b => b.text).join('').trim());
       setConvos(prev => prev.map(c => c.id === currentId
         ? { ...c, messages: [...c.messages, { role: 'assistant', content: replyText, ts: Date.now() }], updatedAt: Date.now() }
         : c
@@ -4602,14 +4616,9 @@ ${pageType === 'cv' ? CV_STRICT_RULES : ''}
 Return ONLY JSON. No em dashes.`;
 
     try {
-      const parsed = await callClaude(prompt, method === 'image' || (pageType === 'cv' && !!imageData));
-      if (parsed.overall) {
-        parsed.overall.verdict = stripEmDashes(parsed.overall.verdict);
-        parsed.overall.headline = stripEmDashes(parsed.overall.headline);
-      }
-      if (Array.isArray(parsed.scores)) parsed.scores = parsed.scores.map(s => ({ ...s, note: stripEmDashes(s.note) }));
-      if (Array.isArray(parsed.recommendations)) parsed.recommendations = parsed.recommendations.map(r => ({ ...r, issue: stripEmDashes(r.issue), fix: stripEmDashes(r.fix) }));
-      if (Array.isArray(parsed.rewrites)) parsed.rewrites = parsed.rewrites.map(r => ({ ...r, before: stripEmDashes(r.before), after: stripEmDashes(r.after) }));
+      let parsed = await callClaude(prompt, method === 'image' || (pageType === 'cv' && !!imageData));
+      // Deep strip covers every field automatically, including any added later.
+      parsed = deepStripEmDashes(parsed);
       setResult(parsed);
     } catch (err) {
       console.error('Audit error:', err);
@@ -4685,15 +4694,8 @@ ${pageType === 'cv' ? CV_STRICT_RULES : ''}
 Return ONLY JSON. No em dashes.`;
 
     try {
-      const parsed = await callClaude(prompt, method === 'image' || (pageType === 'cv' && !!imageData));
-      if (parsed.summary) {
-        parsed.summary.headline = stripEmDashes(parsed.summary.headline);
-        parsed.summary.shift = stripEmDashes(parsed.summary.shift);
-        parsed.summary.niche = stripEmDashes(parsed.summary.niche);
-      }
-      if (typeof parsed.fullRewrite === 'string') {
-        parsed.fullRewrite = stripEmDashes(parsed.fullRewrite);
-      }
+      let parsed = await callClaude(prompt, method === 'image' || (pageType === 'cv' && !!imageData));
+      parsed = deepStripEmDashes(parsed);
       setOptimized(parsed);
     } catch (err) {
       console.error('Optimize error:', err);
@@ -5197,24 +5199,14 @@ function CloseTab() {
       }
       if (!parsed) throw new Error(`Could not parse response. Preview: "${rawText.slice(0, 150)}..."`);
 
-      Object.keys(parsed).forEach(k => { if (typeof parsed[k] === 'string') parsed[k] = stripEmDashes(parsed[k]); });
-      if (parsed.extraction) Object.keys(parsed.extraction).forEach(k => { if (typeof parsed.extraction[k] === 'string') parsed.extraction[k] = stripEmDashes(parsed.extraction[k]); });
-      // Handle structured proposal object
-      if (parsed.proposal && typeof parsed.proposal === 'object') {
-        const p = parsed.proposal;
-        if (typeof p.hook === 'string') p.hook = stripEmDashes(p.hook);
-        if (typeof p.cta === 'string') p.cta = stripEmDashes(p.cta);
-        if (Array.isArray(p.fit)) p.fit = p.fit.map(s => stripEmDashes(s));
-        if (Array.isArray(p.process)) p.process = p.process.map(s => stripEmDashes(s));
-      } else if (typeof parsed.proposal === 'string') {
-        parsed.proposal = stripEmDashes(parsed.proposal);
-      }
-      if (typeof parsed.coldDM === 'string') parsed.coldDM = stripEmDashes(parsed.coldDM);
+      // Strip em/en dashes from every string field, no matter the shape — covers
+      // proof, whyMe, clientPsychology, portfolioMatch, and any field added later.
+      parsed = deepStripEmDashes(parsed);
       if (Array.isArray(parsed.attachments)) {
         const portfolioUrls = new Set(portfolio.map(p => p.url));
         parsed.attachments = parsed.attachments.map(a => {
-          if (typeof a === 'string') return { description: stripEmDashes(a), links: [] };
-          return { description: stripEmDashes(a.description || ''), links: Array.isArray(a.links) ? a.links.filter(u => portfolioUrls.has(u)) : [] };
+          if (typeof a === 'string') return { description: a, links: [] };
+          return { description: a.description || '', links: Array.isArray(a.links) ? a.links.filter(u => portfolioUrls.has(u)) : [] };
         });
       }
 
@@ -6571,7 +6563,7 @@ Return ONLY valid JSON:
       const tryP = s => { try { return JSON.parse(s); } catch { return null; } };
       let parsed = tryP(raw);
       if (!parsed) { const m = raw.match(/\{[\s\S]*\}/); if (m) parsed = tryP(m[0]); }
-      if (parsed) { setScore(parsed); setAppliedKeys({}); }
+      if (parsed) { setScore(deepStripEmDashes(parsed)); setAppliedKeys({}); }
     } catch (e) { console.error(e); }
     finally { setScoring(false); }
   }
