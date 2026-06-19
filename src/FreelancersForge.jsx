@@ -1569,8 +1569,8 @@ select.ff-input {
 }
 
 .ff-hero-heading {
-  font-size: clamp(32px, 5vw, 62px);
-  line-height: 1.04;
+  font-size: clamp(34px, 5vw, 62px);
+  line-height: 1.05;
   font-weight: 600;
   letter-spacing: -0.04em;
   max-width: 100%;
@@ -1578,8 +1578,8 @@ select.ff-input {
 }
 
 .ff-hero-sub {
-  font-size: clamp(14px, 1.3vw, 17px);
-  line-height: 1.6;
+  font-size: clamp(14.5px, 1.3vw, 17px);
+  line-height: 1.65;
   letter-spacing: -0.005em;
   max-width: 640px;
   width: 100%;
@@ -1675,11 +1675,10 @@ select.ff-input {
 
 /* Tighter form spacing on mobile */
 @media (max-width: 768px) {
-  .space-y-5 > * + * { margin-top: 16px !important; }
-  .space-y-6 > * + * { margin-top: 20px !important; }
+  .space-y-5 > * + * { margin-top: 18px !important; }
+  .space-y-6 > * + * { margin-top: 22px !important; }
   /* ff-textarea stays 16px on mobile to prevent iOS zoom */
-  .ff-output-text { font-size: 14px; }
-  .ff-subheading { font-size: 18px; }
+  .ff-output-text { font-size: 14.5px; line-height: 1.7; }
   .ff-dropdown-menu { min-width: min(280px, 90vw); left: 0; right: auto; }
 }
 
@@ -1707,31 +1706,35 @@ select.ff-input {
 /* Mobile overrides */
 @media (max-width: 768px) {
   .ff-root-inner {
-    padding: 24px 16px 56px;
+    padding: 28px 18px 64px;
   }
 
   .ff-topbar {
-    margin-bottom: 20px;
+    margin-bottom: 28px;
   }
 
   .ff-hero {
-    margin-bottom: 24px;
+    margin-bottom: 32px;
+  }
+
+  .ff-hero-heading {
+    margin-bottom: 14px;
   }
 
   .ff-tabs-nav {
-    margin-bottom: 20px;
+    margin-bottom: 28px;
     overflow-x: auto;
   }
 
   .ff-2col {
     grid-template-columns: 1fr;
-    gap: 14px;
-    margin-bottom: 20px;
+    gap: 16px;
+    margin-bottom: 24px;
   }
 
   .ff-2col-stack {
     grid-template-columns: 1fr;
-    gap: 28px;
+    gap: 32px;
   }
 
   .ff-pipeline-table-header {
@@ -1748,11 +1751,11 @@ select.ff-input {
   }
 
   .ff-card {
-    padding: 16px 14px;
+    padding: 20px 18px;
   }
 
   .ff-optimize-cta {
-    padding: 18px 16px;
+    padding: 22px 18px;
   }
 
   .ff-dropdown-menu {
@@ -1765,6 +1768,18 @@ select.ff-input {
     max-width: 100%;
     min-width: 0;
     width: 100%;
+  }
+
+  /* More breathing room on inputs themselves */
+  .ff-input {
+    padding: 13px 15px;
+  }
+  .ff-textarea {
+    padding: 13px 15px;
+  }
+
+  .ff-field-label {
+    margin-bottom: 9px;
   }
 
   /* Fix portfolio form on mobile */
@@ -1781,30 +1796,54 @@ select.ff-input {
 
   /* Fix output text */
   .ff-output-text {
-    font-size: 14px;
+    font-size: 14.5px;
+    line-height: 1.7;
     word-break: break-word;
     overflow-wrap: break-word;
   }
 
-  .ff-subheading { font-size: 17px; }
+  .ff-subheading {
+    font-size: 18px;
+    margin-bottom: 14px;
+  }
 
-  /* Btn full-width on very small screens */
+  /* Btn full-width on very small screens, taller for easier tapping */
   .ff-btn {
     width: 100%;
     justify-content: center;
+    min-height: 46px;
   }
 
-  /* Score card grid on mobile */
-  .space-y-5 > * + * { margin-top: 14px !important; }
+  /* More breathing room between stacked sections */
+  .space-y-5 > * + * { margin-top: 18px !important; }
+
+  /* Stat cards: 2-up with more generous gap and padding on mobile */
+  .ff-stat-cards {
+    gap: 12px;
+  }
+
+  /* Section headers get more room to breathe before content */
+  h2.ff-display {
+    margin-bottom: 8px;
+  }
 }
 
 @media (max-width: 480px) {
   .ff-root-inner {
-    padding: 20px 14px 48px;
+    padding: 22px 16px 52px;
   }
 
   .ff-hero-heading {
-    font-size: 26px;
+    font-size: clamp(28px, 9vw, 34px);
+    margin-bottom: 12px;
+  }
+
+  .ff-hero-sub {
+    font-size: 14px;
+  }
+
+  .ff-hero {
+    margin-bottom: 28px;
   }
 
   .ff-2col-stack {
@@ -1815,16 +1854,38 @@ select.ff-input {
     border-radius: 14px;
   }
 
-  /* Keep buttons from being too small */
+  /* Keep buttons from being too small, comfortable tap target */
   .ff-btn {
     font-size: 14px;
-    padding: 10px 16px;
+    padding: 12px 16px;
+    min-height: 46px;
   }
 
-  /* Tab labels shorter on tiny screens */
+  /* Tab labels shorter on tiny screens, slightly more gap so they don't feel crowded */
   .ff-tab {
     font-size: 12.5px;
-    margin-right: 18px;
+    margin-right: 20px;
+  }
+
+  /* Stat cards stack 2x2 with comfortable padding */
+  .ff-stat-cards {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .ff-card {
+    padding: 18px 16px;
+  }
+
+  /* Tighter but still breathing field spacing */
+  .ff-field-label {
+    font-size: 12px;
+  }
+
+  /* Pipeline new-entry modal: single column on narrow phones */
+  .ff-pe-grid {
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
   }
 }
 
@@ -5784,7 +5845,7 @@ function PipelineTab() {
       {showForm && (
         <div role="dialog" aria-modal="true" aria-labelledby="entry-modal-title" style={{ position:'fixed', inset:0, zIndex:200, display:'flex', alignItems:'center', justifyContent:'center', padding:'16px' }}>
           <div onClick={() => setShowForm(false)} style={{ position:'absolute', inset:0, background:'rgba(0,0,0,0.45)', backdropFilter:'blur(2px)' }} aria-hidden="true"/>
-          <div style={{ position:'relative', width:'100%', maxWidth:520, background:'var(--bg)', borderRadius:20, boxShadow:'0 24px 64px rgba(0,0,0,.18), 0 4px 16px rgba(0,0,0,.1)', overflow:'hidden' }} className="ff-fadeup">
+          <div style={{ position:'relative', width:'100%', maxWidth:520, background:'var(--bg)', borderRadius:20, boxShadow:'0 24px 64px rgba(0,0,0,.18), 0 4px 16px rgba(0,0,0,.1)', overflow:'hidden', maxHeight:'calc(100vh - 32px)', display:'flex', flexDirection:'column' }} className="ff-fadeup">
             {/* Modal header */}
             <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'20px 24px 0' }}>
               <h3 id="entry-modal-title" style={{ fontSize:17, fontWeight:700, color:'var(--text-1)', letterSpacing:'-0.02em' }}>New pipeline entry</h3>
@@ -5793,8 +5854,8 @@ function PipelineTab() {
               </button>
             </div>
             {/* Modal body */}
-            <div style={{ padding:'18px 24px 24px', display:'flex', flexDirection:'column', gap:14 }}>
-              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
+            <div style={{ padding:'18px 24px 24px', display:'flex', flexDirection:'column', gap:14, overflowY:'auto' }}>
+              <div className="ff-pe-grid" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
                 <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
                   <label htmlFor="pe-date" className="ff-field-label" style={{ display:'inline-flex', alignItems:'center' }}>
                     Date sent <Tooltip text="When you sent the proposal, DM, or email." />
