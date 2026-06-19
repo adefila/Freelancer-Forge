@@ -3739,7 +3739,7 @@ export default function FreelancersForge() {
           <div className="ff-theme-dropdown" ref={themeMenuRef}>
             <button
               type="button"
-              className="ff-theme-toggle" aria-label="Toggle theme"
+              className="ff-theme-toggle"
               onClick={() => setThemeMenuOpen(o => !o)}
               aria-label="Change theme"
             >
@@ -6481,6 +6481,7 @@ function ProposalOutput({ result, setResult, pillClass, copied, copyText, select
   const [scoring, setScoring] = useState(false);
   const [scoreOpen, setScoreOpen] = useState(false);
   const [appliedKeys, setAppliedKeys] = useState({});
+  const lastScoredText = useRef(null);
 
   const proposalText = (() => {
     if (!proposal) return '';
@@ -6497,6 +6498,7 @@ function ProposalOutput({ result, setResult, pillClass, copied, copyText, select
   async function runScorecard(forceRescore) {
     if (score && !forceRescore) { setScoreOpen(s => !s); return; }
     setScoring(true); setScoreOpen(true);
+    const isRescore = forceRescore && score;
     try {
       const resp = await fetch('/api/claude', {
         method: 'POST',
@@ -6520,7 +6522,14 @@ CLIENT CONTEXT:
 ${result.extraction?.coreProblem || ''}
 Client type: ${result.extraction?.clientType || ''}
 What they are really evaluating: ${result.extraction?.whatTheyAreActuallyEvaluating || ''}
+${isRescore ? `
+THIS IS A RE-CHECK. The proposal above already reflects edits made after this previous review:
+Previous overall score: ${score.overallScore}/10
+Previous per-section scores: ${score.criteria.map(c => `${c.name} ${c.score}/10`).join(', ')}
+Previous feedback given: ${score.criteria.map(c => `${c.name}: "${c.feedback}"`).join(' | ')}
 
+Score this version on its own merits, sentence by sentence, exactly as strictly as the first pass. Do not assume it improved just because it was edited. Do not anchor to the previous score out of politeness or to be encouraging. If a section was rewritten and the specific problem named in the previous feedback is now fixed, the score for that section should rise to reflect that. If a section is unchanged from before, its score should be IDENTICAL to before, not drift up or down randomly. If a section was rewritten but the underlying issue was not actually fixed, the score should stay the same or could even drop if a new problem was introduced. Be exact, not generous.
+` : ''}
 Score each section from 1-10. Be honest — most proposals score 3-5. A 9-10 is rare and must be earned.
 
 WHAT AVERAGE PROPOSALS DO (score 3-5):
@@ -6541,9 +6550,9 @@ REWRITE RULE: For every section scoring below 7, write a rewrite that would scor
 
 Return ONLY valid JSON:
 {
-  "overallScore": <number 1-10>,
-  "avgScore": <number 3.2 to 4.8, realistic average for this type of post>,
-  "verdict": "1 sentence. Honest read of how this proposal lands.",
+  "overallScore": <number 1-10. ${isRescore ? 'Must reflect genuine change from ' + score.overallScore + ', not drift for its own sake.' : ''}>,
+  "avgScore": ${isRescore ? score.avgScore : '<number 3.2 to 4.8, realistic average for this type of post>'},
+  "verdict": "1 sentence. Honest read of how this proposal lands.${isRescore ? ' If scores did not change, say so plainly and explain why the edit did not move the needle.' : ''}",
   "criteria": [
     { "key": "hook", "name": "Hook strength", "score": <1-10>, "avg": <2-5>, "feedback": "1-2 sentences specific to THIS hook.", "rewrite": "Improved version, or null if score is already 7+." },
     { "key": "proof", "name": "Proof specificity", "score": <1-10>, "avg": <2-5>, "feedback": "1-2 sentences. Does the proof have a real number and map to this client?", "rewrite": "Improved version, or null if score is already 7+." },
@@ -6563,7 +6572,33 @@ Return ONLY valid JSON:
       const tryP = s => { try { return JSON.parse(s); } catch { return null; } };
       let parsed = tryP(raw);
       if (!parsed) { const m = raw.match(/\{[\s\S]*\}/); if (m) parsed = tryP(m[0]); }
-      if (parsed) { setScore(deepStripEmDashes(parsed)); setAppliedKeys({}); }
+      if (parsed) {
+        const clean = deepStripEmDashes(parsed);
+        // Deterministic guard: if a section's text is identical to what was
+        // last scored, force its score/feedback to match exactly. This removes
+        // any chance of the model drifting a number for unchanged text.
+        if (isRescore && Array.isArray(clean.criteria) && lastScoredText.current) {
+          clean.criteria = clean.criteria.map(c => {
+            const prevText = lastScoredText.current[c.key];
+            const currText = c.key === 'process'
+              ? (Array.isArray(proposal?.process) ? proposal.process.join(' ') : (proposal?.process || ''))
+              : (proposal?.[c.key] || '');
+            if (prevText !== undefined && prevText === currText) {
+              const prevCriterion = score.criteria.find(pc => pc.key === c.key);
+              if (prevCriterion) return { ...c, score: prevCriterion.score, feedback: prevCriterion.feedback, rewrite: null };
+            }
+            return c;
+          });
+          clean.overallScore = Math.round((clean.criteria.reduce((s, c) => s + c.score, 0) / clean.criteria.length) * 10) / 10;
+        }
+        // Track what text each section had at the moment it was scored, for next rescore.
+        lastScoredText.current = {
+          hook: proposal?.hook || '', proof: proposal?.proof || '', whyMe: proposal?.whyMe || '',
+          process: Array.isArray(proposal?.process) ? proposal.process.join(' ') : (proposal?.process || ''),
+          cta: proposal?.cta || '',
+        };
+        setScore(clean); setAppliedKeys({});
+      }
     } catch (e) { console.error(e); }
     finally { setScoring(false); }
   }
