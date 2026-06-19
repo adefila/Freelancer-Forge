@@ -5561,7 +5561,7 @@ function CloseTab() {
           <h2 className="ff-section-label mb-5">The Output</h2>
           {!result && !loading && <CloserEmpty mode={mode} />}
           {loading && <OptimizeLoading message={`Drafting your ${CLOSER_MODES[mode].label.toLowerCase()}...`} />}
-          {result && resultMode === 'proposal' && <ProposalOutput result={result} pillClass={pillClass} copied={copied} copyText={copyText} selectAllText={selectAllText} />}
+          {result && resultMode === 'proposal' && <ProposalOutput result={result} setResult={setResult} pillClass={pillClass} copied={copied} copyText={copyText} selectAllText={selectAllText} />}
           {result && resultMode === 'dm' && <DMOutput result={result} copied={copied} copyText={copyText} selectAllText={selectAllText} />}
           {result && resultMode === 'email' && <EmailOutput result={result} copied={copied} copyText={copyText} selectAllText={selectAllText} />}
           {result && resultMode === 'reply' && <ReplyOutput result={result} copied={copied} copyText={copyText} selectAllText={selectAllText} />}
@@ -6482,12 +6482,13 @@ function PsychCard({ psych, delay = 0 }) {
   );
 }
 
-function ProposalOutput({ result, pillClass, copied, copyText, selectAllText }) {
+function ProposalOutput({ result, setResult, pillClass, copied, copyText, selectAllText }) {
   const proposal = result.proposal;
   const isStructured = proposal && typeof proposal === 'object';
   const [score, setScore] = useState(null);
   const [scoring, setScoring] = useState(false);
   const [scoreOpen, setScoreOpen] = useState(false);
+  const [appliedKeys, setAppliedKeys] = useState({});
 
   const proposalText = (() => {
     if (!proposal) return '';
@@ -6501,8 +6502,8 @@ function ProposalOutput({ result, pillClass, copied, copyText, selectAllText }) 
     return parts.join('\n\n');
   })();
 
-  async function runScorecard() {
-    if (score) { setScoreOpen(s => !s); return; }
+  async function runScorecard(forceRescore) {
+    if (score && !forceRescore) { setScoreOpen(s => !s); return; }
     setScoring(true); setScoreOpen(true);
     try {
       const resp = await fetch('/api/claude', {
@@ -6510,21 +6511,25 @@ function ProposalOutput({ result, pillClass, copied, copyText, selectAllText }) 
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           model: 'claude-sonnet-4-6',
-          max_tokens: 900,
+          max_tokens: 1400,
           system: 'You are a JSON-only API. Respond with valid JSON only. No prose, no markdown fences.',
           messages: [{
             role: 'user',
-            content: `You are a senior freelance proposal coach who has reviewed thousands of proposals. Score this proposal honestly and specifically.
+            content: `You are a senior freelance proposal coach who has reviewed thousands of proposals. Score this proposal honestly and specifically, then rewrite every section that falls below standard.
 
-PROPOSAL:
-${proposalText}
+PROPOSAL SECTIONS:
+Hook: ${proposal?.hook || ''}
+Proof: ${proposal?.proof || ''}
+Why me: ${proposal?.whyMe || ''}
+Process: ${Array.isArray(proposal?.process) ? proposal.process.join(' ') : (proposal?.process || '')}
+CTA: ${proposal?.cta || ''}
 
 CLIENT CONTEXT:
 ${result.extraction?.coreProblem || ''}
 Client type: ${result.extraction?.clientType || ''}
 What they are really evaluating: ${result.extraction?.whatTheyAreActuallyEvaluating || ''}
 
-Score each criterion from 1-10. Be honest — most proposals score 3-5. A 9-10 is rare and must be earned.
+Score each section from 1-10. Be honest — most proposals score 3-5. A 9-10 is rare and must be earned.
 
 WHAT AVERAGE PROPOSALS DO (score 3-5):
 - Open with "I am a [job title] with X years experience"
@@ -6540,21 +6545,22 @@ WHAT TOP PROPOSALS DO (score 8-10):
 - CTA is the smallest possible yes, references something specific they said
 - Every sentence is about the client, not the freelancer
 
+REWRITE RULE: For every section scoring below 7, write a rewrite that would score 8-9. Match the length and format of the original (hook/proof/whyMe/cta are 1-2 sentences, process is 1 sentence). If a section already scores 7+, set its rewrite to null — do not rewrite what is not broken.
+
 Return ONLY valid JSON:
 {
   "overallScore": <number 1-10>,
   "avgScore": <number 3.2 to 4.8, realistic average for this type of post>,
   "verdict": "1 sentence. Honest read of how this proposal lands.",
   "criteria": [
-    { "name": "Hook strength", "score": <1-10>, "avg": <2-5>, "feedback": "1-2 sentences. Specific to THIS hook — what works, what could be sharper." },
-    { "name": "Proof specificity", "score": <1-10>, "avg": <2-5>, "feedback": "1-2 sentences. Does the proof have a real number and map to this client?" },
-    { "name": "Why me relevance", "score": <1-10>, "avg": <2-5>, "feedback": "1-2 sentences. Is it earned by what was in the post, or generic?" },
-    { "name": "Process clarity", "score": <1-10>, "avg": <2-5>, "feedback": "1-2 sentences. Does it reduce fear of the unknown for THIS client?" },
-    { "name": "CTA frictionlessness", "score": <1-10>, "avg": <2-5>, "feedback": "1-2 sentences. Is it the smallest possible yes for this client?" }
+    { "key": "hook", "name": "Hook strength", "score": <1-10>, "avg": <2-5>, "feedback": "1-2 sentences specific to THIS hook.", "rewrite": "Improved version, or null if score is already 7+." },
+    { "key": "proof", "name": "Proof specificity", "score": <1-10>, "avg": <2-5>, "feedback": "1-2 sentences. Does the proof have a real number and map to this client?", "rewrite": "Improved version, or null if score is already 7+." },
+    { "key": "whyMe", "name": "Why me relevance", "score": <1-10>, "avg": <2-5>, "feedback": "1-2 sentences. Is it earned by what was in the post, or generic?", "rewrite": "Improved version, or null if score is already 7+." },
+    { "key": "process", "name": "Process clarity", "score": <1-10>, "avg": <2-5>, "feedback": "1-2 sentences. Does it reduce fear of the unknown for THIS client?", "rewrite": "Improved version, or null if score is already 7+." },
+    { "key": "cta", "name": "CTA frictionlessness", "score": <1-10>, "avg": <2-5>, "feedback": "1-2 sentences. Is it the smallest possible yes for this client?", "rewrite": "Improved version, or null if score is already 7+." }
   ],
   "topStrength": "The single most effective thing about this proposal that makes it stand out.",
-  "topFix": "The single change that would have the biggest impact on getting a reply.",
-  "rewrite": "Rewrite only the weakest section (1-2 sentences) to show what a 9/10 version looks like."
+  "topFix": "The single change that would have the biggest impact on getting a reply."
 }`
           }]
         })
@@ -6565,9 +6571,27 @@ Return ONLY valid JSON:
       const tryP = s => { try { return JSON.parse(s); } catch { return null; } };
       let parsed = tryP(raw);
       if (!parsed) { const m = raw.match(/\{[\s\S]*\}/); if (m) parsed = tryP(m[0]); }
-      if (parsed) setScore(parsed);
+      if (parsed) { setScore(parsed); setAppliedKeys({}); }
     } catch (e) { console.error(e); }
     finally { setScoring(false); }
+  }
+
+  function applyRewrite(key, rewriteText) {
+    if (!key || !rewriteText) return;
+    setResult(r => ({ ...r, proposal: { ...r.proposal, [key]: rewriteText } }));
+    setAppliedKeys(a => ({ ...a, [key]: true }));
+  }
+
+  function applyAllRewrites() {
+    if (!score?.criteria) return;
+    const updates = {};
+    const applied = {};
+    score.criteria.forEach(c => {
+      if (c.rewrite && c.key) { updates[c.key] = c.rewrite; applied[c.key] = true; }
+    });
+    if (Object.keys(updates).length === 0) return;
+    setResult(r => ({ ...r, proposal: { ...r.proposal, ...updates } }));
+    setAppliedKeys(a => ({ ...a, ...applied }));
   }
 
   const ScoreBar = ({ val, avg, max=10 }) => {
@@ -6757,8 +6781,15 @@ Return ONLY valid JSON:
 
               {/* Criteria */}
               <div style={{ padding:'16px 20px', borderBottom:'1px solid var(--border)' }}>
-                <p style={{ fontSize:11, fontWeight:700, color:'var(--text-3)', letterSpacing:'.08em', textTransform:'uppercase', marginBottom:14 }}>Breakdown</p>
-                <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
+                <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:14 }}>
+                  <p style={{ fontSize:11, fontWeight:700, color:'var(--text-3)', letterSpacing:'.08em', textTransform:'uppercase', margin:0 }}>Breakdown</p>
+                  {score.criteria?.some(c => c.rewrite) && (
+                    <button onClick={applyAllRewrites} style={{ display:'inline-flex', alignItems:'center', gap:5, background:'none', border:'none', cursor:'pointer', color:'var(--accent)', fontSize:11.5, fontWeight:600, padding:'3px 6px', borderRadius:6, fontFamily:'var(--font-text)' }}>
+                      <Sparkles size={11}/>Apply all fixes
+                    </button>
+                  )}
+                </div>
+                <div style={{ display:'flex', flexDirection:'column', gap:16 }}>
                   {score.criteria?.map((c, i) => (
                     <div key={i}>
                       <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:6 }}>
@@ -6770,6 +6801,22 @@ Return ONLY valid JSON:
                       </div>
                       <ScoreBar val={c.score} avg={c.avg}/>
                       <p style={{ fontSize:12.5, color:'var(--text-3)', lineHeight:1.6, marginTop:6 }}>{c.feedback}</p>
+
+                      {c.rewrite && (
+                        <div style={{ marginTop:9, padding:'10px 12px', background: appliedKeys[c.key] ? 'var(--bg-elev-1)' : 'var(--accent-bg-soft)', border:`1px solid ${appliedKeys[c.key] ? 'var(--border)' : 'var(--accent-border-soft)'}`, borderRadius:10 }}>
+                          <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:10, marginBottom:6 }}>
+                            <span style={{ fontSize:10, fontWeight:700, color: appliedKeys[c.key] ? 'var(--text-3)' : 'var(--accent)', letterSpacing:'.06em', textTransform:'uppercase' }}>
+                              {appliedKeys[c.key] ? '✓ Applied to proposal' : 'Suggested rewrite'}
+                            </span>
+                            {!appliedKeys[c.key] && (
+                              <button onClick={() => applyRewrite(c.key, c.rewrite)} style={{ display:'inline-flex', alignItems:'center', gap:4, background:'var(--accent)', color:'#fff', border:'none', cursor:'pointer', fontSize:11, fontWeight:600, padding:'4px 10px', borderRadius:999, fontFamily:'var(--font-text)', flexShrink:0 }}>
+                                <Check size={10}/>Apply
+                              </button>
+                            )}
+                          </div>
+                          <p style={{ fontSize:13, color:'var(--text-1)', lineHeight:1.6, margin:0, fontStyle:'italic' }}>"{c.rewrite}"</p>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -6787,13 +6834,23 @@ Return ONLY valid JSON:
                 </div>
               </div>
 
-              {/* Rewrite suggestion */}
-              {score.rewrite && (
-                <div style={{ padding:'14px 20px', background:'var(--accent-bg-soft)' }}>
-                  <div style={{ fontSize:10, fontWeight:700, color:'var(--accent)', letterSpacing:'.08em', textTransform:'uppercase', marginBottom:8 }}>Suggested rewrite</div>
-                  <p style={{ fontSize:13.5, color:'var(--text-1)', lineHeight:1.7, margin:0, fontStyle:'italic' }}>"{score.rewrite}"</p>
-                </div>
-              )}
+              {/* Re-score footer */}
+              <div style={{ padding:'14px 20px', display:'flex', alignItems:'center', justifyContent:'space-between', gap:12, flexWrap:'wrap' }}>
+                <p style={{ fontSize:12, color:'var(--text-3)', margin:0, lineHeight:1.5 }}>
+                  {Object.keys(appliedKeys).length > 0
+                    ? `${Object.keys(appliedKeys).length} fix${Object.keys(appliedKeys).length > 1 ? 'es' : ''} applied to your proposal above.`
+                    : 'Apply a fix above, then re-check to see your new score.'}
+                </p>
+                <button
+                  onClick={() => runScorecard(true)}
+                  disabled={scoring}
+                  style={{ display:'inline-flex', alignItems:'center', gap:6, background:'var(--bg-elev-1)', border:'1px solid var(--border)', cursor: scoring ? 'default' : 'pointer', color:'var(--text-1)', fontSize:12.5, fontWeight:600, padding:'7px 14px', borderRadius:999, fontFamily:'var(--font-text)', flexShrink:0, opacity: scoring ? 0.6 : 1 }}
+                >
+                  {scoring
+                    ? <><Loader2 size={12} style={{ animation:'spin 1s linear infinite' }}/>Re-checking...</>
+                    : <><RotateCcw size={12}/>Re-check score</>}
+                </button>
+              </div>
 
             </div>
           )}
