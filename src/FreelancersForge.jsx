@@ -4471,6 +4471,10 @@ function OptimizeTab() {
   const [pageType, setPageType] = useState('portfolio');
   const [method, setMethod] = useState('paste');
   const [pasteText, setPasteText] = useState('');
+  const [structured, setStructured] = useState({
+    title: '', overview: '', specialization: '', skills: '', testimonials: '',
+    headline: '', about: '', experience: '',
+  });
   const [imageData, setImageData] = useState(null);
   const [audience, setAudience] = useState('');
   const [goal, setGoal] = useState('');
@@ -4531,7 +4535,37 @@ function OptimizeTab() {
     reader.readAsDataURL(file);
   };
 
+  const usesStructuredFields = pageType === 'upwork' || pageType === 'linkedin';
+
   const buildPageInputBlock = () => {
+    if (method === 'paste' && pageType === 'upwork') {
+      return `PAGE COPY (each section labeled — read and score each independently):
+TITLE:
+"""${structured.title.trim()}"""
+
+OVERVIEW:
+"""${structured.overview.trim()}"""
+
+SPECIALIZATION / NICHE STATEMENT:
+"""${structured.specialization.trim()}"""
+
+SKILLS LIST:
+"""${structured.skills.trim()}"""
+
+SOCIAL PROOF (JSS, hours, earnings, repeat clients if shown):
+"""${structured.testimonials.trim()}"""`;
+    }
+    if (method === 'paste' && pageType === 'linkedin') {
+      return `PAGE COPY (each section labeled — read and score each independently):
+HEADLINE:
+"""${structured.headline.trim()}"""
+
+ABOUT SECTION:
+"""${structured.about.trim()}"""
+
+EXPERIENCE (most recent 2-3 entries):
+"""${structured.experience.trim()}"""`;
+    }
     if (method === 'paste') return `PAGE COPY:\n"""\n${pasteText.trim()}\n"""`;
     if (imageData?.isPdf) return '[CV is attached as a PDF document. Read it carefully.]';
     return '[See attached image.]';
@@ -4609,7 +4643,9 @@ function OptimizeTab() {
   };
 
   const handleAudit = async () => {
-    if (method === 'paste' && !pasteText.trim()) { setError('Paste the page copy.'); return; }
+    if (method === 'paste' && pageType === 'upwork' && !structured.title.trim() && !structured.overview.trim()) { setError('Add at least your title and overview.'); return; }
+    if (method === 'paste' && pageType === 'linkedin' && !structured.headline.trim() && !structured.about.trim()) { setError('Add at least your headline and About section.'); return; }
+    if (method === 'paste' && !usesStructuredFields && !pasteText.trim()) { setError('Paste the page copy.'); return; }
     if (method === 'image' && !imageData) {
       setError(pageType === 'cv' ? 'Upload your CV (PDF, PNG, or JPG).' : 'Upload a screenshot.');
       return;
@@ -4824,7 +4860,49 @@ Return ONLY JSON. No em dashes.`;
           <h2 className="ff-section-label mb-5">The Page</h2>
 
           <div className="space-y-5">
-            {method === 'paste' && (
+            {method === 'paste' && pageType === 'upwork' && (
+              <div className="space-y-4">
+                <div>
+                  <label className="ff-field-label">Title <span className="ff-text-accent">*</span></label>
+                  <input className="ff-input" placeholder="e.g. Shopify Conversion Specialist | +30% AOV in 60 Days" value={structured.title} onChange={e => setStructured(s => ({ ...s, title: e.target.value }))} />
+                </div>
+                <div>
+                  <label className="ff-field-label">Overview <span className="ff-text-accent">*</span></label>
+                  <textarea className="ff-textarea" rows={6} placeholder="Paste your full overview, starting with the first 2 lines exactly as they appear." value={structured.overview} onChange={e => setStructured(s => ({ ...s, overview: e.target.value }))} />
+                </div>
+                <div>
+                  <label className="ff-field-label">Specialization paragraph <span className="ff-field-hint" style={{ fontWeight: 400 }}>· optional</span></label>
+                  <textarea className="ff-textarea" rows={3} placeholder={'"I work with [niche] who [situation]. I do NOT work with [anti-niche]."'} value={structured.specialization} onChange={e => setStructured(s => ({ ...s, specialization: e.target.value }))} />
+                </div>
+                <div>
+                  <label className="ff-field-label">Skills list <span className="ff-field-hint" style={{ fontWeight: 400 }}>· optional</span></label>
+                  <textarea className="ff-textarea" rows={2} placeholder="Shopify Development, Conversion Rate Optimization, Klaviyo, ..." value={structured.skills} onChange={e => setStructured(s => ({ ...s, skills: e.target.value }))} />
+                </div>
+                <div>
+                  <label className="ff-field-label">Social proof <span className="ff-field-hint" style={{ fontWeight: 400 }}>· optional</span></label>
+                  <input className="ff-input" placeholder="JSS%, hours worked, total earned, repeat client rate, top review line" value={structured.testimonials} onChange={e => setStructured(s => ({ ...s, testimonials: e.target.value }))} />
+                </div>
+              </div>
+            )}
+
+            {method === 'paste' && pageType === 'linkedin' && (
+              <div className="space-y-4">
+                <div>
+                  <label className="ff-field-label">Headline <span className="ff-text-accent">*</span></label>
+                  <input className="ff-input" placeholder="e.g. I help SaaS founders cut onboarding drop-off by 40%" value={structured.headline} onChange={e => setStructured(s => ({ ...s, headline: e.target.value }))} />
+                </div>
+                <div>
+                  <label className="ff-field-label">About section <span className="ff-text-accent">*</span></label>
+                  <textarea className="ff-textarea" rows={8} placeholder="Paste your full About section, starting with the first 3 lines exactly as they appear before 'see more'." value={structured.about} onChange={e => setStructured(s => ({ ...s, about: e.target.value }))} />
+                </div>
+                <div>
+                  <label className="ff-field-label">Experience entries <span className="ff-field-hint" style={{ fontWeight: 400 }}>· optional, most recent 2-3</span></label>
+                  <textarea className="ff-textarea" rows={5} placeholder="Paste your most recent role titles and bullet points." value={structured.experience} onChange={e => setStructured(s => ({ ...s, experience: e.target.value }))} />
+                </div>
+              </div>
+            )}
+
+            {method === 'paste' && !usesStructuredFields && (
               <div>
                 <label className="ff-field-label">Page Copy <span className="ff-text-accent">*</span></label>
                 <textarea className="ff-textarea" rows={12} placeholder="Paste headline, subheadline, About section, CTAs, testimonials..." value={pasteText} onChange={e => setPasteText(e.target.value)} />
