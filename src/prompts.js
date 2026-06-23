@@ -405,55 +405,64 @@ DIAGNOSE BEFORE WRITING:
 
 PHASE 2: WRITE THE PROPOSAL
 
-TONE - THIS IS NOT OPTIONAL:
+THE THREE-LINE RULE (clients decide in 3 lines — everything else is secondary):
+On Upwork, a client sees roughly three lines before they decide to click "more" or skip.
+Those three lines must do three things, in order:
+  Line 1: Name their exact situation so precisely they think "this person read my post."
+  Line 2: Signal you've solved a version of this before, with a specific result or reference.
+  Line 3: The smallest, most specific question or bridge that makes them want to know what comes next.
+If those three lines fail, the rest of the proposal doesn't matter. Write them last, as a unit, after the full proposal is drafted.
+
+TONE — THIS IS NOT OPTIONAL:
 ${toneInstruction ? toneInstruction + '\nThis shapes every word, every sentence length, every level of formality. A casual tone in a formal post is a mismatch. A stiff tone in a casual post is a mismatch. Follow the directive precisely.' : 'Mirror their energy, then raise it slightly. If they wrote casually, be casual and confident. If they were urgent, cut every warm-up word and get to it immediately. If they were detailed and careful, show the same precision. The proposal should feel like a natural reply from someone who thinks the same way they do, but with more clarity.'}
 
-HOOK (2 sentences max - the most important part):
-Name their exact situation so precisely that they think "this person actually read what I wrote."
-The first sentence is about THEM and their specific problem - never about you.
-The second sentence signals you've solved a version of this before.
-Never open with: I, Hi, their name, "I came across", "I'd love to help", "I noticed".
+HOOK (2-3 sentences — the most important part of the entire proposal):
+The opening must read as one continuous, flowing thought — not three separate statements stitched together.
+Sentence 1: Their situation, named precisely. Not a summary. A diagnosis. Specific enough that someone in a different situation would know this wasn't written for them.
+Sentence 2: A proof signal — something you've done for someone in a similar situation with a real outcome. This transitions naturally from their problem to your capability. No hard gear-change.
+Sentence 3 (optional but powerful): A forward-pull sentence. A sharp observation, a specific question, or a preview of your process that makes them curious what's next. This is Line 3 of the Three-Line Rule.
+The whole hook should feel like the opening of a conversation between two people who both understand the problem, not a pitch from someone who wants to be hired.
 
 SKIPPED: "I'm a senior developer with 8 years of experience and I'm very interested in your project."
-CLICKED: "A Shopify store doing that volume with a checkout built on a third-party plugin is going to keep hitting the same wall - the problem isn't the design, it's the data layer underneath it."
+CLICKED (3-line version): "A Shopify store doing that volume with a checkout built on a third-party plugin is going to keep hitting the same wall. The problem isn't the design, it's the data layer underneath it. I rebuilt a similar setup for a DTC brand doing $2M/month and cut their cart abandonment from 71% to 43% in six weeks. Curious whether you've already audited the checkout event tracking, or if that's still an unknown."
 
-PROOF (2 sentences max):
-One story. One result. Directly mapped to their situation.
-If portfolio is provided: pick the single most relevant piece and reference it by name naturally - not as a link, as evidence.
-Structure: [What you did] for [type of client in a similar situation]. [What happened - specific number or outcome]. That's it.
+PROOF (1-2 sentences — flows directly from the hook, does not repeat it):
+The hook already signalled capability. The proof section deepens it with one specific story.
+One result. One number or named outcome. One client type similar to them.
 Never: "I have extensive experience with..." / "I've worked with many clients..." / "My portfolio demonstrates..."
+If portfolio is provided: reference the single most relevant piece by name, as evidence in a sentence, not as a URL.
 
 WHY ME (1 sentence):
-The one thing that separates you from the other 40 people who applied for this same job.
-It must come directly from something in the post - a specific tool they named, a fear they signalled, a constraint they mentioned.
-This is not a soft skill. It is a specific capability or insight that is directly relevant to their actual situation.
+The one differentiator earned specifically by reading this post.
+Reference a specific tool, constraint, fear signal, or detail from their job post.
+This is not a soft skill. It is a specific capability that is directly relevant to their actual problem.
 
-PROCESS (1 sentence - written as a human, not a project manager):
-How you would actually start and what they get first.
+PROCESS (1 sentence — written as a human, not a project manager):
 "I'd start with X this week and have Y back to you by Z" beats "Phase 1: Discovery" every time.
-Reference something specific from their post.
+Reference something concrete from their post. Make the first step feel small and safe.
 
-CTA (1 sentence - the smallest possible yes):
-Make it so easy to say yes that saying nothing feels rude.
-If they mentioned a file, a deadline, or a specific next step - reference it.
-If they seem busy - ask for something tiny.
-If they seem careful - give them something risk-free first.
+CTA (1 sentence — the smallest possible yes):
+Tie it to something they said, a deadline they mentioned, a file they referenced, or a fear they signalled.
+Make saying nothing feel more awkward than replying.
 Never: "I look forward to hearing from you" / "Feel free to reach out" / "Let me know if interested"
 
 ${imageData ? 'IMAGE ATTACHED: Read every single word, number, and requirement visible in this image. Reference specific details by name in the proposal. Do not write as if you did not look.' : ''}
 
 INPUT:
-${intel.trim() || (imageData ? '[See attached image]' : '[No input - write for the most likely scenario in the niche]')}
+${intel.trim() || (imageData ? '[See attached image]' : '[No input — write for the most likely scenario in the niche]')}
 ${portfolioBlock}
 
 ${STRICT_RULES}
 ${NEVER_BEG_RULE}
 
 ANTI-FORMULA CHECK (run this before outputting):
-- Does the hook name their specific situation, or could it apply to a different job? If different job: rewrite.
-- Does "which means" appear more than once? If yes: remove all but one.
-- Do two consecutive sentences start with "I"? If yes: fix it.
+- Read lines 1-3 of the proposal as a unit. If a busy client only read those three lines, would they know what this person does, feel understood, and want to read on? If no: rewrite the hook entirely.
+- Does line 1 contain "I", "Hi", the client's name, "I came across", "I'd love to help"? If yes: rewrite.
+- Does the hook feel like three separate statements glued together, or one flowing thought? If separate: rewrite for rhythm.
 - Does the proof have a real number or named outcome? If no: add one or cut the claim.
+- Do the hook and proof together read as a natural continuation, or is there a hard gear-change between them? If gear-change: bridge them.
+- Does "which means" appear more than once? Remove all but one.
+- Do two consecutive sentences start with "I"? Fix it.
 - Could the CTA have been written for anyone? If yes: make it specific to this post.
 - Does the whole proposal feel like it was written in the last 10 minutes by someone who just read their post carefully? If no: rewrite.
 
@@ -471,7 +480,7 @@ Return ONLY valid JSON. No markdown. No preamble:
     "whatTheyAreActuallyEvaluating": "2 sentences. Beyond the task - what proof, quality, or signal are they looking for in who they hire?"
   },
   "proposal": {
-    "hook": "2 sentences max. Their exact situation. Never starts with I, Hi, or their name.",
+    "hook": "2-3 sentences that read as one continuous flowing thought. Line 1: their specific situation diagnosed precisely. Line 2: your proof signal with a result. Line 3 (optional): a forward-pull question or observation. Never starts with I, Hi, or their name.",
     "proof": "2 sentences max. One result, one number or outcome, one portfolio reference if available.",
     "whyMe": "1 sentence. One specific differentiator earned by reading this exact post.",
     "process": "1 sentence. How you start and what they get first. Human, not corporate.",
