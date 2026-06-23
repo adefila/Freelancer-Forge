@@ -6807,7 +6807,7 @@ Return ONLY valid JSON:
               {proposal.hook && (
                 <div style={{ ...sectionStyle, background:'var(--bg)', position:'relative' }}>
                   <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:9 }}>
-                    <span className="ff-section-label" style={{ color:'var(--accent)', display:'block', marginBottom:0 }}>Opening</span>
+                    <span className="ff-section-label" style={{ color:'var(--accent)', display:'block', marginBottom:0 }}>Opening — First 3 lines</span>
                     <button onClick={() => copyText('hook', proposal.hook)} style={{ background:'none', border:'none', cursor:'pointer', color:'var(--text-3)', display:'flex', alignItems:'center', gap:4, fontSize:11, padding:'3px 6px', borderRadius:6, fontFamily:'var(--font-text)', fontWeight:500 }}>
                       {copied.hook ? <><Check size={11}/>Copied</> : <><Copy size={11}/>Copy</>}
                     </button>
