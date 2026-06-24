@@ -102,6 +102,24 @@ The freelancer in this proposal has already solved a version of this problem and
 export function buildPrompt(mode, intel, imageData, tone, portfolio, clientMessage, myMessage, goal, jobDescription, offer, proof, cvFile) {
   const toneInstruction = tone === 'Auto' ? '' : TONE_DIRECTIVES[tone];
 
+  // CTA behaviour per tone — injected directly into the CTA section so it
+  // overrides the generic CTA rule rather than competing with it from a distance.
+  const CTA_BY_TONE = {
+    Auto:          'Make it so easy to say yes that saying nothing feels rude. Tie it to something they said, a deadline, or a fear they signalled.',
+    Direct:        'State what happens next as a fact, not a request. "I can have a first look at your setup by Thursday" not "Would you be open to a call?" Do not ask for permission.',
+    Warm:          'Invite a decision without pleading for one. Frame it as a natural next step: "If the timeline works, I could start with X as early as this week." Warm but never soft.',
+    Sharp:         'One sentence. Assume the yes. Name the concrete next action and when it happens. No softening qualifier at the end.',
+    Persuasive:    'The CTA is the logical conclusion of the argument just made, not a separate ask. It should feel like the only reasonable next step given everything you just established.',
+    Casual:        'Sound like you\'re wrapping up a text thread. "Happy to jump on a quick call or just get started if you want to send the brief across." Specific, low-friction, natural.',
+    Bold:          'State the next step as if it\'s already decided. "Send me the brief and I\'ll have a plan back to you by Friday." No question mark. No asking if they\'re interested.',
+    Witty:         'Keep the energy but land on something concrete and bookable. A question is fine if it\'s sharp and specific, not a generic "thoughts?" A joke that dodges the ask is not a CTA.',
+    Curious:       'Ask ONE sharp, specific question about their situation that they actually have to think about to answer. Not "would you like to jump on a call?" — something like "Has the current setup ever actually been load-tested under real traffic, or has it just never been pushed hard enough to break yet?" The question IS the CTA. It proves thought, creates dialogue, and makes ignoring it harder than replying.',
+    Empathetic:    'Acknowledge the weight of the decision once, briefly, then name a risk-free first step. "If you want a second opinion before committing, I\'m happy to review what you have and give you an honest read first." Move forward, don\'t linger.',
+    Authoritative: 'Deliver a recommendation, not a request. "The next step is a 30-minute scoping call so I can tell you exactly what this will take. Here\'s my calendar link." No "if you\'re interested" or "feel free to reach out."',
+    Playful:       'Break the pattern one last time. An unexpected angle, a specific and slightly surprising ask, something that makes them smile and reply. Still specific, still bookable, never vague.',
+  };
+  const ctaInstruction = CTA_BY_TONE[tone] || CTA_BY_TONE.Auto;
+
   /* ================================================================
      REPLY MODE
   ================================================================ */
@@ -441,10 +459,10 @@ PROCESS (1 sentence — written as a human, not a project manager):
 "I'd start with X this week and have Y back to you by Z" beats "Phase 1: Discovery" every time.
 Reference something concrete from their post. Make the first step feel small and safe.
 
-CTA (1 sentence — the smallest possible yes):
-Tie it to something they said, a deadline they mentioned, a file they referenced, or a fear they signalled.
-Make saying nothing feel more awkward than replying.
-Never: "I look forward to hearing from you" / "Feel free to reach out" / "Let me know if interested"
+CTA (1 sentence — tone-driven, not generic):
+${ctaInstruction}
+Whatever form it takes, it must be tied to something specific in their post: a deadline, a file, a fear signal, or a detail they mentioned.
+Never: "I look forward to hearing from you" / "Feel free to reach out" / "Let me know if interested" / "I hope to hear from you"
 
 ${imageData ? 'IMAGE ATTACHED: Read every single word, number, and requirement visible in this image. Reference specific details by name in the proposal. Do not write as if you did not look.' : ''}
 
@@ -461,9 +479,10 @@ ANTI-FORMULA CHECK (run this before outputting):
 - Does the hook feel like three separate statements glued together, or one flowing thought? If separate: rewrite for rhythm.
 - Does the proof have a real number or named outcome? If no: add one or cut the claim.
 - Do the hook and proof together read as a natural continuation, or is there a hard gear-change between them? If gear-change: bridge them.
+- Does the CTA follow the tone-specific instruction exactly? If the tone is Curious, is there a sharp specific question? If Bold, does it state the next step without asking permission? If Direct, does it name what happens next as a fact? If no: rewrite the CTA to match the tone.
 - Does "which means" appear more than once? Remove all but one.
 - Do two consecutive sentences start with "I"? Fix it.
-- Could the CTA have been written for anyone? If yes: make it specific to this post.
+- Could the CTA have been written for anyone regardless of tone? If yes: make it specific to both this post AND this tone.
 - Does the whole proposal feel like it was written in the last 10 minutes by someone who just read their post carefully? If no: rewrite.
 
 Return ONLY valid JSON. No markdown. No preamble:
@@ -484,7 +503,7 @@ Return ONLY valid JSON. No markdown. No preamble:
     "proof": "2 sentences max. One result, one number or outcome, one portfolio reference if available.",
     "whyMe": "1 sentence. One specific differentiator earned by reading this exact post.",
     "process": "1 sentence. How you start and what they get first. Human, not corporate.",
-    "cta": "1 sentence. Easiest possible yes. Specific to this client and what they said."
+    "cta": "1 sentence. Follows the tone-specific CTA instruction above exactly. Tied to something specific in their post. Never generic."
   },
   "portfolioMatch": {
     "picked": "Label or URL of the portfolio item used, or null if none was used.",
