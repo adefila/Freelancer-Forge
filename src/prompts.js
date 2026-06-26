@@ -431,18 +431,33 @@ Those three lines must do three things, in order:
   Line 3: The smallest, most specific question or bridge that makes them want to know what comes next.
 If those three lines fail, the rest of the proposal doesn't matter. Write them last, as a unit, after the full proposal is drafted.
 
+URGENCY-ADAPTIVE WRITING (non-negotiable — read the urgency signal first):
+HIGH URGENCY ("ASAP", hard deadline, launch date, "need this done yesterday"):
+  - Cut every warm-up word. No preamble. Start with the situation and move immediately to capability.
+  - The process sentence names a start time: "I can start today" or "I can have a first version to you by [specific day]."
+  - The CTA removes every barrier to starting: "Send me access and I'll begin tonight."
+
+MEDIUM URGENCY (has a timeline but not panicking):
+  - Diagnose carefully, show you've thought about their situation, then move to action.
+  - The process sentence gives a realistic first milestone: "I'd start with X and have Y back to you by [specific day]."
+
+LOW URGENCY (exploring, evaluating, no stated deadline):
+  - The hook can be more diagnostic, the proof more thorough. They have time to read.
+  - The process sentence can offer a low-commitment first step: "Happy to start with a quick audit so you can see how I think before committing to anything larger."
+
 TONE — THIS IS NOT OPTIONAL:
 ${toneInstruction ? toneInstruction + '\nThis shapes every word, every sentence length, every level of formality. A casual tone in a formal post is a mismatch. A stiff tone in a casual post is a mismatch. Follow the directive precisely.' : 'Mirror their energy, then raise it slightly. If they wrote casually, be casual and confident. If they were urgent, cut every warm-up word and get to it immediately. If they were detailed and careful, show the same precision. The proposal should feel like a natural reply from someone who thinks the same way they do, but with more clarity.'}
 
-HOOK (2-3 sentences — the most important part of the entire proposal):
-The opening must read as one continuous, flowing thought — not three separate statements stitched together.
-Sentence 1: Their situation, named precisely. Not a summary. A diagnosis. Specific enough that someone in a different situation would know this wasn't written for them.
-Sentence 2: A proof signal — something you've done for someone in a similar situation with a real outcome. This transitions naturally from their problem to your capability. No hard gear-change.
-Sentence 3 (optional but powerful): A forward-pull sentence. A sharp observation, a specific question, or a preview of your process that makes them curious what's next. This is Line 3 of the Three-Line Rule.
-The whole hook should feel like the opening of a conversation between two people who both understand the problem, not a pitch from someone who wants to be hired.
+HOOK — VARY THE PATTERN (the formula is now visible — break it):
+Most proposals now open with: "diagnosis + proof + question." Clients feel it. Instead, choose the pattern that fits this specific post:
+PATTERN A (diagnosis-led): Name their situation in sentence 1. No proof yet. Just show you understood. Then add proof in sentence 2.
+PATTERN B (proof-led): Lead with the result you got for someone in the same situation. Then map it to their situation. Surprising order — they stop and re-read.
+PATTERN C (question-led): Open with one sharp question that reveals you've already done the work. "Has the checkout ever been tested under the traffic load you're projecting, or is that assumption still untested?" The question IS the hook.
+PATTERN D (observation-led): One specific, unexpected thing you noticed about their situation that they didn't say explicitly but would immediately recognise as true. "Three different tools, no central source of truth — every freelancer they hire starts from scratch."
+Choose the pattern that makes the most strategic sense for this specific post. Never default to Pattern A automatically.
 
-SKIPPED: "I'm a senior developer with 8 years of experience and I'm very interested in your project."
-CLICKED (3-line version): "A Shopify store doing that volume with a checkout built on a third-party plugin is going to keep hitting the same wall. The problem isn't the design, it's the data layer underneath it. I rebuilt a similar setup for a DTC brand doing $2M/month and cut their cart abandonment from 71% to 43% in six weeks. Curious whether you've already audited the checkout event tracking, or if that's still an unknown."
+The whole hook must read as one continuous, flowing thought — not three separate statements stitched together.
+Never open with: I, Hi, their name, "I came across", "I'd love to help", "I noticed".
 
 PROOF (1-2 sentences — flows directly from the hook, does not repeat it):
 The hook already signalled capability. The proof section deepens it with one specific story.
@@ -450,18 +465,27 @@ One result. One number or named outcome. One client type similar to them.
 Never: "I have extensive experience with..." / "I've worked with many clients..." / "My portfolio demonstrates..."
 If portfolio is provided: reference the single most relevant piece by name, as evidence in a sentence, not as a URL.
 
-WHY ME (1 sentence):
-The one differentiator earned specifically by reading this post.
-Reference a specific tool, constraint, fear signal, or detail from their job post.
-This is not a soft skill. It is a specific capability that is directly relevant to their actual problem.
+WHY ME — ANSWER THE FEAR, NOT THE BRIEF (this is what's killing reply rates):
+Most "why me" sentences pick a specific detail from the post and connect it to a skill. That answers the brief. It does not answer the fear.
+The fear is: "What if I hire someone who seems good, and it still doesn't work out?"
+Read the frustration signals in the post. Read what they over-explained. Read what they mentioned more than once. THAT is the fear.
+The why-me sentence must directly answer that fear — not with reassurance, but with specific evidence that the thing they're afraid of is exactly the thing you've navigated before.
+If they mentioned a previous freelancer failed: don't say "I'm reliable." Say exactly what you do differently that would have prevented that failure.
+If they mentioned a tight deadline: don't say "I meet deadlines." Name the constraint and how you've handled the same one.
+If they seem burned: don't say "communication is my priority." Show them the specific way you work that removes the friction they've experienced.
 
-PROCESS (1 sentence — written as a human, not a project manager):
-"I'd start with X this week and have Y back to you by Z" beats "Phase 1: Discovery" every time.
-Reference something concrete from their post. Make the first step feel small and safe.
+PROCESS (1 sentence — de-risk commitment, don't just describe starting):
+The client who opened your proposal but didn't reply isn't unsold. They're not ready to commit.
+The process sentence must make the first step feel so small that agreeing costs them nothing.
+NOT: "I'd start with a discovery call to understand your requirements."
+NOT: "Phase 1 would be a full audit of your current setup."
+YES: "Happy to do a 20-minute screen share to look at what you've got before either of us commits to anything."
+YES: "I can review the brief and send you a 3-point plan by tomorrow — no charge, no obligation, just so you can see how I'd approach it."
+The goal: lower the cost of saying yes until it's easier to reply than to stay silent.
 
-CTA (1 sentence — tone-driven, not generic):
+CTA (1 sentence — tone-driven, tied to something they said):
 ${ctaInstruction}
-Whatever form it takes, it must be tied to something specific in their post: a deadline, a file, a fear signal, or a detail they mentioned.
+Whatever form it takes, it must reference something specific in their post: a deadline, a file, a fear signal, or a detail they mentioned.
 Never: "I look forward to hearing from you" / "Feel free to reach out" / "Let me know if interested" / "I hope to hear from you"
 
 ${imageData ? 'IMAGE ATTACHED: Read every single word, number, and requirement visible in this image. Reference specific details by name in the proposal. Do not write as if you did not look.' : ''}
@@ -476,14 +500,14 @@ ${NEVER_BEG_RULE}
 ANTI-FORMULA CHECK (run this before outputting):
 - Read lines 1-3 of the proposal as a unit. If a busy client only read those three lines, would they know what this person does, feel understood, and want to read on? If no: rewrite the hook entirely.
 - Does line 1 contain "I", "Hi", the client's name, "I came across", "I'd love to help"? If yes: rewrite.
-- Does the hook feel like three separate statements glued together, or one flowing thought? If separate: rewrite for rhythm.
+- Does the hook use Pattern A (diagnosis-led) by default without checking if a different pattern would be stronger? If it defaults to pattern A without reason: consider B, C, or D.
 - Does the proof have a real number or named outcome? If no: add one or cut the claim.
-- Do the hook and proof together read as a natural continuation, or is there a hard gear-change between them? If gear-change: bridge them.
+- Does the "why me" sentence answer the specific FEAR in the post, or does it just connect a skill to the brief? If it answers the brief but not the fear: rewrite it.
+- Does the process sentence make commitment feel small and risk-free, or does it describe a large engagement starting? If large: rewrite to lower the cost of saying yes.
 - Does the CTA follow the tone-specific instruction exactly? If the tone is Curious, is there a sharp specific question? If Bold, does it state the next step without asking permission? If Direct, does it name what happens next as a fact? If no: rewrite the CTA to match the tone.
-- Does "which means" appear more than once? Remove all but one.
-- Do two consecutive sentences start with "I"? Fix it.
-- Could the CTA have been written for anyone regardless of tone? If yes: make it specific to both this post AND this tone.
 - Does the whole proposal feel like it was written in the last 10 minutes by someone who just read their post carefully? If no: rewrite.
+
+Return ONLY valid JSON. No markdown. No preamble:
 
 Return ONLY valid JSON. No markdown. No preamble:
 {
@@ -499,11 +523,11 @@ Return ONLY valid JSON. No markdown. No preamble:
     "whatTheyAreActuallyEvaluating": "2 sentences. Beyond the task - what proof, quality, or signal are they looking for in who they hire?"
   },
   "proposal": {
-    "hook": "2-3 sentences that read as one continuous flowing thought. Line 1: their specific situation diagnosed precisely. Line 2: your proof signal with a result. Line 3 (optional): a forward-pull question or observation. Never starts with I, Hi, or their name.",
-    "proof": "2 sentences max. One result, one number or outcome, one portfolio reference if available.",
-    "whyMe": "1 sentence. One specific differentiator earned by reading this exact post.",
-    "process": "1 sentence. How you start and what they get first. Human, not corporate.",
-    "cta": "1 sentence. Follows the tone-specific CTA instruction above exactly. Tied to something specific in their post. Never generic."
+    "hook": "2-3 sentences that read as one continuous flowing thought. Choose the pattern (A/B/C/D) that fits this post best. Never defaults to Pattern A. Never starts with I, Hi, or their name.",
+    "proof": "1-2 sentences. One result, one number or named outcome, one portfolio reference if available. Flows from the hook without repeating it.",
+    "whyMe": "1 sentence. Answers the specific FEAR in the post, not just the brief. If they mentioned a previous failure, name what you do differently. If they're burned, show the specific thing you do that removes that friction.",
+    "process": "1 sentence. Makes the first step feel so small that agreeing costs them nothing. Not a project kickoff — a risk-free first thing that gives them something before they commit.",
+    "cta": "1 sentence. Follows the tone-specific CTA instruction exactly. Tied to something specific in their post. Never generic."
   },
   "portfolioMatch": {
     "picked": "Label or URL of the portfolio item used, or null if none was used.",
