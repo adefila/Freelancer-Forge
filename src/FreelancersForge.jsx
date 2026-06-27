@@ -1903,7 +1903,7 @@ select.ff-input {
   grid-template-columns: 220px 1fr;
   gap: 0;
   height: calc(100vh - 300px);
-  min-height: 520px;
+  min-height: 420px;
   max-height: 800px;
   background: var(--bg);
   border: 1px solid var(--border);
@@ -2043,7 +2043,6 @@ select.ff-input {
   display: flex;
   flex-direction: column;
   gap: 18px;
-  scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
 }
 .ff-chat-messages::-webkit-scrollbar { width: 4px; }
@@ -2412,12 +2411,21 @@ select.ff-input {
 
 /* Responsive */
 @media (max-width: 760px) {
-  .ff-ask-layout { grid-template-columns: 1fr; }
+  .ff-ask-layout {
+    grid-template-columns: 1fr;
+    /* On mobile, fill as much of the screen as possible without keyboard issues.
+       Use dvh (dynamic viewport height) where supported — it shrinks with the keyboard.
+       Fall back to 100vh minus safe margins. */
+    height: calc(100dvh - 260px);
+    min-height: 360px;
+    max-height: none;
+    border-radius: 12px;
+  }
   .ff-chat-sidebar { display: none; }
   .ff-chat-sidebar-toggle { display: flex; }
   .ff-sheet-backdrop { display: block; }
   .ff-chat-sheet { display: block; }
-  .ff-chat-messages { padding: 16px 14px 8px; }
+  .ff-chat-messages { padding: 14px 14px 8px; }
   .ff-chat-bubble-ai { max-width: 92%; font-size: 14px; }
   .ff-chat-bubble-user { max-width: 88%; }
 }
@@ -4064,9 +4072,14 @@ function AskAnythingTab() {
   useEffect(() => {
     if (!messagesContainerRef.current) return;
     const el = messagesContainerRef.current;
-    // Use rAF so DOM has painted before we measure scrollHeight
+    // Double rAF: first frame lets React commit, second lets browser paint.
+    // On mobile, a single rAF can fire before the new message is measured.
+    // We skip smooth scrolling (removed scroll-behavior:smooth) because
+    // iOS freezes when scroll animation conflicts with keyboard resize events.
     requestAnimationFrame(() => {
-      el.scrollTop = el.scrollHeight;
+      requestAnimationFrame(() => {
+        el.scrollTop = el.scrollHeight;
+      });
     });
   }, [messages, loading]);
 
@@ -4224,7 +4237,14 @@ FORMAT: Short paragraphs, one point each. Bold the single most important thing p
   };
 
   const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+    // On mobile (touch devices), the software keyboard's Enter key should add
+    // a newline — not submit. Submitting mid-keyboard-animation causes freezes.
+    // Only submit on Enter for physical keyboards (non-touch devices).
+    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    if (e.key === 'Enter' && !e.shiftKey && !isTouchDevice) {
+      e.preventDefault();
+      sendMessage();
+    }
   };
 
   const copyMessage = async (text, idx) => {
@@ -4441,7 +4461,7 @@ FORMAT: Short paragraphs, one point each. Bold the single most important thing p
                 </div>
               )}
               <input ref={fileInputRef} type="file" accept="image/*,application/pdf,.txt,.md,.csv,.json,.doc,.docx" style={{ display: 'none' }} onChange={e => { handleAttachFile(e.target.files?.[0]); e.target.value = ''; }} />
-              <textarea ref={textareaRef} className="ff-chat-textarea" placeholder="Ask anything about freelancing…" value={input} onChange={(e) => { setInput(e.target.value); autoResize(); }} onKeyDown={handleKeyDown} rows={1} disabled={loading} />
+              <textarea ref={textareaRef} className="ff-chat-textarea" placeholder={loading ? "Forge is thinking…" : "Ask anything about freelancing…"} value={input} onChange={(e) => { if (!loading) { setInput(e.target.value); autoResize(); } }} onKeyDown={handleKeyDown} rows={1} style={{ opacity: loading ? 0.6 : 1, cursor: loading ? 'default' : 'text' }} />
               <div className="ff-chat-input-actions">
                 <button type="button" className="ff-chat-attach-btn" onClick={() => fileInputRef.current?.click()} aria-label="Attach file">
                   <Paperclip size={14} />
