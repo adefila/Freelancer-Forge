@@ -2317,9 +2317,10 @@ select.ff-input {
   background: rgba(0,0,0,.35);
   z-index: 90;
   opacity: 0;
+  pointer-events: none;
   transition: opacity var(--t-med);
 }
-.ff-sheet-backdrop.open { opacity: 1; }
+.ff-sheet-backdrop.open { opacity: 1; pointer-events: all; }
 .ff-chat-sheet {
   display: none;
   position: fixed;
@@ -2330,11 +2331,12 @@ select.ff-input {
   z-index: 100;
   padding: 0 0 env(safe-area-inset-bottom, 16px);
   max-height: 80vh;
+  pointer-events: none;
   overflow-y: auto;
   transform: translateY(100%);
   transition: transform var(--t-med);
 }
-.ff-chat-sheet.open { transform: translateY(0); }
+.ff-chat-sheet.open { transform: translateY(0); pointer-events: all; }
 .ff-chat-sheet-handle {
   width: 36px; height: 4px;
   background: var(--border);
