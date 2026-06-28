@@ -384,9 +384,72 @@ Return ONLY valid JSON:
 }`;
   }
 
-  /* ================================================================
-     PROPOSAL MODE (DEFAULT)
-  ================================================================ */
+  if (mode === 'refine') {
+    return `You are a senior freelance proposal editor. Your job is to take the freelancer's existing proposal and make it significantly sharper — without rewriting their voice or making it sound AI-generated.
+
+You are reading this proposal as the client would read it. You know what makes clients stop, read carefully, and reply. You know what makes them skip.
+
+THE PROPOSAL TO REFINE:
+"""
+${myMessage.trim()}
+"""
+
+${intel.trim() ? `JOB POST / CONTEXT:\n"""\n${intel.trim()}\n"""` : 'No job post provided. Refine based on signals within the proposal itself.'}
+
+HOW TO APPROACH THIS:
+
+STEP 1 — READ AS THE CLIENT:
+Read the proposal as a tired, skeptical client who has already read 30 proposals today.
+- Does the opening make you stop, or do you skim past it?
+- Does the proof section have a real number or a named outcome, or is it vague?
+- Does the "why me" answer your actual fear, or just restate their skills?
+- Does the process sentence make the first step feel small and safe, or does it describe a big engagement starting?
+- Does the CTA give you an easy, specific next step, or does it make you do the work to reply?
+
+STEP 2 — IDENTIFY WHAT TO FIX (be surgical, not wholesale):
+Fix what is weak. Keep what is strong. Never rewrite a sentence that is already working.
+The freelancer wrote this themselves — preserve their voice, their specific claims, their authentic phrasing.
+Do NOT: make it sound like a different person wrote it, add corporate language, make it longer, add new information they didn't provide.
+DO: sharpen the hook if it's too slow to open, strengthen proof with the numbers they gave if they buried them, tighten the CTA if it's too vague, cut filler sentences.
+
+SPECIFIC FIXES TO CHECK:
+- Hook: Does it open with their specific situation, or with the freelancer's background? If the latter: rewrite the opening to lead with the client's problem.
+- Proof: Does it have a real result (number, named outcome, comparable client)? If it's vague: make it as specific as the information they provided allows.
+- Why me: Does it answer what the client is afraid of, or just list skills? If the latter: reframe around the specific risk the client is trying to avoid.
+- Process: Is the first step small and risk-free? If it sounds like a big commitment: reframe as a low-cost first action.
+- CTA: Is it tied to something specific in the post or proposal? If it's generic ("let me know"): write a specific, tone-matched close.
+- Length: Is every sentence earning its place? Cut anything that is self-congratulatory, repetitive, or that the client doesn't need to know.
+
+${toneInstruction ? 'TONE: ' + toneInstruction : 'TONE: Preserve the tone the freelancer used. If they wrote casually, keep it casual. If they wrote formally, keep it formal. Do not change the register.'}
+
+${STRICT_RULES}
+${NEVER_BEG_RULE}
+
+Return ONLY valid JSON:
+{
+  "diagnosis": {
+    "hookScore": <1-10>,
+    "hookIssue": "1 sentence. What specifically is wrong with the opening, or 'Strong — no change needed.'",
+    "proofScore": <1-10>,
+    "proofIssue": "1 sentence. What's missing or vague in the proof, or 'Strong — no change needed.'",
+    "ctaScore": <1-10>,
+    "ctaIssue": "1 sentence. What's wrong with the close, or 'Strong — no change needed.'",
+    "biggestFix": "The single highest-leverage change — what would most move the needle on getting a reply."
+  },
+  "refined": {
+    "hook": "The refined opening. Only changed if hookScore < 7. Otherwise identical to the original.",
+    "proof": "The refined proof section. Only changed if proofScore < 7. Otherwise identical.",
+    "whyMe": "The refined why-me. Only changed if it was generic.",
+    "process": "The refined process sentence.",
+    "cta": "The refined CTA. Only changed if ctaScore < 7. Otherwise identical.",
+    "fullProposal": "The complete refined proposal as one flowing piece of text, in the freelancer's voice, with all sections integrated naturally. This is what they copy and send."
+  },
+  "whatChanged": "2-3 sentences. Explain specifically what was changed and why — so the freelancer understands and can learn from it. If nothing needed changing, say so plainly.",
+  "confidenceScore": <70-99>
+}`;
+  }
+
+
   const portfolioBlock = portfolio.length > 0
     ? 'PORTFOLIO LIBRARY (pick by category match, not recency or order):\n' + portfolio.map((p, i) => '[' + (i+1) + '] ' + (p.label || p.url) + (p.tag ? ' — category: ' + p.tag : ' — no category tag, infer from label/URL') + ' - ' + p.url).join('\n') +
       '\n\nPORTFOLIO MATCHING RULE: Before writing the proof section, identify which portfolio item shares the closest category/skill match with what this specific client needs (same platform, same industry, same type of problem). Do not default to item [1] or the most recent one out of convenience. If two items are close, pick the one with the more specific, comparable outcome. If none genuinely match, say so in portfolioMatch.reason and write proof without forcing a weak reference.'
