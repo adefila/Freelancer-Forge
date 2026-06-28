@@ -5294,10 +5294,8 @@ function CloseTab() {
     if (mode === 'reply' && !clientMessage.trim() && !imageData) { setError("Paste the client's message so we know what to reply to."); return; }
     if (mode === 'followup' && !clientMessage.trim() && !myMessage.trim() && !imageData) { setError("Paste either the client's message or your last reply."); return; }
     if (mode === 'refine' && !myMessage.trim()) { setError('Paste your proposal to refine it.'); return; }
-      setError('Paste the job description or upload your CV.');
-      return;
-    }
-    if (mode !== 'followup' && mode !== 'coverletter' && mode !== 'reply' && !intel.trim() && !imageData) { setError('Add intel.'); return; }
+    if (mode === 'coverletter' && !jobDescription.trim() && !intel.trim() && !cvFile) { setError('Paste the job description or upload your CV.'); return; }
+    if (mode !== 'followup' && mode !== 'coverletter' && mode !== 'reply' && mode !== 'refine' && !intel.trim() && !imageData) { setError('Add intel.'); return; }
     setError(''); setLoading(true); setResult(null);
 
     try {
