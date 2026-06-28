@@ -154,6 +154,7 @@ const PAGE_TYPES = {
 
 const CLOSER_MODES = {
   proposal: { label: 'Proposal', icon: FileText, desc: 'Full proposal, DM, and matched attachments', cta: 'Generate Proposal' },
+  refine: { label: 'Refine Mine', icon: Wand2, desc: 'Paste your own proposal and sharpen it', cta: 'Refine My Proposal' },
   dm: { label: 'Cold DM', icon: MessageSquare, desc: 'Short, pattern-breaking direct message', cta: 'Generate DM' },
   email: { label: 'Cold Email', icon: Mail, desc: 'Subject line and email body', cta: 'Generate Email' },
   followup: { label: 'Follow-up', icon: Reply, desc: 'Reply or re-engage based on a conversation', cta: 'Draft Follow-up' },
@@ -5220,6 +5221,7 @@ function CloseTab() {
   const [newUrl, setNewUrl] = useState('');
   const [newLabel, setNewLabel] = useState('');
   const [newTag, setNewTag] = useState('');
+  const [portfolioAddOpen, setPortfolioAddOpen] = useState(false);
   const [clientMessage, setClientMessage] = useState('');
   const [myMessage, setMyMessage] = useState('');
   const [goal, setGoal] = useState('');
@@ -5291,7 +5293,7 @@ function CloseTab() {
   const handleGenerate = async () => {
     if (mode === 'reply' && !clientMessage.trim() && !imageData) { setError("Paste the client's message so we know what to reply to."); return; }
     if (mode === 'followup' && !clientMessage.trim() && !myMessage.trim() && !imageData) { setError("Paste either the client's message or your last reply."); return; }
-    if (mode === 'coverletter' && !jobDescription.trim() && !intel.trim() && !cvFile) {
+    if (mode === 'refine' && !myMessage.trim()) { setError('Paste your proposal to refine it.'); return; }
       setError('Paste the job description or upload your CV.');
       return;
     }
@@ -5652,6 +5654,36 @@ function CloseTab() {
                 </div>
 
               </>
+            ) : mode === 'refine' ? (
+              <>
+                <div>
+                  <label className="ff-field-label" style={{ display: 'inline-flex', alignItems: 'center' }}>
+                    Your proposal <span className="ff-text-accent" style={{ marginLeft: 4 }}>*</span>
+                    <Tooltip text="Paste what you wrote. We'll sharpen the hook, tighten the proof, and make sure the CTA matches your tone — without rewriting your voice." />
+                  </label>
+                  <p className="ff-field-hint mb-2">We'll check it against what clients actually stop and read, fix what's generic, and keep your voice.</p>
+                  <textarea
+                    className="ff-textarea"
+                    rows={10}
+                    placeholder="Paste your full proposal here..."
+                    value={myMessage}
+                    onChange={e => setMyMessage(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className="ff-field-label" style={{ display: 'inline-flex', alignItems: 'center' }}>
+                    Job post <span className="ff-field-hint" style={{ fontWeight: 400, marginLeft: 6 }}>· optional but improves accuracy</span>
+                    <Tooltip text="Paste the job post so we can check your proposal actually addresses what the client asked — not just what you thought they asked." />
+                  </label>
+                  <textarea
+                    className="ff-textarea"
+                    rows={5}
+                    placeholder="Paste the job post or brief..."
+                    value={intel}
+                    onChange={e => setIntel(e.target.value)}
+                  />
+                </div>
+              </>
             ) : (
               <>
                 <div>
@@ -5683,16 +5715,29 @@ function CloseTab() {
                         {portfolio.map(item => <PortfolioCard key={item.id} item={item} onRemove={() => removePortfolioItem(item.id)} />)}
                       </div>
                     )}
-                    <div className="ff-portfolio-form space-y-2">
-                      <input type="url" className="ff-input" placeholder="https://your-link.com" value={newUrl} onChange={e => setNewUrl(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addPortfolioItem())} />
-                      <div className="grid grid-cols-2 gap-2">
-                        <input type="text" className="ff-input" placeholder="Label" value={newLabel} onChange={e => setNewLabel(e.target.value)} />
-                        <input type="text" className="ff-input" placeholder="Tag" value={newTag} onChange={e => setNewTag(e.target.value)} />
+                    {newUrl !== undefined && (portfolioAddOpen || portfolio.length === 0) ? (
+                      <div className="ff-portfolio-form space-y-2">
+                        <input autoFocus type="url" className="ff-input" placeholder="https://your-link.com" value={newUrl} onChange={e => setNewUrl(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addPortfolioItem())} />
+                        <div className="grid grid-cols-2 gap-2">
+                          <input type="text" className="ff-input" placeholder="Label (e.g. Shopify redesign)" value={newLabel} onChange={e => setNewLabel(e.target.value)} />
+                          <input type="text" className="ff-input" placeholder="Category tag (e.g. Shopify)" value={newTag} onChange={e => setNewTag(e.target.value)} />
+                        </div>
+                        <div style={{ display: 'flex', gap: 8 }}>
+                          <button type="button" onClick={() => { addPortfolioItem(); setPortfolioAddOpen(false); }} disabled={!newUrl.trim()} className="ff-btn ff-btn-secondary" style={{ flex: 1 }}>
+                            <Plus size={13} /> Add to Library
+                          </button>
+                          {portfolio.length > 0 && (
+                            <button type="button" onClick={() => setPortfolioAddOpen(false)} className="ff-btn ff-btn-secondary" style={{ width: 'auto', padding: '0 14px' }}>
+                              Cancel
+                            </button>
+                          )}
+                        </div>
                       </div>
-                      <button type="button" onClick={addPortfolioItem} disabled={!newUrl.trim()} className="ff-btn ff-btn-secondary">
-                        <Plus size={13} /> Add to Library
+                    ) : portfolio.length > 0 ? (
+                      <button type="button" onClick={() => setPortfolioAddOpen(true)} className="ff-btn ff-btn-secondary" style={{ width: '100%' }}>
+                        <Plus size={13} /> Add another link
                       </button>
-                    </div>
+                    ) : null}
                   </div>
                 )}
               </>
@@ -5715,6 +5760,7 @@ function CloseTab() {
           {!result && !loading && <CloserEmpty mode={mode} />}
           {loading && <OptimizeLoading message={`Drafting your ${CLOSER_MODES[mode].label.toLowerCase()}...`} />}
           {result && resultMode === 'proposal' && <ProposalOutput result={result} setResult={setResult} pillClass={pillClass} copied={copied} copyText={copyText} selectAllText={selectAllText} />}
+          {result && resultMode === 'refine' && <RefineOutput result={result} copied={copied} copyText={copyText} />}
           {result && resultMode === 'dm' && <DMOutput result={result} copied={copied} copyText={copyText} selectAllText={selectAllText} />}
           {result && resultMode === 'email' && <EmailOutput result={result} copied={copied} copyText={copyText} selectAllText={selectAllText} />}
           {result && resultMode === 'reply' && <ReplyOutput result={result} copied={copied} copyText={copyText} selectAllText={selectAllText} />}
@@ -7049,6 +7095,68 @@ Return ONLY valid JSON:
 }
 
 
+
+function RefineOutput({ result, copied, copyText }) {
+  const d = result.diagnosis || {};
+  const r = result.refined || {};
+  const scoreColor = s => s >= 8 ? '#16a34a' : s >= 6 ? '#2563EB' : '#d97706';
+
+  return (
+    <div className="space-y-5">
+      {/* Diagnosis */}
+      <div className="ff-fadeup ff-card">
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+          <h3 className="ff-subheading">Diagnosis</h3>
+          {result.confidenceScore && (
+            <span style={{ fontSize: 12, fontWeight: 700, padding: '3px 10px', borderRadius: 999, background: result.confidenceScore >= 85 ? '#f0fdf4' : '#fffbeb', color: result.confidenceScore >= 85 ? '#16a34a' : '#d97706', border: `1px solid ${result.confidenceScore >= 85 ? '#bbf7d0' : '#fde68a'}` }}>
+              {result.confidenceScore} confidence
+            </span>
+          )}
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 16 }}>
+          {[['Hook', d.hookScore, d.hookIssue], ['Proof', d.proofScore, d.proofIssue], ['CTA', d.ctaScore, d.ctaIssue]].map(([label, score, issue]) => (
+            <div key={label} style={{ padding: '12px 14px', background: 'var(--bg-elev-1)', borderRadius: 10, border: '1px solid var(--border)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-2)' }}>{label}</span>
+                <span style={{ fontSize: 16, fontWeight: 800, color: scoreColor(score) }}>{score}</span>
+              </div>
+              <p style={{ fontSize: 12, color: 'var(--text-3)', lineHeight: 1.5, margin: 0 }}>{issue}</p>
+            </div>
+          ))}
+        </div>
+        {d.biggestFix && (
+          <div style={{ padding: '11px 14px', background: 'var(--accent-bg-soft)', border: '1px solid var(--accent-border-soft)', borderRadius: 9 }}>
+            <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--accent)', letterSpacing: '.06em', textTransform: 'uppercase', marginBottom: 5 }}>Highest-leverage fix</p>
+            <p style={{ fontSize: 13.5, color: 'var(--text-1)', lineHeight: 1.6, margin: 0 }}>{d.biggestFix}</p>
+          </div>
+        )}
+      </div>
+
+      {/* Refined proposal — full copy */}
+      {r.fullProposal && (
+        <div className="ff-fadeup" style={{ animationDelay: '40ms' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+            <h3 className="ff-subheading">Refined proposal</h3>
+            <button className="ff-icon-btn" onClick={() => copyText('refined', r.fullProposal)}>
+              {copied.refined ? <><Check size={12} />Copied</> : <><Copy size={12} />Copy</>}
+            </button>
+          </div>
+          <div className="ff-card">
+            <p className="ff-output-text" style={{ whiteSpace: 'pre-line', lineHeight: 1.75, fontSize: 15 }}>{r.fullProposal}</p>
+          </div>
+        </div>
+      )}
+
+      {/* What changed */}
+      {result.whatChanged && (
+        <div className="ff-fadeup ff-card" style={{ animationDelay: '70ms' }}>
+          <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-3)', letterSpacing: '.07em', textTransform: 'uppercase', marginBottom: 8 }}>What changed and why</p>
+          <p style={{ fontSize: 13.5, color: 'var(--text-2)', lineHeight: 1.7, margin: 0 }}>{result.whatChanged}</p>
+        </div>
+      )}
+    </div>
+  );
+}
 
 function DMOutput({ result, copied, copyText, selectAllText }) {
   return (
