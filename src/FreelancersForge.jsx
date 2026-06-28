@@ -6840,8 +6840,44 @@ Return ONLY valid JSON:
   const labelStyle = { display:'block', marginBottom:9 };
   const paraStyle = { fontSize:14.5, lineHeight:1.72, color:'var(--text-1)', letterSpacing:'-0.007em', margin:0, whiteSpace:'pre-line' };
 
+  const firstLine = proposal?.firstLine || (proposal?.hook ? proposal.hook.split('.')[0] + '.' : '');
+  const previewText = firstLine || proposalText.slice(0, 150);
+  const charCount = previewText.length;
+  const charOk = charCount <= 150;
+
   return (
     <div className="space-y-5">
+
+      {/* Client preview banner — what they see before clicking */}
+      {previewText && (
+        <div className="ff-fadeup" style={{ background:'var(--bg)', border:'1.5px solid var(--border)', borderRadius:14, overflow:'hidden' }}>
+          <div style={{ padding:'10px 16px', borderBottom:'1px solid var(--border)', display:'flex', alignItems:'center', justifyContent:'space-between', background:'var(--bg-elev-1)' }}>
+            <div style={{ display:'flex', alignItems:'center', gap:7 }}>
+              <div style={{ width:8, height:8, borderRadius:'50%', background:'#22c55e' }}/>
+              <span style={{ fontSize:11.5, fontWeight:700, color:'var(--text-2)', letterSpacing:'-.005em' }}>What the client sees before clicking</span>
+            </div>
+            <span style={{ fontSize:11, fontWeight:600, color: charOk ? '#16a34a' : '#dc2626', background: charOk ? '#f0fdf4' : '#fef2f2', padding:'2px 8px', borderRadius:999, border:`1px solid ${charOk ? '#bbf7d0' : '#fecaca'}` }}>
+              {charCount} / 150 chars {charOk ? '✓' : '— too long'}
+            </span>
+          </div>
+          {/* Upwork-style proposal list preview */}
+          <div style={{ padding:'14px 16px' }}>
+            <div style={{ background:'var(--bg-elev-1)', border:'1px solid var(--border)', borderRadius:10, padding:'12px 14px' }}>
+              <p style={{ fontSize:13.5, color:'var(--text-1)', lineHeight:1.6, margin:0, fontStyle:'normal' }}>
+                {previewText}
+                <span style={{ color:'var(--text-3)', fontStyle:'italic' }}> ... </span>
+                <span style={{ color:'var(--accent)', fontSize:12.5, fontWeight:600, cursor:'default' }}>View more</span>
+              </p>
+            </div>
+            <p style={{ fontSize:11.5, color:'var(--text-3)', marginTop:8, lineHeight:1.5 }}>
+              {charOk
+                ? 'This is your entire pitch before the client decides to open or skip. Make sure it names their situation specifically.'
+                : 'First sentence is over 150 characters. Upwork will cut it mid-word. Shorten it or the hook loses its impact.'}
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Client diagnosis */}
       <div className="ff-fadeup ff-card">
         <h3 className="ff-subheading mb-4">Client diagnosis</h3>
@@ -6873,7 +6909,10 @@ Return ONLY valid JSON:
               {proposal.hook && (
                 <div style={{ ...sectionStyle, background:'var(--bg)', position:'relative' }}>
                   <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:9 }}>
-                    <span className="ff-section-label" style={{ color:'var(--accent)', display:'block', marginBottom:0 }}>Opening — First 3 lines</span>
+                    <span className="ff-section-label" style={{ color:'var(--accent)', display:'block', marginBottom:0 }}>
+                      Opening — First 3 lines
+                      {firstLine && <span style={{ fontWeight:500, color: charOk ? '#16a34a' : '#dc2626', fontSize:10, marginLeft:6 }}>({charCount} chars)</span>}
+                    </span>
                     <button onClick={() => copyText('hook', proposal.hook)} style={{ background:'none', border:'none', cursor:'pointer', color:'var(--text-3)', display:'flex', alignItems:'center', gap:4, fontSize:11, padding:'3px 6px', borderRadius:6, fontFamily:'var(--font-text)', fontWeight:500 }}>
                       {copied.hook ? <><Check size={11}/>Copied</> : <><Copy size={11}/>Copy</>}
                     </button>
