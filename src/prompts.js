@@ -486,13 +486,31 @@ DIAGNOSE BEFORE WRITING:
 
 PHASE 2: WRITE THE PROPOSAL
 
-THE THREE-LINE RULE (clients decide in 3 lines — everything else is secondary):
-On Upwork, a client sees roughly three lines before they decide to click "more" or skip.
-Those three lines must do three things, in order:
-  Line 1: Name their exact situation so precisely they think "this person read my post."
-  Line 2: Signal you've solved a version of this before, with a specific result or reference.
-  Line 3: The smallest, most specific question or bridge that makes them want to know what comes next.
-If those three lines fail, the rest of the proposal doesn't matter. Write them last, as a unit, after the full proposal is drafted.
+THE 150-CHARACTER RULE (the most important constraint in this entire prompt):
+On Upwork, clients see a preview of the proposal in the applicant list. That preview is exactly the first ~150 characters of what you write. That is ONE sentence. Sometimes not even a full one.
+The client makes their click/skip decision before they have read anything else.
+The first sentence of the hook IS the entire proposal from the client's perspective.
+
+Count the characters in your first sentence before finalising. It must:
+- Be under 150 characters
+- Contain ZERO generic words (excited, experienced, skilled, passionate, help, great opportunity)
+- Name something specific about their situation that could not apply to any other job post
+- Create enough tension or curiosity that skipping it feels like a missed answer
+
+WHAT THE CLIENT SEES IN THE LIST (their actual experience):
+SKIPPED: "Hi, I've reviewed your job description and I'm excited about this opportunity. With five years..." [cut off]
+SKIPPED: "I am a senior developer with extensive experience in WordPress and e-commerce solutions..." [cut off]
+OPENED: "A Shopify store at that volume with a third-party checkout plugin hits the same wall every time." [cut off — but they want to know what the wall is]
+OPENED: "That brief has been handed to three developers before you posted this." [cut off — but they want to know how you know]
+OPENED: "The conversion problem on that landing page isn't the copy." [cut off — but they want to know what it is]
+
+The first sentence must end a thought OR deliberately cut off at a point that creates a question the client needs answered. Either way, they click.
+
+THE THREE-LINE RULE (what they read after clicking "View more"):
+Those next 2-3 lines must complete the picture:
+  Line 2: Signal you've solved a version of this before, with a specific result or number.
+  Line 3: The smallest, most specific bridge that pulls them into the rest.
+Write the hook last, as a unit, after drafting the full proposal.
 
 URGENCY-ADAPTIVE WRITING (non-negotiable — read the urgency signal first):
 HIGH URGENCY ("ASAP", hard deadline, launch date, "need this done yesterday"):
@@ -561,6 +579,7 @@ ${STRICT_RULES}
 ${NEVER_BEG_RULE}
 
 ANTI-FORMULA CHECK (run this before outputting):
+- COUNT the characters in firstLine. If it exceeds 150 characters: cut it. If it contains "excited", "experienced", "I", "Hi", "skilled", "passionate", "help", "great", "opportunity": rewrite it entirely.
 - Read lines 1-3 of the proposal as a unit. If a busy client only read those three lines, would they know what this person does, feel understood, and want to read on? If no: rewrite the hook entirely.
 - Does line 1 contain "I", "Hi", the client's name, "I came across", "I'd love to help"? If yes: rewrite.
 - Does the hook use Pattern A (diagnosis-led) by default without checking if a different pattern would be stronger? If it defaults to pattern A without reason: consider B, C, or D.
@@ -586,7 +605,8 @@ Return ONLY valid JSON. No markdown. No preamble:
     "whatTheyAreActuallyEvaluating": "2 sentences. Beyond the task - what proof, quality, or signal are they looking for in who they hire?"
   },
   "proposal": {
-    "hook": "2-3 sentences that read as one continuous flowing thought. Choose the pattern (A/B/C/D) that fits this post best. Never defaults to Pattern A. Never starts with I, Hi, or their name.",
+    "firstLine": "THE single opening sentence. Under 150 characters. No generic words. Either names their specific situation or cuts off in a way that creates a question they need answered. This is the ONLY text a client reads before deciding to open or skip. Write this last, after drafting the full proposal.",
+    "hook": "2-3 sentences total including firstLine. The complete hook reads as one flowing thought. Line 1 is firstLine. Line 2 deepens it with proof or sharpens the diagnosis. Line 3 (optional) pulls them forward. Never starts with I, Hi, or their name.",
     "proof": "1-2 sentences. One result, one number or named outcome, one portfolio reference if available. Flows from the hook without repeating it.",
     "whyMe": "1 sentence. Answers the specific FEAR in the post, not just the brief. If they mentioned a previous failure, name what you do differently. If they're burned, show the specific thing you do that removes that friction.",
     "process": "1 sentence. Makes the first step feel so small that agreeing costs them nothing. Not a project kickoff — a risk-free first thing that gives them something before they commit.",
